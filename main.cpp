@@ -23,7 +23,8 @@ void leerComando(void){
 int main()
 {
   cout<<"Hola mundo :D\n";
-  //newDisk(300,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
-  deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
+  newDisk(300,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
+  //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
+  reportMBR("/home/emely/Escritorio/testData","disk1Rep.jpg");
   return 0;
 }

@@ -7,9 +7,15 @@ void clearArray(char array[],int size){
         }
 }
 
-void getFullPath(char path[],char name[],char full_path[]){
+void getFullPathDisk(char path[],char name[],char full_path[]){
     strcat(full_path,path);
     strcat(full_path,"/");
     strcat(full_path,name);
     strcat(full_path,".disk");
+}
+
+void getFullPath(char path[],char name[],char full_path[]){
+    strcat(full_path,path);
+    strcat(full_path,"/");
+    strcat(full_path,name);
 }

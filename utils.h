@@ -4,6 +4,7 @@
 
 void clearArray(char [],int);
 
-void getFullPath(char [],char[],char[]);
+void getFullPathDisk(char [],char[],char[]);
 
+void getFullPath(char [],char[],char[]);
 #endif // UTILS_H
