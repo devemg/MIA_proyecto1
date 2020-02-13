@@ -1,7 +1,11 @@
 #include <stdio.h>
-#include <string.h>
-#include "automata.h"//;
-
+#include <iostream>
+#include <stdlib.h>
+#include <handlerdisk.h>
+#include <enums.h>
+#include <iostream>
+using namespace std;
+/*
 void leerComando(void){
  char comando[200];
  while (1) {
@@ -14,10 +18,12 @@ void leerComando(void){
     analizarComando(comando);
     printf("\n");
  }
-}
+}*/
 
 int main()
 {
-  leerComando();
-    return 0;
+  cout<<"Hola mundo :D\n";
+  //newDisk(300,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
+
+  return 0;
 }
