@@ -280,9 +280,6 @@ void replaceMBR(MBR *disco,char path[]){
          cout<<"Error al abrir el archivo\n";
          return;
      }
-     //inicializando con ceros
-     fseek(myFile, disco->mbr_tamanio, SEEK_SET);
-     fwrite("\0", sizeof(char), 1, myFile);
      //escribir MBR en disco
      fseek(myFile, 0, SEEK_SET);
      fwrite(disco, sizeof(MBR), 1, myFile);
