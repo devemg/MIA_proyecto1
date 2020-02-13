@@ -24,10 +24,12 @@ void reportMBR(char[],char[]);
 
 void addReportEBR(EBR,FILE*,int);
 
-MBR* openMBR();
+MBR* openMBR(char[]);
 
 int getSignature();
 
 void getCurrentDate(char []);
+
+void replaceMBR(MBR*,char[]);
 
 #endif // HANDLERDISK_H

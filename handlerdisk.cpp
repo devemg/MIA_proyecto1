@@ -3,19 +3,7 @@
 void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
 
      //VALIDAR TAMAÑO
-     int final_size = 0;
-      switch(unit)
-      {
-         case KB: //equivale a kilobytes
-             final_size = size*1024;
-             break;
-         case MB: //equivale a MegaBytes
-             final_size = size * 1024 * 1024;
-             break;
-         default:
-             final_size = size * 1024 * 1024;
-             break;
-    }
+     int final_size = getSize(size,unit);
     //MBR
     MBR* disco = (MBR*)malloc(sizeof(MBR));
     getCurrentDate(disco->mbr_fecha_creacion);
@@ -108,7 +96,7 @@ void reportMBR(char path[],char name[]){
     //char full_path[200];
     //clearArray(full_path,sizeof(full_path));
     //getFullPath(path,name,full_path);
-    MBR* disco = openMBR();
+    MBR* disco = openMBR("/home/emely/Escritorio/testData/disk1.disk");
     if(disco==NULL){
         cout<<"Error al generar reporte\n";
         return;
@@ -158,7 +146,7 @@ void reportMBR(char path[],char name[]){
 
      for(i=0;i<4;i++){
         part = disco->particiones[i];
-        //if(part.part_status == Inactivo) continue;
+        if(part.part_status == Inactivo) continue;
         //PART NAME
         fputs("<tr><td colspan=\"2\" bgcolor=\"",myFile);
         fputs(colors[i],myFile);
@@ -270,9 +258,9 @@ void addReportEBR(EBR ebr,FILE *myFile,int index){
     fputs(">];\n", myFile);
 }
 
-MBR* openMBR(){
+MBR* openMBR(char path[]){
     FILE *myFile;
-    myFile = fopen("/home/emely/Escritorio/testData/disk1.disk","rb+");
+    myFile = fopen(path,"rb+");
     if(myFile==NULL){
         cout<<"Error al abrir el disco\n";
         return NULL;
@@ -282,4 +270,22 @@ MBR* openMBR(){
     fread(mbr,sizeof(MBR),1,myFile);
     fclose(myFile);
 return mbr;
+}
+
+void replaceMBR(MBR *disco,char path[]){
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el archivo\n";
+         return;
+     }
+     //inicializando con ceros
+     fseek(myFile, disco->mbr_tamanio, SEEK_SET);
+     fwrite("\0", sizeof(char), 1, myFile);
+     //escribir MBR en disco
+     fseek(myFile, 0, SEEK_SET);
+     fwrite(disco, sizeof(MBR), 1, myFile);
+     //cerrando stream
+     fclose (myFile);
 }

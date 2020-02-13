@@ -4,6 +4,7 @@
 #include <handlerdisk.h>
 #include <enums.h>
 #include <iostream>
+#include <handlerpartitions.h>
 using namespace std;
 /*
 void leerComando(void){
@@ -23,8 +24,10 @@ void leerComando(void){
 int main()
 {
   cout<<"Hola mundo :D\n";
-  newDisk(300,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
+  newDisk(30000,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
   //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
+  newPartition(300,KB,"/home/emely/Escritorio/testData/disk1.disk",Primaria,FirstFit,"particion 1");
   reportMBR("/home/emely/Escritorio/testData","disk1Rep.jpg");
+
   return 0;
 }
