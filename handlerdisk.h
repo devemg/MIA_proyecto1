@@ -16,11 +16,18 @@ using namespace std;
 
 void newDisk(int,Fit,Unit,char[],char[]);
 
-void reportMBR(char[]);
+void deleteDisk(char[]);
+
+void writeMBR(MBR*,char[],char[]);
+
+void reportMBR(char[],char[]);
+
+MBR* openMBR();
 
 int getSignature();
 
 void getCurrentDate(char []);
+
 
 
 #endif // HANDLERDISK_H

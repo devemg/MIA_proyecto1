@@ -24,6 +24,6 @@ int main()
 {
   cout<<"Hola mundo :D\n";
   //newDisk(300,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
-
+  deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
   return 0;
 }
