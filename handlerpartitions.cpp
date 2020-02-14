@@ -1,5 +1,10 @@
 #include "handlerpartitions.h"
 
+void createPartition(int size, Unit unit, char path[],char nameDisk[],TipoParticion tipoParticion, Fit fit, char name[]){
+    newPartition(size,unit,"/home/emely/Escritorio/testData/disk1.disk",tipoParticion,fit,name);
+    newPartition(size,unit,"/home/emely/Escritorio/testData/disk1_mirror.disk",tipoParticion,fit,name);
+}
+
 void newPartition(int size, Unit unit, char path[], TipoParticion tipoParticion, Fit fit, char name[]){
     MBR *disco = openMBR(path);
     if(disco==NULL){

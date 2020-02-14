@@ -2,7 +2,7 @@
 #define STRUCTURES_H
 
 //info of partitions
-typedef struct
+struct Partition
 {
     char part_status;
     char part_type;
@@ -11,10 +11,10 @@ typedef struct
     int part_size;
     char part_name[16];
 
-}Partition;
+};
 
 //info of disk
-typedef struct
+struct MBR
 {
     int mbr_tamanio;
     char mbr_fecha_creacion[16];
@@ -22,13 +22,13 @@ typedef struct
     char disk_fit;
     Partition particiones[4];
 
-}MBR;
+};
 
 //info of extended partitions
 //list with pointers to the next EBR
 //null = -1
 
-typedef struct
+struct EBR
 {
     char part_status;
     char part_fit;
@@ -36,7 +36,7 @@ typedef struct
     int part_size;
     int part_next;
     char part_name[16];
-}EBR;
+};
 
 
 #endif // STRUCTURES_H

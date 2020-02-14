@@ -4,6 +4,8 @@
 #include <utils.h>
 #include <handlerdisk.h>
 
+void createPartition(int,Unit,char[],char[],TipoParticion,Fit,char[]);
+
 void newPartition(int,Unit,char[],TipoParticion,Fit,char[]);
 
 void newPrimaryPart(int,Fit,char[],MBR*);
