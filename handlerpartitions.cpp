@@ -121,7 +121,7 @@ Response newExtendedPart(int size, Fit fit, char name[], MBR *disco, char path[]
                     partition->part_type = Extendida;
                     partition->part_status = Activo;
                     replaceMBR(disco,path);
-                    //fillSpaceWithZeros(path,partition->part_start,size);
+                    writeEBR(partition,path);
                     return SUCCESS;
             }else{
                 return ERROR_FULL_PARTITION_PRIMARY;
@@ -130,4 +130,27 @@ Response newExtendedPart(int size, Fit fit, char name[], MBR *disco, char path[]
             return ERROR_EXISTS_EXTEND_PARTITION;
         }
 
+}
+
+void writeEBR(Partition *partition, char path[]){
+    EBR *extendedPart = (EBR*)malloc(sizeof(EBR));
+    extendedPart->part_fit = partition->part_fit;
+    strcpy(extendedPart->part_name,partition->part_name);
+    extendedPart->part_next = -1;
+    extendedPart->part_size = partition->part_size;
+    extendedPart->part_start = partition->part_start;
+    extendedPart->part_status = partition->part_status;
+
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el archivo\n";
+         return;
+     }
+     //escribir MBR en disco
+     fseek(myFile, partition->part_start, SEEK_SET);
+     fwrite(extendedPart, sizeof(EBR), 1, myFile);
+     //cerrando stream
+     fclose (myFile);
 }

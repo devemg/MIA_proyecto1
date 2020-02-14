@@ -22,7 +22,7 @@ void writeMBR(MBR*,char[],char[]);
 
 void reportMBR(char[],char[]);
 
-void addReportEBR(EBR,FILE*,int);
+void addReportEBR(EBR*,FILE*,int);
 
 MBR* openMBR(char[]);
 
@@ -33,5 +33,7 @@ void getCurrentDate(char []);
 void replaceMBR(MBR*,char[]);
 
 void reportDisk(char[],char[]);
+
+EBR* getFirstEBR(MBR*,char[]);
 
 #endif // HANDLERDISK_H

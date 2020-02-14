@@ -196,16 +196,9 @@ void reportMBR(char path[],char path_report[]){
      //REPORTE DE EBR'S
 
      i = 0;
-     EBR ebr;
-     ebr.part_fit = FirstFit;
-     string nombrePart = "Martel";
-     strcpy(ebr.part_name,nombrePart.c_str());
-     ebr.part_next = 1234;
-     ebr.part_size = 124568;
-     ebr.part_start = 0;
-     ebr.part_status = Activo;
+     EBR *ebr = getFirstEBR(disco,path);
 
-     if(true){//existenExtendidas
+     if(ebr!=NULL){//existenExtendidas
         addReportEBR(ebr,myFile,i);
      }
 
@@ -215,38 +208,38 @@ void reportMBR(char path[],char path_report[]){
      string pathString(path_report);
      string command = "dot -Tpng report_disk.dot -o "+pathString;//+"/report_disk.png";
      system(command.c_str());
-    cout<<"Reporte de disco creado...\n";
+     cout<<"Reporte de disco creado...\n";
 }
 
-void addReportEBR(EBR ebr,FILE *myFile,int index){
+void addReportEBR(EBR *ebr,FILE *myFile,int index){
     string nombreNodo;
     nombreNodo = "tbl"+to_string(index+1);
     fputs(nombreNodo.c_str(),myFile);
     fputs(" [\nshape=plaintext\n label=<\n", myFile);
     fputs("<table border='0' cellborder='1' cellspacing='0'>\n",myFile);
     fputs("<tr><td colspan=\"3\">",myFile);
-    fputs(ebr.part_name,myFile);
+    fputs(ebr->part_name,myFile);
     fputs("</td></tr>\n",myFile);
     fputs("<th><td>Nombre</td><td>Valor</td></th>\n",myFile);
     //PART STATUS
     fputs("<tr><td bgcolor=\"#fcc8c8\">part_status</td><td bgcolor=\"#fcc8c8\">",myFile);
-    fprintf(myFile, "%d", ebr.part_status);
+    fprintf(myFile, "%d", ebr->part_status);
     fputs("</td></tr>\n",myFile);
     //PART FIT
     fputs("<tr><td bgcolor=\"#fcc8c8\">part_fit</td><td bgcolor=\"#fcc8c8\">",myFile);
-    fprintf(myFile, "%c", ebr.part_fit);
+    fprintf(myFile, "%c", ebr->part_fit);
     fputs("</td></tr>\n",myFile);
     //PART START
     fputs("<tr><td bgcolor=\"#fcc8c8\">part_start</td><td bgcolor=\"#fcc8c8\">",myFile);
-    fprintf(myFile, "%d", ebr.part_start);
+    fprintf(myFile, "%d", ebr->part_start);
     fputs("</td></tr>\n",myFile);
     //PART SIZE
     fputs("<tr><td bgcolor=\"#fcc8c8\">part_size</td><td bgcolor=\"#fcc8c8\">",myFile);
-    fprintf(myFile, "%d", ebr.part_size);
+    fprintf(myFile, "%d", ebr->part_size);
     fputs("</td></tr>\n",myFile);
     //PART NEXT
     fputs("<tr><td bgcolor=\"#fcc8c8\">part_next</td><td bgcolor=\"#fcc8c8\">",myFile);
-    fprintf(myFile, "%d", ebr.part_next);
+    fprintf(myFile, "%d", ebr->part_next);
     fputs("</td></tr>\n",myFile);
 
     fputs("</table>\n",myFile);
@@ -280,4 +273,30 @@ void replaceMBR(MBR *disco,char path[]){
      fwrite(disco, sizeof(MBR), 1, myFile);
      //cerrando stream
      fclose (myFile);
+}
+
+EBR* getFirstEBR(MBR *disco,char path[]){
+    int i;
+    Partition *extended = NULL;
+    for(i=0;i<4;i++){
+        if(disco->particiones[i].part_status == Activo && disco->particiones[i].part_type == Extendida){
+            extended = &disco->particiones[i];
+            break;
+        }
+    }
+        if(extended!=NULL){
+            FILE *myFile = fopen(path,"rb+");
+            if(myFile==NULL){
+                cout<<"Error al abrir el archivo \n";
+                return NULL;
+            }
+            EBR *ebr = (EBR*)malloc(sizeof(EBR));
+
+            fseek(myFile, extended->part_start, SEEK_SET);
+            fread(ebr, sizeof(EBR), 1, myFile);
+            fclose(myFile);
+            return ebr;
+        }
+
+    return NULL;
 }
