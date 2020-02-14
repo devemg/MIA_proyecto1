@@ -89,14 +89,14 @@ void deleteDisk(char path[]){
      }
 }
 
-void reportMBR(char path[],char name[]){
+void reportMBR(char path[],char path_report[]){
     //CREAR DIRECTORIO SI NO EXISTE
     //mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
     //char full_path[200];
     //clearArray(full_path,sizeof(full_path));
     //getFullPath(path,name,full_path);
-    MBR* disco = openMBR("/home/emely/Escritorio/testData/disk1.disk");
+    MBR* disco = openMBR(path);
     if(disco==NULL){
         cout<<"Error al generar reporte\n";
         return;
@@ -217,8 +217,8 @@ void reportMBR(char path[],char name[]){
      fputs("}\n",myFile);
      //cerrando stream
      fclose (myFile);
-     string pathString(path);
-     string command = "dot -Tpng report_disk.dot -o "+pathString+"/report_disk.png";
+     string pathString(path_report);
+     string command = "dot -Tpng report_disk.dot -o "+pathString;//+"/report_disk.png";
      system(command.c_str());
     cout<<"Reporte de disco creado...\n";
 }

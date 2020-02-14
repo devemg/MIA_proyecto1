@@ -1,8 +1,20 @@
 #include "handlerpartitions.h"
 
 void createPartition(int size, Unit unit, char path[],char nameDisk[],TipoParticion tipoParticion, Fit fit, char name[]){
-    newPartition(size,unit,"/home/emely/Escritorio/testData/disk1.disk",tipoParticion,fit,name);
-    newPartition(size,unit,"/home/emely/Escritorio/testData/disk1_mirror.disk",tipoParticion,fit,name);
+    char full_path[200];
+    clearArray(full_path,sizeof(full_path));
+    getFullPathDisk(path,nameDisk,full_path);
+    //ESCRIBIR ARCHIVO
+    newPartition(size,unit,full_path,tipoParticion,fit,name);
+
+    char nameMirror[50];
+    clearArray(nameMirror,50);
+    strcat(nameMirror,nameDisk);
+    strcat(nameMirror,"_mirror");
+    clearArray(full_path,sizeof(full_path));
+    getFullPathDisk(path,nameMirror,full_path);
+    //ESCRIBIR RAID
+    newPartition(size,unit,full_path,tipoParticion,fit,name);
 }
 
 void newPartition(int size, Unit unit, char path[], TipoParticion tipoParticion, Fit fit, char name[]){
