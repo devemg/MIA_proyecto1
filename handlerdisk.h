@@ -36,4 +36,6 @@ void reportDisk(char[],char[]);
 
 EBR* getFirstEBR(MBR*,char[]);
 
+EBR* readEBR(int,char[]);
+
 #endif // HANDLERDISK_H

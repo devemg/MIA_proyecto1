@@ -9,6 +9,8 @@ enum Response {SUCCESS,
                ERROR_INSUFICIENT_SPACE,
                ERROR_FULL_PARTITION_PRIMARY,
                ERROR_UNHANDLED,
-               ERROR_EXISTS_EXTEND_PARTITION};
+               ERROR_EXISTS_EXTENDED_PARTITION,
+               ERROR_NOT_EXIST_EXTENDED_PARTITION,
+               ERROR_READING_EBR};
 
 #endif // ENUMS_H

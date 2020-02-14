@@ -198,8 +198,14 @@ void reportMBR(char path[],char path_report[]){
      i = 0;
      EBR *ebr = getFirstEBR(disco,path);
 
-     if(ebr!=NULL){//existenExtendidas
+     while(ebr!=NULL){//existenExtendidas
         addReportEBR(ebr,myFile,i);
+        if(ebr->part_next!=-1){
+            ebr = readEBR(ebr->part_next,path);
+        }else{
+            ebr = NULL;
+        }
+        i++;
      }
 
      fputs("}\n",myFile);
@@ -212,8 +218,7 @@ void reportMBR(char path[],char path_report[]){
 }
 
 void addReportEBR(EBR *ebr,FILE *myFile,int index){
-    string nombreNodo;
-    nombreNodo = "tbl"+to_string(index+1);
+    string nombreNodo = "tbl"+to_string(index+1);
     fputs(nombreNodo.c_str(),myFile);
     fputs(" [\nshape=plaintext\n label=<\n", myFile);
     fputs("<table border='0' cellborder='1' cellspacing='0'>\n",myFile);
@@ -241,7 +246,6 @@ void addReportEBR(EBR *ebr,FILE *myFile,int index){
     fputs("<tr><td bgcolor=\"#fcc8c8\">part_next</td><td bgcolor=\"#fcc8c8\">",myFile);
     fprintf(myFile, "%d", ebr->part_next);
     fputs("</td></tr>\n",myFile);
-
     fputs("</table>\n",myFile);
     fputs(">];\n", myFile);
 }
@@ -285,18 +289,22 @@ EBR* getFirstEBR(MBR *disco,char path[]){
         }
     }
         if(extended!=NULL){
-            FILE *myFile = fopen(path,"rb+");
-            if(myFile==NULL){
-                cout<<"Error al abrir el archivo \n";
-                return NULL;
-            }
-            EBR *ebr = (EBR*)malloc(sizeof(EBR));
-
-            fseek(myFile, extended->part_start, SEEK_SET);
-            fread(ebr, sizeof(EBR), 1, myFile);
-            fclose(myFile);
-            return ebr;
+            return readEBR(extended->part_start,path);
         }
 
     return NULL;
+}
+
+EBR* readEBR(int point, char path[]){
+    FILE *myFile = fopen(path,"rb+");
+    if(myFile==NULL){
+        cout<<"Error al abrir el archivo \n";
+        return NULL;
+    }
+    EBR *ebr = (EBR*)malloc(sizeof(EBR));
+
+    fseek(myFile, point, SEEK_SET);
+    fread(ebr, sizeof(EBR), 1, myFile);
+    fclose(myFile);
+    return ebr;
 }

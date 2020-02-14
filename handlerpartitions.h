@@ -12,6 +12,10 @@ Response newPrimaryPart(int,Fit,char[],MBR*,char[]);
 
 Response newExtendedPart(int,Fit,char[],MBR*,char[]);
 
-void writeEBR(Partition *, char[]);
+Response newLogicPart(int,Fit,char[],MBR*,char[]);
+
+void newEBR(Partition *, char[]);
+
+void writeEBR(EBR *, char[],int);
 
 #endif // HANDLERPARTITIONS_H
