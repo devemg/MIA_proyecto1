@@ -24,11 +24,12 @@ void leerComando(void){
 int main()
 {
   cout<<"Hola mundo :D\n";
-  //newDisk(30000,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
+  newDisk(3000,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
   //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
-  createPartition(300,KB,"/home/emely/Escritorio/testData","disk1",Primaria,FirstFit,"particion 1");
+  createPartition(100,KB,"/home/emely/Escritorio/testData","disk1",Primaria,FirstFit,"particion 1");
+  createPartition(100,KB,"/home/emely/Escritorio/testData","disk1",Extendida,FirstFit,"particion 2");
   reportMBR("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep.png");
-  reportMBR("/home/emely/Escritorio/testData/disk1_mirror.disk","/home/emely/Escritorio/testData/disk1Rep_mirror.png");
+  //reportMBR("/home/emely/Escritorio/testData/disk1_mirror.disk","/home/emely/Escritorio/testData/disk1Rep_mirror.png");
 
   return 0;
 }

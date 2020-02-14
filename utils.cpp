@@ -37,3 +37,29 @@ int getSize(int size,Unit unit){
   }
 
 }
+
+void showMessageError(Response response){
+    switch (response) {
+    case ERROR_FULL_PARTITION_PRIMARY:
+        cout<<"Error al crear la partición. Ya existen cuatro particiones primarias creadas\n";
+        break;
+    case ERROR_INSUFICIENT_SPACE:
+        cout<<"Error al crear la partición. No hay espacio suficiente\n";
+        break;
+    case ERROR_EXISTS_EXTEND_PARTITION:
+        cout<<"Ya existe una partición extendida en el disco\n";
+        break;
+    }
+}
+
+void fillSpaceWithZeros(char full_path[],int position,int size){
+    FILE * myFile;
+     myFile = fopen (full_path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el archivo\n";
+         return;
+     }
+    fseek(myFile,position , SEEK_SET);
+    fwrite("\0", sizeof(char), size, myFile);
+}

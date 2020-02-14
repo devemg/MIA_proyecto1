@@ -90,12 +90,7 @@ void deleteDisk(char path[]){
 }
 
 void reportMBR(char path[],char path_report[]){
-    //CREAR DIRECTORIO SI NO EXISTE
-    //mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-    //char full_path[200];
-    //clearArray(full_path,sizeof(full_path));
-    //getFullPath(path,name,full_path);
     MBR* disco = openMBR(path);
     if(disco==NULL){
         cout<<"Error al generar reporte\n";

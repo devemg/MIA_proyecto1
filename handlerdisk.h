@@ -32,4 +32,6 @@ void getCurrentDate(char []);
 
 void replaceMBR(MBR*,char[]);
 
+void reportDisk(char[],char[]);
+
 #endif // HANDLERDISK_H

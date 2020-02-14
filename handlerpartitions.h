@@ -6,10 +6,10 @@
 
 void createPartition(int,Unit,char[],char[],TipoParticion,Fit,char[]);
 
-void newPartition(int,Unit,char[],TipoParticion,Fit,char[]);
+Response newPartition(int,Unit,char[],TipoParticion,Fit,char[]);
 
-void newPrimaryPart(int,Fit,char[],MBR*);
+Response newPrimaryPart(int,Fit,char[],MBR*,char[]);
 
-
+Response newExtendedPart(int,Fit,char[],MBR*,char[]);
 
 #endif // HANDLERPARTITIONS_H
