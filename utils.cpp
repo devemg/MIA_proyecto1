@@ -47,7 +47,7 @@ void showMessageError(Response response){
         cout<<"Ya existe una partición extendida en el disco\n";
         break;
     case ERROR_NOT_EXIST_EXTENDED_PARTITION:
-        cout<<"No se puede crear partición lógica. No existe una partición extendida en el disco\n";
+        cout<<"Error al operar la partición lógica. No existe una partición extendida en el disco\n";
         break;
     case ERROR_READING_EBR:
         cout<<"Ocurrió un error al crear la partición lógica :(\n";

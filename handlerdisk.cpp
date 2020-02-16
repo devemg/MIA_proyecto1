@@ -308,3 +308,16 @@ EBR* readEBR(int point, char path[]){
     fclose(myFile);
     return ebr;
 }
+
+Partition* getExtendedPart(char name[], MBR *disco){
+    int i;
+    for(i=0;i<4;i++){
+        if(disco->particiones[i].part_status == Activo && disco->particiones[i].part_type == Extendida){
+            if(strcmp(disco->particiones[i].part_name,name)==0){
+                return &disco->particiones[i];
+            }
+
+        }
+    }
+    return NULL;
+}

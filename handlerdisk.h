@@ -38,4 +38,6 @@ EBR* getFirstEBR(MBR*,char[]);
 
 EBR* readEBR(int,char[]);
 
+Partition* getExtendedPart(char[],MBR*);
+
 #endif // HANDLERDISK_H

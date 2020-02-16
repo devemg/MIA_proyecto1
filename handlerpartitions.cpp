@@ -252,11 +252,10 @@ Response rmPartition(char path[], char name[], TipoParticion tipoParticion,Delet
     }
     switch (tipoParticion) {
     case Primaria:
+    case Extendida:
         return deletePrimaryPart(disco,name,dtype,path);
-   case Extendida:
-       // return newExtendedPart(final_size,fit,name,disco,path);
     case Logica:
-       // return newLogicPart(final_size,fit,name,disco,path);
+        return deleteLogicPart(name,disco,path);
         break;
     }
 }
@@ -280,4 +279,48 @@ Response deletePrimaryPart(MBR *disco,char name[],DeleteType dtype,char path[]){
         }
     }
     return ERROR_PARTITION_NOT_EXIST;
+}
+
+Response deleteLogicPart(char name[], MBR *disco, char path[]){
+    EBR *firstEBR = getFirstEBR(disco,path);
+    Partition *extended = getExtendedPart(name,disco);
+    if(extended==NULL){
+        return ERROR_NOT_EXIST_EXTENDED_PARTITION;
+    }
+    int newPosition = 0;
+    int fullSpace = 0;
+    if(firstEBR==NULL){
+        return ERROR_NOT_EXIST_EXTENDED_PARTITION;
+    }
+
+    EBR *backEBR = (EBR*)malloc(sizeof(EBR));
+
+    if(firstEBR->part_next == -1 && firstEBR->part_status == Activo &&
+            strcmp(firstEBR->part_name,name)){
+       firstEBR->part_start = 0;
+       clearArray(firstEBR->part_name,16);
+       firstEBR->part_next = -1;
+       firstEBR->part_size = 0;
+       firstEBR->part_start = extended->part_start+sizeof(EBR);
+       writeEBR(firstEBR,path,firstEBR->part_start-sizeof(EBR));
+       return SUCCESS;
+    }else{
+        //agregar al final de la lista
+        bool flag = true;
+        while(flag){//existenExtendidas
+            newPosition+=firstEBR->part_size;
+            fullSpace += firstEBR->part_size;
+            if(firstEBR->part_next!=-1){
+                backEBR = firstEBR;
+               firstEBR = readEBR(firstEBR->part_next,path);
+           }else{
+               flag = false;
+           }
+        }
+        cout<<"HOLI";
+/*       firstEBR->part_next = newPosition;
+       writeEBR(firstEBR,path,firstEBR->part_start-sizeof(EBR));
+       newEBR->part_start = newPosition+sizeof(EBR);
+       writeEBR(newEBR,path,newPosition);
+  */  }
 }
