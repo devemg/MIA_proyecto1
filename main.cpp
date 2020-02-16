@@ -28,9 +28,10 @@ int main()
   //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
   createPartition(100,KB,"/home/emely/Escritorio/testData","disk1",Primaria,FirstFit,"particion 1");
   createPartition(100,KB,"/home/emely/Escritorio/testData","disk1",Extendida,FirstFit,"particion 2");
-  createPartition(200,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.1");
-  createPartition(200,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.2");
-  createPartition(100,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.3");
+
+  createPartition(50,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.1");
+  //createPartition(50,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.1");
+  deletePartition("/home/emely/Escritorio/testData","disk1","particion 1",Primaria,Full);
 
   reportMBR("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep.png");
   //reportMBR("/home/emely/Escritorio/testData/disk1_mirror.disk","/home/emely/Escritorio/testData/disk1Rep_mirror.png");

@@ -27,13 +27,10 @@ int getSize(int size,Unit unit){
             return size;
        case KB: //equivale a kilobytes
            return size*1024;
-           break;
        case MB: //equivale a MegaBytes
            return size * 1024 * 1024;
-           break;
        default:
            return size * 1024 * 1024;
-           break;
   }
 
 }
@@ -55,6 +52,14 @@ void showMessageError(Response response){
     case ERROR_READING_EBR:
         cout<<"Ocurrió un error al crear la partición lógica :(\n";
         break;
+    case ERROR_SIZE_MIN:
+        cout<<"El tamaño deber ser mayor a cero\n";
+        break;
+    case ERROR_PARTITION_NOT_EXIST:
+        cout<<"La partición no existe\n";
+        break;
+
+
     }
 }
 

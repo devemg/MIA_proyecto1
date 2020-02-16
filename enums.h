@@ -11,6 +11,9 @@ enum Response {SUCCESS,
                ERROR_UNHANDLED,
                ERROR_EXISTS_EXTENDED_PARTITION,
                ERROR_NOT_EXIST_EXTENDED_PARTITION,
-               ERROR_READING_EBR};
+               ERROR_READING_EBR,
+              ERROR_SIZE_MIN,
+              ERROR_PARTITION_NOT_EXIST};
+enum DeleteType {Fast,Full};
 
 #endif // ENUMS_H
