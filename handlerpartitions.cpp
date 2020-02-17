@@ -16,7 +16,7 @@ void createPartition(int size, Unit unit, char path[],char nameDisk[],TipoPartic
         getFullPathDisk(path,nameMirror,full_path);
         //ESCRIBIR RAID
         //Response response1 =
-        newPartition(size,unit,full_path,tipoParticion,fit,name);
+        //newPartition(size,unit,full_path,tipoParticion,fit,name);
         switch (tipoParticion) {
         case Primaria:
             cout<<"¡La partición primaria fue creada con éxito!\n";
@@ -56,37 +56,108 @@ Response newPartition(int size, Unit unit, char path[], TipoParticion tipoPartic
 }
 
 Response newPrimaryPart(int size,Fit fit,char name[],MBR *disco,char path[]){
-    int i;
-    Partition *partition;
-    bool hayEspacio=false;
-    int espacioOcupado=0;
-    //BUSCAR PARTICION
-    for(i=0;i<4;i++){
-        partition  = &disco->particiones[i];
-        if(partition->part_status==Inactivo){
-            hayEspacio = true;
-            break;
-        }else{
-            espacioOcupado+=partition->part_size;
-        }
-    }
-    if(hayEspacio){
-        if(size>(disco->mbr_tamanio-espacioOcupado)){
-            return ERROR_INSUFICIENT_SPACE;
-        }
-            partition  = &disco->particiones[i];
-                partition->part_fit = fit;
-                strcpy(partition->part_name,name);
-                partition->part_size = size;
-                partition->part_start=(espacioOcupado+sizeof(MBR));
-                partition->part_type = Primaria;
-                partition->part_status = Activo;
-                replaceMBR(disco,path);
-                //fillSpaceWithZeros(path,partition->part_start,size);
-                return SUCCESS;
-    }else{
-        return ERROR_FULL_PARTITION_PRIMARY;
-    }
+     int i;
+     int startPoint=-1;
+     int contadorParticiones = 0;
+    //VIRTUALIZANDO ESPACIOS LIBRES
+     virtualBlock *parts[4];
+     bool empty = true;
+     for(i = 0;i<4;i++){
+         if(disco->particiones[i].part_status == Activo){
+             parts[i] = new virtualBlock(disco->particiones[i].part_size,disco->particiones[i].part_start,OCUPADO);
+             empty = false;
+             contadorParticiones++;
+         }
+     }
+     if(empty){
+        startPoint = sizeof(MBR);
+     }else{
+         //ordenar
+         virtualBlock *temporal;
+         for (int i = 0;i < contadorParticiones; i++){
+             for (int j = 0; j< contadorParticiones-1; j++){
+                 if (parts[j]->start > parts[j+1]->start){
+                 temporal = parts[j];
+                 parts[j] = parts[j+1];
+                 parts[j+1] = temporal;
+                 }
+             }
+         }
+        //obtener espacios libres
+         int inicio=sizeof(MBR);
+         int fin = sizeof(MB)-1;
+         virtualBlock *espaciosLibres[5];
+         int contadorEspacios = 0;
+         for(i=0;i<contadorParticiones;i++){
+            fin = parts[i]->start;
+            if(fin - inicio > 0){
+                espaciosLibres[contadorEspacios] = new virtualBlock(fin-inicio,inicio,LIBRE);
+                contadorEspacios++;
+            }
+            inicio = parts[i]->start+parts[i]->size;
+         }
+         espaciosLibres[contadorEspacios] = new virtualBlock(disco->mbr_tamanio-inicio,inicio,LIBRE);
+         contadorEspacios++;
+         //ordenar espacios libres por tamaño
+         for (int i = 0;i < contadorParticiones; i++){
+             for (int j = 0; j< contadorParticiones-1; j++){
+                 if (espaciosLibres[j]->size > espaciosLibres[j+1]->size){
+                 temporal = espaciosLibres[j];
+                 espaciosLibres[j] = espaciosLibres[j+1];
+                 espaciosLibres[j+1] = temporal;
+                 }
+             }
+         }
+         //BUSCAR SEGUN AJUSTE
+         switch (fit) {
+         case FirstFit:
+             for(i=0;i<contadorEspacios;i++){
+                if(size<=espaciosLibres[i]->size){
+                    startPoint = espaciosLibres[i]->start;
+                }
+             }
+             if(startPoint == -1){
+                 return ERROR_INSUFICIENT_SPACE;
+             }
+             break;
+         case BestFit:
+
+             break;
+         case WorstFit:
+             if(size<=espaciosLibres[contadorEspacios-1]->size){
+                 startPoint = espaciosLibres[contadorEspacios-1]->start;
+             }
+             if(startPoint == -1){
+                 return ERROR_INSUFICIENT_SPACE;
+             }
+             break;
+         }
+     }
+//*************************************************************************************
+ //BUSCAR PARTICION
+     Partition *partition;
+     bool hayEspacio = false;
+ for(i=0;i<4;i++){
+     partition  = &disco->particiones[i];
+     if(partition->part_status==Inactivo){
+         hayEspacio = true;
+         break;
+     }
+ }
+ if(hayEspacio){
+         partition  = &disco->particiones[i];
+         partition->part_fit = fit;
+         strcpy(partition->part_name,name);
+         partition->part_size = size;
+         partition->part_start = startPoint;
+         partition->part_type = Primaria;
+         partition->part_status = Activo;
+         replaceMBR(disco,path);
+         //fillSpaceWithZeros(path,partition->part_start,size);
+         return SUCCESS;
+ }else{
+            return ERROR_FULL_PARTITION_PRIMARY;
+ }
 }
 
 Response newExtendedPart(int size, Fit fit, char name[], MBR *disco, char path[]){

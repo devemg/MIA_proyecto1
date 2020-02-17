@@ -3,6 +3,7 @@
 #include <enums.h>
 #include <utils.h>
 #include <handlerdisk.h>
+#include <virtual_blocks.h>
 
 void createPartition(int,Unit,char[],char[],TipoParticion,Fit,char[]);
 

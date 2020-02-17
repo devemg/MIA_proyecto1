@@ -15,5 +15,5 @@ enum Response {SUCCESS,
               ERROR_SIZE_MIN,
               ERROR_PARTITION_NOT_EXIST };
 enum DeleteType {Fast,Full};
-
+enum statusBlock {OCUPADO,LIBRE};
 #endif // ENUMS_H

@@ -8,7 +8,8 @@ SOURCES += \
     main.cpp \
     handlerpartitions.cpp \
     handlerdisk.cpp \
-    utils.cpp
+    utils.cpp \
+    virtual_blocks.cpp
 
 HEADERS += \
     automata.h \
@@ -16,4 +17,5 @@ HEADERS += \
     handlerpartitions.h \
     handlerdisk.h \
     enums.h \
-    utils.h
+    utils.h \
+    virtual_blocks.h
