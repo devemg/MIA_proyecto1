@@ -10,16 +10,6 @@
 #include <enums.h>
 #include <iostream>
 
-class virtualBlock{
-public:
-    int size;
-    int start;
-    statusBlock status;
-    virtualBlock *next;
-    virtualBlock();
-    virtualBlock(int,int, statusBlock);
-};
-
 
 class virtualBlock_tracker {
 virtualBlock *start;

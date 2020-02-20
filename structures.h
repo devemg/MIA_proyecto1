@@ -1,5 +1,6 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
+#include <enums.h>
 
 //info of partitions
 struct Partition
@@ -36,6 +37,16 @@ struct EBR
     int part_size;
     int part_next;
     char part_name[16];
+};
+
+class virtualBlock{
+public:
+    int size;
+    int start;
+    statusBlock status;
+    virtualBlock *next;
+    virtualBlock();
+    virtualBlock(int,int, statusBlock);
 };
 
 

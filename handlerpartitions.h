@@ -26,4 +26,7 @@ Response rmPartition(char[],char[],TipoParticion,DeleteType);
 Response deletePrimaryPart(MBR*,char[],DeleteType,char[]);
 
 Response deleteLogicPart(char[], MBR*, char[]);
+
+Response getStartAddress(MBR*,Fit,int,int*);
+
 #endif // HANDLERPARTITIONS_H

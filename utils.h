@@ -3,6 +3,8 @@
 #include <string.h>
 #include <enums.h>
 #include <iostream>
+#include <structures.h>
+
 using namespace std;
 
 

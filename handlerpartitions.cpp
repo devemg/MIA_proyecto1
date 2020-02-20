@@ -57,84 +57,12 @@ Response newPartition(int size, Unit unit, char path[], TipoParticion tipoPartic
 
 Response newPrimaryPart(int size,Fit fit,char name[],MBR *disco,char path[]){
      int i;
-     int startPoint=-1;
-     int contadorParticiones = 0;
-    //VIRTUALIZANDO ESPACIOS LIBRES
-     virtualBlock *parts[4];
-     bool empty = true;
-     for(i = 0;i<4;i++){
-         if(disco->particiones[i].part_status == Activo){
-             parts[i] = new virtualBlock(disco->particiones[i].part_size,disco->particiones[i].part_start,OCUPADO);
-             empty = false;
-             contadorParticiones++;
-         }
+     int startPoint;
+     Response resp = getStartAddress(disco,fit,size,&startPoint);
+     if(resp!=SUCCESS){
+        return resp;
      }
-     if(empty){
-        startPoint = sizeof(MBR);
-     }else{
-         //ordenar
-         virtualBlock *temporal;
-         for (int i = 0;i < contadorParticiones; i++){
-             for (int j = 0; j< contadorParticiones-1; j++){
-                 if (parts[j]->start > parts[j+1]->start){
-                 temporal = parts[j];
-                 parts[j] = parts[j+1];
-                 parts[j+1] = temporal;
-                 }
-             }
-         }
-        //obtener espacios libres
-         int inicio=sizeof(MBR);
-         int fin = sizeof(MB)-1;
-         virtualBlock *espaciosLibres[5];
-         int contadorEspacios = 0;
-         for(i=0;i<contadorParticiones;i++){
-            fin = parts[i]->start;
-            if(fin - inicio > 0){
-                espaciosLibres[contadorEspacios] = new virtualBlock(fin-inicio,inicio,LIBRE);
-                contadorEspacios++;
-            }
-            inicio = parts[i]->start+parts[i]->size;
-         }
-         espaciosLibres[contadorEspacios] = new virtualBlock(disco->mbr_tamanio-inicio,inicio,LIBRE);
-         contadorEspacios++;
-         //ordenar espacios libres por tamaño
-         for (int i = 0;i < contadorParticiones; i++){
-             for (int j = 0; j< contadorParticiones-1; j++){
-                 if (espaciosLibres[j]->size > espaciosLibres[j+1]->size){
-                 temporal = espaciosLibres[j];
-                 espaciosLibres[j] = espaciosLibres[j+1];
-                 espaciosLibres[j+1] = temporal;
-                 }
-             }
-         }
-         //BUSCAR SEGUN AJUSTE
-         switch (fit) {
-         case FirstFit:
-             for(i=0;i<contadorEspacios;i++){
-                if(size<=espaciosLibres[i]->size){
-                    startPoint = espaciosLibres[i]->start;
-                }
-             }
-             if(startPoint == -1){
-                 return ERROR_INSUFICIENT_SPACE;
-             }
-             break;
-         case BestFit:
-
-             break;
-         case WorstFit:
-             if(size<=espaciosLibres[contadorEspacios-1]->size){
-                 startPoint = espaciosLibres[contadorEspacios-1]->start;
-             }
-             if(startPoint == -1){
-                 return ERROR_INSUFICIENT_SPACE;
-             }
-             break;
-         }
-     }
-//*************************************************************************************
- //BUSCAR PARTICION
+     //BUSCAR PARTICION
      Partition *partition;
      bool hayEspacio = false;
  for(i=0;i<4;i++){
@@ -160,13 +88,112 @@ Response newPrimaryPart(int size,Fit fit,char name[],MBR *disco,char path[]){
  }
 }
 
+Response getStartAddress(MBR *disco,Fit fit,int size,int *startPoint){
+    int i;
+    *startPoint = -1;
+    int contadorParticiones = 0;
+   //VIRTUALIZANDO ESPACIOS LIBRES
+    virtualBlock *parts[4];
+
+    bool empty = true;
+    for(i = 0;i<4;i++){
+        if(disco->particiones[i].part_status == Activo){
+            parts[i] = new virtualBlock(disco->particiones[i].part_size,disco->particiones[i].part_start,OCUPADO);
+            empty = false;
+            contadorParticiones++;
+        }
+    }
+    if(empty){
+       *startPoint = sizeof(MBR);
+    }else{
+        //ordenar
+        virtualBlock *temporal;
+        for (int i = 0;i < contadorParticiones; i++){
+            for (int j = 0; j< contadorParticiones-1; j++){
+                if (parts[j]->start > parts[j+1]->start){
+                temporal = parts[j];
+                parts[j] = parts[j+1];
+                parts[j+1] = temporal;
+                }
+            }
+        }
+       //obtener espacios libres
+        int inicio=sizeof(MBR);
+        int fin = sizeof(MB)-1;
+        virtualBlock *espaciosLibres[5];
+        int contadorEspacios = 0;
+        for(i=0;i<contadorParticiones;i++){
+           fin = parts[i]->start;
+           if(fin - inicio > 0){
+               espaciosLibres[contadorEspacios] = new virtualBlock(fin-inicio,inicio,LIBRE);
+               contadorEspacios++;
+           }
+           inicio = parts[i]->start+parts[i]->size;
+        }
+        espaciosLibres[contadorEspacios] = new virtualBlock(disco->mbr_tamanio-inicio,inicio,LIBRE);
+        contadorEspacios++;
+        //ordenar espacios libres por tamaño
+        for (int i = 0;i < contadorEspacios; i++){
+            for (int j = 0; j< contadorEspacios-1; j++){
+                if (espaciosLibres[j]->size > espaciosLibres[j+1]->size){
+                temporal = espaciosLibres[j];
+                espaciosLibres[j] = espaciosLibres[j+1];
+                espaciosLibres[j+1] = temporal;
+                }
+            }
+        }
+        //BUSCAR SEGUN AJUSTE
+        switch (fit) {
+        case FirstFit:
+            for(i=0;i<contadorEspacios;i++){
+               if(size<=espaciosLibres[i]->size){
+                   *startPoint = espaciosLibres[i]->start;
+                   break;
+               }
+            }
+
+            break;
+        case WorstFit:
+            if(size<=espaciosLibres[contadorEspacios-1]->size){
+                *startPoint = espaciosLibres[contadorEspacios-1]->start;
+            }
+            break;
+        case BestFit:
+            int tams[contadorEspacios];
+            for(i=0;i<contadorEspacios;i++){
+                 tams[i] = espaciosLibres[i]->size-size;
+            }
+
+            int best =0;
+            for(i=0;i<contadorEspacios;i++){
+                if(tams[i]<tams[best]){
+                    best = i;
+                }
+            }
+            if(best == -1){
+                return ERROR_INSUFICIENT_SPACE;
+            }
+            *startPoint = espaciosLibres[best]->start;
+            break;
+        }
+    }
+    if(*startPoint == -1){
+        return ERROR_INSUFICIENT_SPACE;
+    }
+    return SUCCESS;
+}
+
 Response newExtendedPart(int size, Fit fit, char name[], MBR *disco, char path[]){
     int i;
-    Partition *partition;
-    bool hayEspacio=false;
-    bool noHayPartExt = true;
-    int espacioOcupado=0;
+    int startPoint;
+    Response resp = getStartAddress(disco,fit,size,&startPoint);
+    if(resp!=SUCCESS){
+       return resp;
+    }
     //BUSCAR PARTICION
+    Partition *partition;
+    bool noHayPartExt = true;
+    bool hayEspacio = false;
     for(i=0;i<4;i++){
         partition  = &disco->particiones[i];
         if(partition->part_type == Extendida){
@@ -180,21 +207,16 @@ Response newExtendedPart(int size, Fit fit, char name[], MBR *disco, char path[]
         if(partition->part_status==Inactivo){
             hayEspacio = true;
             break;
-        }else{
-            espacioOcupado+=partition->part_size;
         }
     }
 
         if(noHayPartExt){
             if(hayEspacio){
-                if(size>(disco->mbr_tamanio-espacioOcupado)){
-                    return ERROR_INSUFICIENT_SPACE;
-                }
                 partition  = &disco->particiones[i];
                     partition->part_fit = fit;
                     strcpy(partition->part_name,name);
                     partition->part_size = size;
-                    partition->part_start=(espacioOcupado+sizeof(MBR));
+                    partition->part_start=startPoint;
                     partition->part_type = Extendida;
                     partition->part_status = Activo;
                     replaceMBR(disco,path);
@@ -206,7 +228,6 @@ Response newExtendedPart(int size, Fit fit, char name[], MBR *disco, char path[]
         }else{
             return ERROR_EXISTS_EXTENDED_PARTITION;
         }
-
 }
 
 void newEBR(Partition *partition, char path[]){

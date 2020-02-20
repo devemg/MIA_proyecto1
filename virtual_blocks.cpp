@@ -66,7 +66,7 @@ int getStartPoint(int size,MBR *disco,Fit fit){
        startPoint = sizeof(MBR);
     }else{
         //ordenar
-        virtualBlock *temporal;
+        virtualBlock *temporal = NULL;
         for (int i = 0;i < contadorParticiones; i++){
             for (int j = 0; j< contadorParticiones-1; j++){
                 if (parts[j]->start > parts[j+1]->start){
