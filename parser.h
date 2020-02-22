@@ -83,20 +83,22 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 22 "parser.y" /* yacc.c:1909  */
+#line 279 "parser.y" /* yacc.c:1909  */
 
 #include <enums.h>
 
 //se especifican los tipo de valores para los no terminales y lo terminales
 char TEXT [256];
-double VAL;
-int INT;
 Fit FIT;
 TipoParticion TIPOPARTICION;
 DeleteType DELETETYPE;
 Unit UNIT;
+CommandEnum COMMAND_ENUM;
+struct Option * OPTION;
+class Command *COMMAND;
 
-#line 100 "parser.h" /* yacc.c:1909  */
+
+#line 102 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

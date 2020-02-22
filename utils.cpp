@@ -80,3 +80,18 @@ float getDecimal(float val){
     //float rounded_down = floorf(val * 100) / 100;
     return roundf(val * 100) / 100;
 }
+
+char* showOption(Options op){
+    switch (op) {
+    case Id:return "id";
+    case Add:return "add";
+    case Delete:return "delete";
+    case Type:return "type";
+    case Path:return "path";
+    case Unitt:return "unit";
+    case Fitt:return "fit";
+    case Size:return "size";
+    case Name:return "name";
+    default:return "";
+    }
+}

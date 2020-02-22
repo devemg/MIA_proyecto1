@@ -16,4 +16,7 @@ enum Response {SUCCESS,
               ERROR_PARTITION_NOT_EXIST };
 enum DeleteType {Fast,Full};
 enum statusBlock {OCUPADO,LIBRE};
+enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec};
+enum Options {Id,Add,Delete,Type,Path,Unitt,Fitt,Size,Name};
+
 #endif // ENUMS_H

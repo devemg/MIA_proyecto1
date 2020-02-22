@@ -23,4 +23,6 @@ void fillSpaceWithZeros(char[],int,int);
 
 float getDecimal(float);
 
+char* showOption(Options);
+
 #endif // UTILS_H
