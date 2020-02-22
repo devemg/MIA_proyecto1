@@ -10,7 +10,6 @@
 #include <string.h>
 #include<stdlib.h>
 #include<time.h>
-
 #include <iostream>
 using namespace std;
 
@@ -39,5 +38,7 @@ EBR* getFirstEBR(MBR*,char[]);
 EBR* readEBR(int,char[]);
 
 Partition* getExtendedPart(char[],MBR*);
+
+void writeExtendedReport(FILE*,MBR*,char[]);
 
 #endif // HANDLERDISK_H

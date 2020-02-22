@@ -4,6 +4,7 @@
 #include <enums.h>
 #include <iostream>
 #include <structures.h>
+#include <math.h>
 
 using namespace std;
 
@@ -19,5 +20,7 @@ int getSize(int,Unit);
 void showMessageError(Response);
 
 void fillSpaceWithZeros(char[],int,int);
+
+float getDecimal(float);
 
 #endif // UTILS_H

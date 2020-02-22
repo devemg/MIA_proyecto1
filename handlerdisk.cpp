@@ -93,12 +93,12 @@ void reportMBR(char path[],char path_report[]){
 
     MBR* disco = openMBR(path);
     if(disco==NULL){
-        cout<<"Error al generar reporte\n";
+        cout<<"Error al generar reporte de MBR\n";
         return;
     }
 
     FILE * myFile;
-     myFile = fopen ("report_disk.dot","w+");
+     myFile = fopen ("report_mbr.dot","w+");
      if (myFile==NULL)
      {
          cout<<"Error al crear el archivo\n";
@@ -212,9 +212,9 @@ void reportMBR(char path[],char path_report[]){
      //cerrando stream
      fclose (myFile);
      string pathString(path_report);
-     string command = "dot -Tpng report_disk.dot -o "+pathString;//+"/report_disk.png";
+     string command = "dot -Tpng report_mbr.dot -o "+pathString;//+"/report_mbr.png";
      system(command.c_str());
-     cout<<"Reporte de disco creado...\n";
+     cout<<"Reporte de MBR creado...\n";
 }
 
 void addReportEBR(EBR *ebr,FILE *myFile,int index){
@@ -320,4 +320,147 @@ Partition* getExtendedPart(char name[], MBR *disco){
         }
     }
     return NULL;
+}
+
+void reportDisk(char path[], char path_report[]){
+    MBR* disco = openMBR(path);
+    if(disco==NULL){
+        cout<<"Error al generar reporte de disco\n";
+        return;
+    }
+
+    FILE * myFile;
+     myFile = fopen ("report_disk.dot","w+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al crear el archivo de reporte\n";
+         return;
+     }
+    fseek(myFile, 0, SEEK_SET);
+    fputs("digraph G {\n", myFile);
+    fputs("parent [\n", myFile);
+    fputs("shape=plaintext\n", myFile);
+    fputs("label=<\n", myFile);
+    fputs("<table border='1' cellborder='1'>\n", myFile);
+    fputs("<tr>\n", myFile);
+
+    //MBR
+    fputs("<td rowspan=\"2\" bgcolor =\"#dd8703\" >MBR</td>\n", myFile);
+
+    int i;
+    int inicio = sizeof(MBR);
+    int fin = sizeof(MBR)-1;
+
+    for(i=0;i<4;i++){
+        if(disco->particiones[i].part_status == Activo){
+        switch(disco->particiones[i].part_type){
+        case Primaria:
+            fin = disco->particiones[i].part_start;
+            if(fin-inicio > 0){
+                //ESPACIO LIBRE
+                fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">Libre<br/>\n", myFile);
+                fprintf(myFile, "%.2f\n",(getDecimal((float)((fin-inicio)*100)/disco->mbr_tamanio)));
+                fputs("%</td>\n", myFile);
+            }
+            inicio = disco->particiones[i].part_start+disco->particiones[i].part_size;
+            //PARTICION PRIMARIA
+            fputs("<td rowspan=\"2\" bgcolor =\"#50b104\" >Primaria <br/>",myFile);
+            fprintf(myFile, "%.2f\n",getDecimal((float)(disco->particiones[i].part_size*100)/disco->mbr_tamanio));
+            fputs("%</td>\n", myFile);
+            break;
+        case Extendida:
+            fin = disco->particiones[i].part_start;
+            if(fin-inicio > 0){
+                //ESPACIO LIBRE
+                fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">Libre<br/>\n", myFile);
+                fprintf(myFile, "%.2f\n",getDecimal((float)((fin-inicio)*100)/disco->mbr_tamanio));
+                fputs("%</td>\n", myFile);
+            }
+            inicio = disco->particiones[i].part_start+disco->particiones[i].part_size;
+            //PARTICION EXTENDIDA
+            fputs("<td>\n", myFile);
+            writeExtendedReport(myFile,disco,path);
+            fputs("</td>\n", myFile);
+            break;
+        }
+       }
+    }
+    if(disco->mbr_tamanio-inicio > 0){
+        //ESPACIO LIBRE
+        fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">Libre<br/>\n", myFile);
+        fprintf(myFile, "%.2f\n", getDecimal((float)((disco->mbr_tamanio-inicio)*100)/disco->mbr_tamanio));
+
+        fputs("%</td>\n", myFile);
+    }
+
+    fputs("</tr>\n", myFile);
+    fputs("</table>\n", myFile);
+    fputs(">];\n", myFile);
+
+     fputs("}\n",myFile);
+     //cerrando stream
+     fclose (myFile);
+     string pathString(path_report);
+     string command = "dot -Tpng report_disk.dot -o "+pathString;//+"/report_disk.png";
+     system(command.c_str());
+     cout<<"Reporte de disco creado...\n";
+}
+
+void writeExtendedReport(FILE *myFile, MBR *disco, char path[]){
+
+    EBR *first = getFirstEBR(disco,path);
+    if(first == NULL){
+        return;
+    }
+    int i;
+    Partition *extended = NULL;
+    for(i=0;i<4;i++){
+        if(disco->particiones[i].part_status == Activo && disco->particiones[i].part_type == Extendida){
+            extended = &disco->particiones[i];
+            break;
+        }
+    }
+        if(extended==NULL){
+            return;
+        }
+    fputs("<table border = \"1\" cellborder=\"1\" bgcolor=\"#da3a85\">\n", myFile);
+    //fputs("<tr><td colspan=\"3\">Extendida</td></tr>\n", myFile);
+    fputs("<tr>\n", myFile);
+    bool flag = true;
+    int inicio = extended->part_start;
+    int fin = 0;
+    while(flag){
+        fin = first->part_start-sizeof(EBR);
+        if(fin-inicio > 0){
+            //ESPACIO LIBRE
+            fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">\n", myFile);
+            fprintf(myFile, "%.2f\n",getDecimal((float)((fin-inicio)*100)/disco->mbr_tamanio));
+            fputs("%</td>\n", myFile);
+        }
+        inicio = first->part_start+first->part_size;
+        if(first->part_status == Activo){
+            fputs("<td bgcolor=\"#eeeeee\">EBR</td>\n", myFile);
+        }
+        fputs("<td bgcolor=\"#eeeeee\">", myFile);
+        if(first->part_status == Inactivo){
+            fputs("Libre <br/>",myFile);
+        }else{
+            fputs("Lógica <br/>",myFile);
+        }
+        fprintf(myFile, "%.2f\n",getDecimal((float)(first->part_size*100)/disco->mbr_tamanio));
+        fputs("%</td>\n",myFile);
+        if(first->part_next!=-1){
+           first = readEBR(first->part_next,path);
+       }else{
+           flag = false;
+       }
+    }
+    if(disco->mbr_tamanio-inicio > 0){
+        //ESPACIO LIBRE
+        fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">Libre<br/>\n", myFile);
+        fprintf(myFile, "%.2f\n",getDecimal((float)(((extended->part_start+extended->part_size)-inicio)*100)/disco->mbr_tamanio));
+        fputs("%</td>\n", myFile);
+    }
+    fputs("</tr>\n", myFile);
+    fputs("</table>\n", myFile);
 }

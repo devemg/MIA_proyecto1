@@ -58,7 +58,8 @@ void showMessageError(Response response){
     case ERROR_PARTITION_NOT_EXIST:
         cout<<"La partición no existe\n";
         break;
-
+    default:
+        break;
 
     }
 }
@@ -73,4 +74,9 @@ void fillSpaceWithZeros(char full_path[],int position,int size){
      }
     fseek(myFile,position , SEEK_SET);
     fwrite("\0", sizeof(char), size, myFile);
+}
+
+float getDecimal(float val){
+    //float rounded_down = floorf(val * 100) / 100;
+    return roundf(val * 100) / 100;
 }
