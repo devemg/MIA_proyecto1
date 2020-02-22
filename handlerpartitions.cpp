@@ -259,7 +259,7 @@ void writeEBR(EBR *extendedPart,char path[],int point){
 Response newLogicPart(int size, Fit fit, char name[], MBR *disco, char path[]){
     EBR *firstEBR = getFirstEBR(disco,path);
     int newPosition = 0;
-    int fullSpace = 0;
+
     if(firstEBR==NULL){
         return ERROR_NOT_EXIST_EXTENDED_PARTITION;
     }
@@ -282,16 +282,11 @@ Response newLogicPart(int size, Fit fit, char name[], MBR *disco, char path[]){
         //agregar al final de la lista
         bool flag = true;
         while(flag){//existenExtendidas
-            newPosition+=firstEBR->part_size;
-            fullSpace += firstEBR->part_size;
             if(firstEBR->part_next!=-1){
                firstEBR = readEBR(firstEBR->part_next,path);
            }else{
                flag = false;
            }
-        }
-        if(size>(firstEBR->part_size-fullSpace)){
-            return ERROR_INSUFICIENT_SPACE;
         }
        firstEBR->part_next = newPosition;
        writeEBR(firstEBR,path,firstEBR->part_start-sizeof(EBR));

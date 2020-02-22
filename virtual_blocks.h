@@ -19,7 +19,4 @@ void showTracker();
 virtualBlock_tracker();
 int getNewPoint(Fit,int);
 };
-
-int getStartPoint(int,MBR*,Fit);
-
 #endif // VIRTUAL_SPACE_H

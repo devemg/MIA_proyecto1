@@ -5,6 +5,9 @@
 #include <enums.h>
 #include <iostream>
 #include <handlerpartitions.h>
+#include <parser.h>
+#include <scanner.h>
+
 using namespace std;
 /*
 void leerComando(void){
@@ -23,7 +26,11 @@ void leerComando(void){
 
 int main()
 {
-  cout<<"Hola mundo :D\n";
+    const char* x = "temp.txt";
+        FILE* input = fopen(x, "r" );
+        yyrestart(input);//SE PASA LA CADENA DE ENTRADA A FLEX
+        yyparse();//SE INICIA LA COMPILACION
+ /* cout<<"Hola mundo :D\n";
   newDisk(3000,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
   //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
   createPartition(1500,KB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion 1.2");
@@ -39,6 +46,8 @@ int main()
   reportMBR("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep.png");
   reportDisk("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep2.png");
   //reportMBR("/home/emely/Escritorio/testData/disk1_mirror.disk","/home/emely/Escritorio/testData/disk1Rep_mirror.png");
+*/
+
 
   return 0;
 }

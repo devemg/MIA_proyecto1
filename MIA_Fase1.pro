@@ -9,7 +9,9 @@ SOURCES += \
     handlerpartitions.cpp \
     handlerdisk.cpp \
     utils.cpp \
-    virtual_blocks.cpp
+    virtual_blocks.cpp \
+    parser.cpp \
+    scanner.cpp
 
 HEADERS += \
     automata.h \
@@ -18,4 +20,10 @@ HEADERS += \
     handlerdisk.h \
     enums.h \
     utils.h \
-    virtual_blocks.h
+    virtual_blocks.h \
+    parser.h \
+    scanner.h \
+    scanner.l
+
+DISTFILES += \
+    parser.y
