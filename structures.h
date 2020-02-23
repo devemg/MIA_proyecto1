@@ -82,5 +82,26 @@ public:
 };
 
 
+class MountedPart{
+public:
+    char name[75];
+    char id[10];
+};
+
+
+
+class MountedDisk{
+  public:
+    char path[100];
+    char letter;
+    MountedPart *parts[60];
+
+    MountedDisk(){
+        int i;
+        for(i=0;i<60;i++)
+            parts[i]=NULL;
+    }
+};
+
 
 #endif // STRUCTURES_H

@@ -26,17 +26,22 @@ void leerComando(void){
 
 int main()
 {
-    const char* x = "temp.txt";
+   /* const char* x = "temp.txt";
         FILE* input = fopen(x, "r" );
         yyrestart(input);//SE PASA LA CADENA DE ENTRADA A FLEX
         yyparse();//SE INICIA LA COMPILACION
- /* cout<<"Hola mundo :D\n";
+        */
+
+
+
   newDisk(3000,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
   //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
   createPartition(1500,KB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion 1.2");
   createPartition(500,KB,"/home/emely/Escritorio/testData","disk1",Extendida,BestFit,"particion 1");
-  //createPartition(500,KB,"/home/emely/Escritorio/testData","disk1",Primaria,FirstFit,"particion 1.3");
-
+  mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1.2");
+  mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1");
+  showMounts();
+/*
   createPartition(250,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.3");
   createPartition(250,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.1");
   //deletePartition("/home/emely/Escritorio/testData","disk1","particion 1",Primaria,Full);

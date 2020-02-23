@@ -13,7 +13,9 @@ enum Response {SUCCESS,
                ERROR_NOT_EXIST_EXTENDED_PARTITION,
                ERROR_READING_EBR,
               ERROR_SIZE_MIN,
-              ERROR_PARTITION_NOT_EXIST };
+              ERROR_PARTITION_NOT_EXIST,
+              ERROR_PARTITION_EXIST,
+              ERROR_PARTITION_MOUNTED};
 enum DeleteType {Fast,Full};
 enum statusBlock {OCUPADO,LIBRE};
 enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec};

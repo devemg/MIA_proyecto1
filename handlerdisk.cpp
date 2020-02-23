@@ -254,7 +254,7 @@ MBR* openMBR(char path[]){
     FILE *myFile;
     myFile = fopen(path,"rb+");
     if(myFile==NULL){
-        cout<<"Error al abrir el disco\n";
+        cout<<"Error: No existe el disco\n";
         return NULL;
     }
     fseek(myFile, 0, SEEK_SET);

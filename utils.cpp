@@ -58,6 +58,12 @@ void showMessageError(Response response){
     case ERROR_PARTITION_NOT_EXIST:
         cout<<"La partición no existe\n";
         break;
+    case ERROR_PARTITION_EXIST:
+        cout<<"La partición ya existe\n";
+        break;
+    case ERROR_PARTITION_MOUNTED:
+        cout<<"La partición ya está montada\n";
+        break;
     default:
         break;
 

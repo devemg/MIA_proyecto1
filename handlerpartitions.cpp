@@ -411,3 +411,81 @@ Response deleteLogicPart(char name[], MBR *disco, char path[]){
        writeEBR(newEBR,path,newPosition);
   */  }
 }
+
+Response mountPart(char path[], char name[]){
+
+    int contador = 0;
+    bool exist= false;
+    //MONTAR DISCO
+    while(partsMounted[contador]!=NULL){
+        if(strcmp(partsMounted[contador]->path,path)==0){
+            exist = true;
+            break;
+        }
+        contador++;
+    }
+    if(!exist){
+        partsMounted[contador] = new MountedDisk();
+        strcpy(partsMounted[contador]->path,path);
+        partsMounted[contador]->letter = 97+contador;
+    }
+    //MONTAR PARTICION
+    bool existPart = false;
+    MountedDisk *mdisk = partsMounted[contador];
+    int contador2=0;
+    //VALIDAR QUE YA ESTÉ MONTADA LA PARTICION
+    while(mdisk->parts[contador2]!=NULL){
+        if(strcmp(mdisk->parts[contador2]->name,name)==0){
+            return ERROR_PARTITION_MOUNTED;
+        }
+        contador2++;
+    }
+
+    MBR *disco = openMBR(mdisk->path);
+    if(disco==NULL){
+        return ERROR_UNHANDLED;
+    }
+    //BUSCAR PARTICION PRIMARIA/EXTENDIDA
+    int i;
+    for(i=0;i<4;i++){
+        if(strcmp(disco->particiones[i].part_name,name)==0){
+            existPart = true;
+            break;
+        }
+    }
+
+    if(existPart){
+         mdisk->parts[contador2] = new MountedPart();
+         strcpy(mdisk->parts[contador2]->id,getPartId(mdisk->letter,contador2));
+         strcpy(mdisk->parts[contador2]->name, name);
+    }else{
+        return ERROR_PARTITION_NOT_EXIST;
+    }
+    return SUCCESS;
+}
+
+void showMounts(){
+    int contador = 0;
+    int contador2=0;
+    while(partsMounted[contador]!=NULL){
+        cout<<"--------------------------------------------------\n";
+        cout<<"DISCO \""<<partsMounted[contador]->letter<<"\" \n";
+        cout<<partsMounted[contador]->path<<endl;
+        cout<<"Particiones: \n";
+            contador2 = 0;
+            while (partsMounted[contador]->parts[contador2]!=NULL) {
+                cout<<"Nombre: "<<partsMounted[contador]->parts[contador2]->name<<endl;
+                cout<<"Id: "<<partsMounted[contador]->parts[contador2]->id<<endl;
+                contador2++;
+            }
+        contador++;
+    }
+    cout<<"--------------------------------------------------\n";
+}
+
+char* getPartId(char letra, int numero){
+    string str("vd");
+    str+=letra;
+    str+=to_string(numero);
+    return &str[0];
+}
