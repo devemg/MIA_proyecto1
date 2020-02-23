@@ -71,6 +71,7 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
     char *id;
     int size = -1;
     Option *it;
+
     switch (cmd) {
     case mkdisk:
         //opciones obligatorias
@@ -174,21 +175,27 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
             return false;
         }
         break;
-    case rep:
+   case rep:
         //opciones obligatorias
         //path name id
         it = opt;
+        int len;
+        int index;
         while(it!=NULL){
             switch (it->option) {
             case Path:
                 path = it->text;
                 break;
             case Name:
-                if(strcmp(path,"mbr")==0){
-                    std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
+                name = it->text;
+                len = strlen(name);
+                for (index = 0; index < len; ++index)
+                   name[index] = tolower(name[index]);
+                if(strcmp(name,"mbr")!=0 && strcmp(name,"disk")!=0){
+                    std::cout<<"Debe indicar el tipo de reporte: \"mbr\" o \"disk\" en línea"<<yylineno<<".\n";
                     return false;
                 }
-                name = it->text;
+
                 break;
             case Id:
                 id = it->text;
@@ -212,7 +219,7 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
             return false;
         }
         break;
-    case fdisk:
+     case fdisk:
         //opciones obligatorias
         //path name id
         it = opt;
@@ -369,7 +376,7 @@ COMMANDS_LIST: COMMANDS_LIST COMMAND{
 COMMAND: STATE_COMMANDS OPTIONS_LIST{
 
     if(validateOptionCommand($1,$2)){
-        $$ = new Command($1,$2);
+      //  $$ = new Command($1,$2);
     }
 };
 
