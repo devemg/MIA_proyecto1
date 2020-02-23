@@ -5,6 +5,8 @@
 #include <iostream>
 #include <structures.h>
 #include <math.h>
+#include <handlerdisk.h>
+#include <handlerpartitions.h>
 
 using namespace std;
 

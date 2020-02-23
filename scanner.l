@@ -12,6 +12,8 @@ comentario "/*"[^'*']*"*/"
 digito [0-9]
 iden {letra}+({letra}|{digito})*
 Numero {digito}+
+path (\/[a-z]+[a-z0-9_\-\.]+)+|\"(\/[a-z]+[a-z0-9_\-\. ]+)+\"
+
 %%
 "-size"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return SIZE; }
 "-fit"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return FIT; }
@@ -43,6 +45,7 @@ Numero {digito}+
 "full"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return FULL; }
 
 [=]         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return IGUAL; }
+{path}          { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return PATH_; }
 {iden}          { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return WORD; }
 {Numero}        { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return NUMERO; }
 {comentario}    { /*Se ignoran*/ }

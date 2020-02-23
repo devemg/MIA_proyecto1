@@ -96,10 +96,99 @@ char* showOption(Options op){
     }
 }
 
+const char* showFit(Fit op){
+    switch (op) {
+    case FirstFit:return "FF";
+    case WorstFit:return "WF";
+    case BestFit:return "BF";
+    default:return "";
+    }
+}
+
+const char* showUnit(Unit op){
+    switch (op) {
+    case MB:return "KB";
+    case KB:return "MB";
+    case Byte:return "B";
+    default:return "";
+    }
+}
+
+string getNamePath(char *path){
+    string s(path);
+    string delimiter = "/";
+
+    size_t pos = 0;
+    string token;
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+        token = s.substr(0, pos);
+        //std::cout << token << std::endl;
+        s.erase(0, pos + delimiter.length());
+    }
+    int pos_ = -1;
+    pos_ = s.find(".");
+    if(pos_>0){
+        s = s.substr(0,pos_);
+    }
+    return s;
+}
+
+string getPathWithoutName(char *path,int sizeName){
+    string s(path);
+    int size=strlen(path);
+    if(size-sizeName-1<size && size-sizeName-1 >0){
+        return s.substr(0,size-sizeName-1);
+    }
+    return "";
+}
+
 void letsExecCommands(Command *commands){
     Command *first = commands;
+    char *name;
+    char *path;
+    char *id;
+    Fit fit;
+    Unit unit;
+    int size = -1;
+    string ss;
+    string hh;
+    char *chh;
+    Option *it;
     while(first!=NULL){
-        cout<<"Ejecutando comandos...\n";
+        switch (first->cmd) {
+        case mkdisk:
+            fit = FirstFit;
+            unit = MB;
+            it = first->opts;
+            while(it!=NULL){
+                switch (it->option) {
+                case Size:
+                    size = it->num;
+                    break;
+                case Fitt:
+                    fit = it->fit;
+                    break;
+                case Unitt:
+                    unit = it->unit;
+                    break;
+                case Path:
+                    path = it->text;
+                    break;
+                }
+             it = it->next;
+            }
+            //cout<<"PATH COMPLETE: "<<path<<endl;
+            //cout<<"SIZE: "<<size <<endl;
+            //cout<<"FIT: "<<showFit(fit)<<endl;
+            //cout<<"UNIT: "<<showUnit(unit)<<endl;
+            ss = getNamePath(path);
+            chh = &ss[0];
+            //cout<<"NAME: "<<chh<<endl;
+            hh = getPathWithoutName(path,strlen(chh));
+            //cout<<hh<<endl;
+            newDisk(size,fit,unit,&hh[0],chh);
+            break;
+        }
         first = first->next;
     }
 }

@@ -299,7 +299,7 @@ class Command *COMMAND;
 %token<TEXT>  L_
 %token<TEXT>  FAST
 %token<TEXT>  FULL
-
+%token<TEXT>  PATH_
 //NO TERMINALES DE TIPO VAL, POSEEN ATRIBUTOS INT VALOR, Y QSTRING TEXTO
 %type<TEXT>  INICIO
 %type<FIT>  FIT_OPTIONS
@@ -383,6 +383,10 @@ $$->fit = $3;
 |UNIT IGUAL UNIT_OPTIONS{
 $$ = new Option(Unitt);
 $$->unit = $3;
+}
+|PATH IGUAL PATH_{
+$$ = new Option(Path);
+$$->text = $3;
 }
 |PATH IGUAL WORD{
 $$ = new Option(Path);

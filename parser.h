@@ -74,7 +74,8 @@ extern int yydebug;
     E_ = 284,
     L_ = 285,
     FAST = 286,
-    FULL = 287
+    FULL = 287,
+    PATH_ = 288
   };
 #endif
 
@@ -98,7 +99,7 @@ struct Option * OPTION;
 class Command *COMMAND;
 
 
-#line 102 "parser.h" /* yacc.c:1909  */
+#line 103 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
