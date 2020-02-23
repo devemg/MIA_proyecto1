@@ -114,7 +114,7 @@ float getDecimal(float val){
     return roundf(val * 100) / 100;
 }
 
-char* showOption(Options op){
+const char* showOption(Options op){
     switch (op) {
     case Id:return "id";
     case Add:return "add";
@@ -398,6 +398,42 @@ string getPathWithoutName(char *path,int sizeName){
     return s;
 }
 
+void fillOptions(Option *it,int *size, int *add,Fit *fit,Unit *unit,TipoParticion *tipo,DeleteType *deltype,
+                 char **path,char **id,char **name){
+    while(it!=NULL){
+        switch (it->option) {
+        case Size:
+            *size = it->num;
+            break;
+        case Fitt:
+            *fit = it->fit;
+            break;
+        case Unitt:
+            *unit = it->unit;
+            break;
+        case Path:
+            *path = it->text;
+            break;
+        case Id:
+            *id = it->text;
+            break;
+        case Name:
+            *name = it->text;
+            break;
+        case Type:
+            *tipo = it->type;
+            break;
+        case Delete:
+            *deltype = it->delType;
+            break;
+        case Add:
+            *add = it->num;
+            break;
+        }
+     it = it->next;
+    }
+}
+
 void letsExecCommands(Command *commands){
     Command *first = commands;
     char *name;
@@ -409,6 +445,9 @@ void letsExecCommands(Command *commands){
     string ss;
     string hh;
     char *chh;
+    int add;
+    DeleteType delType;
+    TipoParticion tipoPart;
     Option *it;
     while(first!=NULL){
         switch (first->cmd) {
@@ -416,36 +455,20 @@ void letsExecCommands(Command *commands){
             fit = FirstFit;
             unit = MB;
             it = first->opts;
-            while(it!=NULL){
-                switch (it->option) {
-                case Size:
-                    size = it->num;
-                    break;
-                case Fitt:
-                    fit = it->fit;
-                    break;
-                case Unitt:
-                    unit = it->unit;
-                    break;
-                case Path:
-                    path = it->text;
-                    break;
-                }
-             it = it->next;
-            }
-            /*
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+
             cout<<"PATH COMPLETE: "<<path<<endl;
             cout<<"SIZE: "<<size <<endl;
             cout<<"FIT: "<<showFit(fit)<<endl;
             cout<<"UNIT: "<<showUnit(unit)<<endl;
-            */
+
             int ext = 0;
             ss = getNamePath(path,&ext);
             chh = &ss[0];
-            //cout<<"NAME: "<<chh<<endl;
+            cout<<"NAME: "<<chh<<endl;
             hh = getPathWithoutName(path,strlen(chh)+ext);
-            cout<<hh<<endl;
-            newDisk(size,fit,unit,&hh[0],chh);
+            cout<<"PATH: "<<hh<<endl;
+            //newDisk(size,fit,unit,&hh[0],chh);
             break;
         }
         first = first->next;

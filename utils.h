@@ -25,11 +25,14 @@ void fillSpaceWithZeros(char[],int,int);
 
 float getDecimal(float);
 
-char* showOption(Options);
+const char* showOption(Options);
 
 bool validateOptionCommand(CommandEnum,Option *);
 
 void letsExecCommands(Command*);
 
 int getInt(string);
+
+void fillOptions(Option *it,int *size, int *add,Fit *fit,Unit *unit,TipoParticion *tipo,DeleteType *deltype,
+                 char **path,char *id,char *name);
 #endif // UTILS_H

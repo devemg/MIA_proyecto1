@@ -1,5 +1,7 @@
 #include "handlerpartitions.h"
 
+MountedDisk *partsMounted[27];
+
 //CREATE
 void createPartition(int size, Unit unit, char path[],char nameDisk[],TipoParticion tipoParticion, Fit fit, char name[]){
     char full_path[200];
@@ -53,6 +55,7 @@ Response newPartition(int size, Unit unit, char path[], TipoParticion tipoPartic
         return newLogicPart(final_size,fit,name,disco,path);
         break;
     }
+    return SUCCESS;
 }
 
 Response newPrimaryPart(int size,Fit fit,char name[],MBR *disco,char path[]){
@@ -295,7 +298,7 @@ Response newLogicPart(int size, Fit fit, char name[], MBR *disco, char path[]){
     }
 
 
-
+return SUCCESS;
 }
 
 //DELETE
@@ -345,6 +348,7 @@ Response rmPartition(char path[], char name[], TipoParticion tipoParticion,Delet
         return deleteLogicPart(name,disco,path);
         break;
     }
+    return SUCCESS;
 }
 
 Response deletePrimaryPart(MBR *disco,char name[],DeleteType dtype,char path[]){
@@ -410,6 +414,7 @@ Response deleteLogicPart(char name[], MBR *disco, char path[]){
        newEBR->part_start = newPosition+sizeof(EBR);
        writeEBR(newEBR,path,newPosition);
   */  }
+    return SUCCESS;
 }
 
 Response mountPart(char path[], char name[]){
