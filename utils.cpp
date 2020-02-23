@@ -139,7 +139,7 @@ string getPathWithoutName(char *path,int sizeName){
     if(size-sizeName-1<size && size-sizeName-1 >0){
         return s.substr(0,size-sizeName-1);
     }
-    return "";
+    return s;
 }
 
 void letsExecCommands(Command *commands){
@@ -177,16 +177,16 @@ void letsExecCommands(Command *commands){
                 }
              it = it->next;
             }
-            //cout<<"PATH COMPLETE: "<<path<<endl;
-            //cout<<"SIZE: "<<size <<endl;
-            //cout<<"FIT: "<<showFit(fit)<<endl;
-            //cout<<"UNIT: "<<showUnit(unit)<<endl;
+            cout<<"PATH COMPLETE: "<<path<<endl;
+            cout<<"SIZE: "<<size <<endl;
+            cout<<"FIT: "<<showFit(fit)<<endl;
+            cout<<"UNIT: "<<showUnit(unit)<<endl;
             ss = getNamePath(path);
             chh = &ss[0];
-            //cout<<"NAME: "<<chh<<endl;
+            cout<<"NAME: "<<chh<<endl;
             hh = getPathWithoutName(path,strlen(chh));
-            //cout<<hh<<endl;
-            newDisk(size,fit,unit,&hh[0],chh);
+            cout<<hh<<endl;
+            //newDisk(size,fit,unit,&hh[0],chh);
             break;
         }
         first = first->next;
