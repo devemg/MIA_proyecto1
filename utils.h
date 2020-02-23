@@ -25,4 +25,6 @@ float getDecimal(float);
 
 char* showOption(Options);
 
+void letsExecCommands(Command*);
+
 #endif // UTILS_H

@@ -4,41 +4,11 @@
 #include <string.h>
 #include <enums.h>
 #include <utils.h>
+#include <structures.h>
 
 extern int yylineno; //linea actual
 extern int columna; //columna actual
 extern char *yytext; //lexema actual
-
-class Option
-{
-public:
-    Option(Options op){
-        option = op;
-        next = NULL;
-    }
-
-    Options option;
-    char *text;
-    int num;
-    Fit fit;
-    Unit unit;
-    TipoParticion type;
-    DeleteType delType;
-
-    Option *next;
-};
-
-class Command {
-public:
-    CommandEnum cmd;
-    Option *opts;
-    Command *next;
-    Command(CommandEnum c,Option *o){
-        cmd = c;
-        opts = o;
-        next = NULL;
-    }
-};
 
 int yyerror(const char* mens){
 //metodo que se llama al haber un error sintactico
@@ -350,15 +320,11 @@ class Command *COMMAND;
 %%
 
 INICIO :COMMANDS_LIST{
-   /* Command *first = $1;
-    while(first!=NULL){
-    std::cout<<"COMANDO: "<<first->cmd<<std::endl;
-    first = first->next;
-    }*/
+   letsExecCommands($1);
 };
 
 COMMANDS_LIST: COMMANDS_LIST COMMAND{
-  /*  if($1!=NULL){
+    if($1!=NULL){
         if($2!=NULL){
             Command *first = $1;
             while(first->next!=NULL){
@@ -366,17 +332,22 @@ COMMANDS_LIST: COMMANDS_LIST COMMAND{
             }
             first->next = $2;
         }
+    $$=$1;
+    }else{
+        if($2!=NULL){
+            $$=$2;
+        }
     }
-    $$=$1;*/
+
 }
 |COMMAND{
-  //  $$ = $1;
+   $$ = $1;
 };
 
 COMMAND: STATE_COMMANDS OPTIONS_LIST{
 
     if(validateOptionCommand($1,$2)){
-      //  $$ = new Command($1,$2);
+        $$ = new Command($1,$2);
     }
 };
 

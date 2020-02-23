@@ -83,7 +83,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 291 "parser.y" /* yacc.c:1909  */
+#line 256 "parser.y" /* yacc.c:1909  */
 
 #include <enums.h>
 

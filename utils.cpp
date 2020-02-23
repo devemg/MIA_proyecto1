@@ -95,3 +95,11 @@ char* showOption(Options op){
     default:return "";
     }
 }
+
+void letsExecCommands(Command *commands){
+    Command *first = commands;
+    while(first!=NULL){
+        cout<<"Ejecutando comandos...\n";
+        first = first->next;
+    }
+}
