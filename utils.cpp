@@ -454,7 +454,9 @@ void letsExecCommands(Command *commands){
         case mkdisk:
             fit = FirstFit;
             unit = MB;
+
             it = first->opts;
+            clearArray(path,strlen(path));
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
 
             cout<<"PATH COMPLETE: "<<path<<endl;
@@ -462,13 +464,26 @@ void letsExecCommands(Command *commands){
             cout<<"FIT: "<<showFit(fit)<<endl;
             cout<<"UNIT: "<<showUnit(unit)<<endl;
 
+            {
             int ext = 0;
             ss = getNamePath(path,&ext);
             chh = &ss[0];
-            cout<<"NAME: "<<chh<<endl;
             hh = getPathWithoutName(path,strlen(chh)+ext);
+            }
+            cout<<"NAME: "<<chh<<endl;
             cout<<"PATH: "<<hh<<endl;
+
             //newDisk(size,fit,unit,&hh[0],chh);
+            break;
+        case rmdisk:
+            it = first->opts;
+            clearArray(path,strlen(path));
+
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+
+            cout<<"PATH COMPLETE: "<<path<<endl;
+
+            deleteDisk(path);
             break;
         }
         first = first->next;
