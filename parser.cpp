@@ -82,222 +82,8 @@ std::cout<<"ERROR EN COMANDO: "<<mens<<" "<<yytext<< std::endl;
 return 0;
 }
 
-bool validateOptionCommand(CommandEnum cmd,Option *opt){
-    char *name;
-    char *path;
-    char *id;
-    int size = -1;
-    Option *it;
 
-    switch (cmd) {
-    case mkdisk:
-        //opciones obligatorias
-        it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Size:
-                if(it->num > 0){
-                    size = it->num;
-                }else{
-                    std::cout<<"El tamaño debe ser mayor o igual a cero. \n";
-                    return false;
-                }
-                break;
-            case Fitt:
-            case Unitt:
-                break;
-            case Path:
-                path = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-
-        if(size == -1){
-            std::cout<<"Debe indicar un tamaño en línea "<<yylineno<<"\n";
-            return false;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-    case rmdisk:
-        //opciones obligatorias
-        //path
-         it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Path:
-                path = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-    case mount:
-        //opciones obligatorias
-        //path name
-        it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Path:
-                path = it->text;
-                break;
-            case Name:
-                name = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(strcmp(name,"\0")==0){
-            std::cout<<"Debe indicar un nombre en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-    case unmount:
-        //opciones obligatorias
-        //name
-        it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Name:
-                name = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(name,"\0")==0){
-            std::cout<<"Debe indicar un nombre en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-   case rep:
-        //opciones obligatorias
-        //path name id
-        it = opt;
-        int len;
-        int index;
-        while(it!=NULL){
-            switch (it->option) {
-            case Path:
-                path = it->text;
-                break;
-            case Name:
-                name = it->text;
-                len = strlen(name);
-                for (index = 0; index < len; ++index)
-                   name[index] = tolower(name[index]);
-                if(strcmp(name,"mbr")!=0 && strcmp(name,"disk")!=0){
-                    std::cout<<"Debe indicar el tipo de reporte: \"mbr\" o \"disk\" en línea"<<yylineno<<".\n";
-                    return false;
-                }
-
-                break;
-            case Id:
-                id = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(strcmp(name,"\0")==0){
-            std::cout<<"Debe indicar un nombre en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(strcmp(id,"\0")==0){
-            std::cout<<"Debe indicar un id en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-     case fdisk:
-        //opciones obligatorias
-        //path name id
-        it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Size:
-                if(it->num > 0){
-                    size = it->num;
-                }else{
-                    std::cout<<"El tamaño debe ser mayor o igual a cero. \n";
-                    return false;
-                }
-                break;
-            case Path:
-                path = it->text;
-                break;
-            case Name:
-                if(strcmp(path,"mbr")==0){
-                    std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-                    return false;
-                }
-                name = it->text;
-                break;
-            case Id:
-                id = it->text;
-                break;
-            case Unitt:
-            case Add:
-            case Type:
-            case Fitt:
-            case Delete:
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(strcmp(name,"\0")==0){
-            std::cout<<"Debe indicar un nombre en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(it->option != Delete)if(strcmp(id,"\0")==0){
-            std::cout<<"Debe indicar un id en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(it->option != Delete)if(size == -1){
-            std::cout<<"Debe indicar un tamaño en línea "<<yylineno<<"\n";
-            return false;
-        }
-        break;
-    }
-    return true;
-}
-
-
-#line 301 "parser.cpp" /* yacc.c:339  */
+#line 87 "parser.cpp" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -371,7 +157,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 238 "parser.y" /* yacc.c:355  */
+#line 24 "parser.y" /* yacc.c:355  */
 
 #include <enums.h>
 
@@ -386,7 +172,7 @@ struct Option * OPTION;
 class Command *COMMAND;
 
 
-#line 390 "parser.cpp" /* yacc.c:355  */
+#line 176 "parser.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -403,7 +189,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 407 "parser.cpp" /* yacc.c:358  */
+#line 193 "parser.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -701,12 +487,12 @@ static const yytype_uint8 yytranslate[] =
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint16 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,   304,   304,   308,   325,   329,   336,   336,   336,   336,
-     336,   336,   337,   340,   348,   353,   357,   361,   365,   369,
-     373,   377,   381,   385,   389,   394,   394,   396,   396,   396,
-     398,   398,   398,   400,   400,   400
+       0,    90,    90,    98,   116,   120,   129,   129,   129,   129,
+     129,   129,   130,   133,   141,   146,   150,   154,   158,   162,
+     166,   170,   174,   178,   182,   187,   187,   189,   189,   189,
+     191,   191,   191,   193,   193,   193
 };
 #endif
 
@@ -1511,15 +1297,19 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 304 "parser.y" /* yacc.c:1646  */
+#line 90 "parser.y" /* yacc.c:1646  */
     {
-   letsExecCommands((yyvsp[0].COMMAND));
+Command *first = (yyvsp[0].COMMAND);
+if(first!=NULL){
+    letsExecCommands(first);
 }
-#line 1519 "parser.cpp" /* yacc.c:1646  */
+
+}
+#line 1309 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 308 "parser.y" /* yacc.c:1646  */
+#line 98 "parser.y" /* yacc.c:1646  */
     {
     if((yyvsp[-1].COMMAND)!=NULL){
         if((yyvsp[0].COMMAND)!=NULL){
@@ -1533,76 +1323,79 @@ yyreduce:
     }else{
         if((yyvsp[0].COMMAND)!=NULL){
             (yyval.COMMAND)=(yyvsp[0].COMMAND);
+        }else{
+            (yyval.COMMAND)=NULL;
         }
     }
-
 }
-#line 1541 "parser.cpp" /* yacc.c:1646  */
+#line 1332 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 325 "parser.y" /* yacc.c:1646  */
+#line 116 "parser.y" /* yacc.c:1646  */
     {
    (yyval.COMMAND) = (yyvsp[0].COMMAND);
 }
-#line 1549 "parser.cpp" /* yacc.c:1646  */
+#line 1340 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 329 "parser.y" /* yacc.c:1646  */
+#line 120 "parser.y" /* yacc.c:1646  */
     {
-
-    if(validateOptionCommand((yyvsp[-1].COMMAND_ENUM),(yyvsp[0].OPTION))){
+   if(validateOptionCommand((yyvsp[-1].COMMAND_ENUM),(yyvsp[0].OPTION))){
         (yyval.COMMAND) = new Command((yyvsp[-1].COMMAND_ENUM),(yyvsp[0].OPTION));
-    }
+   }else{
+       (yyval.COMMAND)=NULL;
+   }
+
 }
-#line 1560 "parser.cpp" /* yacc.c:1646  */
+#line 1353 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 336 "parser.y" /* yacc.c:1646  */
+#line 129 "parser.y" /* yacc.c:1646  */
     {(yyval.COMMAND_ENUM)=mkdisk;}
-#line 1566 "parser.cpp" /* yacc.c:1646  */
+#line 1359 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 336 "parser.y" /* yacc.c:1646  */
+#line 129 "parser.y" /* yacc.c:1646  */
     {(yyval.COMMAND_ENUM)=rmdisk;}
-#line 1572 "parser.cpp" /* yacc.c:1646  */
+#line 1365 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 336 "parser.y" /* yacc.c:1646  */
+#line 129 "parser.y" /* yacc.c:1646  */
     {(yyval.COMMAND_ENUM)=fdisk;}
-#line 1578 "parser.cpp" /* yacc.c:1646  */
+#line 1371 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 336 "parser.y" /* yacc.c:1646  */
+#line 129 "parser.y" /* yacc.c:1646  */
     {(yyval.COMMAND_ENUM)=mount;}
-#line 1584 "parser.cpp" /* yacc.c:1646  */
+#line 1377 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 336 "parser.y" /* yacc.c:1646  */
+#line 129 "parser.y" /* yacc.c:1646  */
     {(yyval.COMMAND_ENUM)=unmount;}
-#line 1590 "parser.cpp" /* yacc.c:1646  */
+#line 1383 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 336 "parser.y" /* yacc.c:1646  */
+#line 129 "parser.y" /* yacc.c:1646  */
     {(yyval.COMMAND_ENUM)=rep;}
-#line 1596 "parser.cpp" /* yacc.c:1646  */
+#line 1389 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 337 "parser.y" /* yacc.c:1646  */
+#line 130 "parser.y" /* yacc.c:1646  */
     {(yyval.COMMAND_ENUM)=exec;}
-#line 1602 "parser.cpp" /* yacc.c:1646  */
+#line 1395 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 340 "parser.y" /* yacc.c:1646  */
+#line 133 "parser.y" /* yacc.c:1646  */
     {
 Option *op = (yyvsp[-1].OPTION);
 while(op->next!=NULL){
@@ -1611,175 +1404,175 @@ while(op->next!=NULL){
 op->next = (yyvsp[0].OPTION);
 (yyval.OPTION) = (yyvsp[-1].OPTION);
 }
-#line 1615 "parser.cpp" /* yacc.c:1646  */
+#line 1408 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 348 "parser.y" /* yacc.c:1646  */
+#line 141 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = (yyvsp[0].OPTION);
 }
-#line 1623 "parser.cpp" /* yacc.c:1646  */
+#line 1416 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 353 "parser.y" /* yacc.c:1646  */
+#line 146 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = new Option(Name);
-(yyval.OPTION)->text = (yyvsp[0].TEXT);
+strcpy((yyval.OPTION)->text, (yyvsp[0].TEXT));
 }
-#line 1632 "parser.cpp" /* yacc.c:1646  */
+#line 1425 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 357 "parser.y" /* yacc.c:1646  */
+#line 150 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = new Option(Size);
 (yyval.OPTION)->num = getInt((yyvsp[0].TEXT));
 }
-#line 1641 "parser.cpp" /* yacc.c:1646  */
+#line 1434 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 361 "parser.y" /* yacc.c:1646  */
+#line 154 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = new Option(Fitt);
 (yyval.OPTION)->fit = (yyvsp[0].FIT);
 }
-#line 1650 "parser.cpp" /* yacc.c:1646  */
+#line 1443 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 365 "parser.y" /* yacc.c:1646  */
+#line 158 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = new Option(Unitt);
 (yyval.OPTION)->unit = (yyvsp[0].UNIT);
 }
-#line 1659 "parser.cpp" /* yacc.c:1646  */
+#line 1452 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 369 "parser.y" /* yacc.c:1646  */
+#line 162 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = new Option(Path);
-(yyval.OPTION)->text = (yyvsp[0].TEXT);
+strcpy((yyval.OPTION)->text, (yyvsp[0].TEXT));
 }
-#line 1668 "parser.cpp" /* yacc.c:1646  */
+#line 1461 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 373 "parser.y" /* yacc.c:1646  */
+#line 166 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = new Option(Path);
-(yyval.OPTION)->text = (yyvsp[0].TEXT);
+strcpy((yyval.OPTION)->text, (yyvsp[0].TEXT));
 }
-#line 1677 "parser.cpp" /* yacc.c:1646  */
+#line 1470 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 377 "parser.y" /* yacc.c:1646  */
+#line 170 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = new Option(Type);
 (yyval.OPTION)->type = (yyvsp[0].TIPOPARTICION);
 }
-#line 1686 "parser.cpp" /* yacc.c:1646  */
+#line 1479 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 381 "parser.y" /* yacc.c:1646  */
+#line 174 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = new Option(Delete);
 (yyval.OPTION)->delType = (yyvsp[0].DELETETYPE);
 }
-#line 1695 "parser.cpp" /* yacc.c:1646  */
+#line 1488 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 385 "parser.y" /* yacc.c:1646  */
+#line 178 "parser.y" /* yacc.c:1646  */
     {
 (yyval.OPTION) = new Option(Add);
 (yyval.OPTION)->num = getInt((yyvsp[0].TEXT));
 }
-#line 1704 "parser.cpp" /* yacc.c:1646  */
+#line 1497 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 389 "parser.y" /* yacc.c:1646  */
+#line 182 "parser.y" /* yacc.c:1646  */
     {
  (yyval.OPTION) = new Option(Id);
- (yyval.OPTION)->text = (yyvsp[0].TEXT);
+ strcpy((yyval.OPTION)->text, (yyvsp[0].TEXT));
 }
-#line 1713 "parser.cpp" /* yacc.c:1646  */
+#line 1506 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 394 "parser.y" /* yacc.c:1646  */
+#line 187 "parser.y" /* yacc.c:1646  */
     {(yyval.DELETETYPE)=Fast;}
-#line 1719 "parser.cpp" /* yacc.c:1646  */
+#line 1512 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 394 "parser.y" /* yacc.c:1646  */
+#line 187 "parser.y" /* yacc.c:1646  */
     {(yyval.DELETETYPE)=Full;}
-#line 1725 "parser.cpp" /* yacc.c:1646  */
+#line 1518 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 396 "parser.y" /* yacc.c:1646  */
+#line 189 "parser.y" /* yacc.c:1646  */
     {(yyval.TIPOPARTICION)=Primaria;}
-#line 1731 "parser.cpp" /* yacc.c:1646  */
+#line 1524 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 396 "parser.y" /* yacc.c:1646  */
+#line 189 "parser.y" /* yacc.c:1646  */
     {(yyval.TIPOPARTICION)=Extendida;}
-#line 1737 "parser.cpp" /* yacc.c:1646  */
+#line 1530 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 396 "parser.y" /* yacc.c:1646  */
+#line 189 "parser.y" /* yacc.c:1646  */
     {(yyval.TIPOPARTICION)=Logica;}
-#line 1743 "parser.cpp" /* yacc.c:1646  */
+#line 1536 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 398 "parser.y" /* yacc.c:1646  */
+#line 191 "parser.y" /* yacc.c:1646  */
     {(yyval.UNIT)=KB;}
-#line 1749 "parser.cpp" /* yacc.c:1646  */
+#line 1542 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 398 "parser.y" /* yacc.c:1646  */
+#line 191 "parser.y" /* yacc.c:1646  */
     {(yyval.UNIT)=MB;}
-#line 1755 "parser.cpp" /* yacc.c:1646  */
+#line 1548 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 398 "parser.y" /* yacc.c:1646  */
+#line 191 "parser.y" /* yacc.c:1646  */
     {(yyval.UNIT)=Byte;}
-#line 1761 "parser.cpp" /* yacc.c:1646  */
+#line 1554 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 400 "parser.y" /* yacc.c:1646  */
+#line 193 "parser.y" /* yacc.c:1646  */
     {(yyval.FIT)=BestFit;}
-#line 1767 "parser.cpp" /* yacc.c:1646  */
+#line 1560 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 400 "parser.y" /* yacc.c:1646  */
+#line 193 "parser.y" /* yacc.c:1646  */
     {(yyval.FIT)=FirstFit;}
-#line 1773 "parser.cpp" /* yacc.c:1646  */
+#line 1566 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 400 "parser.y" /* yacc.c:1646  */
+#line 193 "parser.y" /* yacc.c:1646  */
     {(yyval.FIT)=WorstFit;}
-#line 1779 "parser.cpp" /* yacc.c:1646  */
+#line 1572 "parser.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1783 "parser.cpp" /* yacc.c:1646  */
+#line 1576 "parser.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2007,5 +1800,5 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 402 "parser.y" /* yacc.c:1906  */
+#line 195 "parser.y" /* yacc.c:1906  */
 

@@ -147,7 +147,229 @@ const char* showUnit(Unit op){
     }
 }
 
-string getNamePath(char *path){
+bool validateOptionCommand(CommandEnum cmd,Option *opt){
+    bool existName;
+    bool existPath;
+    bool existId;
+    bool existSize;
+    Option *it;
+
+    switch (cmd) {
+    case mkdisk:
+        //opciones obligatorias
+        //size path
+        existPath = false;
+        existSize = false;
+        it = opt;
+        while(it!=NULL){
+            switch (it->option) {
+            case Size:
+                if(it->num > 0){
+                    existSize=true;
+                }else{
+                    std::cout<<"El tamaño debe ser mayor o igual a cero. \n";
+                    return false;
+                }
+                break;
+            case Fitt:
+            case Unitt:
+                break;
+            case Path:
+                existPath = true;
+                break;
+            default:
+                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
+                break;
+            }
+         it = it->next;
+        }
+        if(!existSize){
+            std::cout<<"Debe indicar un tamaño.\n";
+            return false;
+        }
+        if(!existPath){
+            std::cout<<"Debe indicar un archivo.\n";
+            return false;
+        }
+        break;
+    case rmdisk:
+        //opciones obligatorias
+        //path
+        existPath = false;
+         it = opt;
+        while(it!=NULL){
+            switch (it->option) {
+            case Path:
+                existPath = true;
+                break;
+            default:
+                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
+                break;
+            }
+         it = it->next;
+        }
+        if(!existPath){
+            std::cout<<"Debe indicar un archivo.\n";
+            return false;
+        }
+        break;
+    case mount:
+        //opciones obligatorias
+        //path name
+        existPath = false;
+        existName = false;
+        it = opt;
+        while(it!=NULL){
+            switch (it->option) {
+            case Path:
+                existPath = true;
+                break;
+            case Name:
+                existName = true;
+                break;
+            default:
+                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
+                break;
+            }
+         it = it->next;
+        }
+        if(!existPath){
+            std::cout<<"Debe indicar un archivo.\n";
+            return false;
+        }
+        if(!existName){
+            std::cout<<"Debe indicar un nombre.\n";
+            return false;
+        }
+        break;
+    case unmount:
+        //opciones obligatorias
+        //name
+        it = opt;
+        existName = false;
+        while(it!=NULL){
+            switch (it->option) {
+            case Name:
+                existName = true;
+                break;
+            default:
+                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
+                break;
+            }
+         it = it->next;
+        }
+        if(!existName){
+            std::cout<<"Debe indicar un nombre.\n";
+            return false;
+        }
+        break;
+   case rep:
+        //opciones obligatorias
+        //path name id
+        it = opt;
+        existPath = false;
+        existName = false;
+        existId = false;
+        int len;
+        int index;
+        while(it!=NULL){
+            switch (it->option) {
+            case Path:
+                existPath = true;
+                break;
+            case Name:
+                existName = true;
+                len = strlen(it->text);
+                for (index = 0; index < len; ++index)
+                   it->text[index] = tolower(it->text[index]);
+                if(strcmp(it->text,"mbr")!=0 && strcmp(it->text,"disk")!=0){
+                    std::cout<<"Debe indicar el tipo de reporte: \"mbr\" o \"disk\".\n";
+                    return false;
+                }
+
+                break;
+            case Id:
+                existId = true;
+                break;
+            default:
+                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
+                break;
+            }
+         it = it->next;
+        }
+        if(!existPath){
+            std::cout<<"Debe indicar un archivo.\n";
+            return false;
+        }
+        if(!existName){
+            std::cout<<"Debe indicar un nombre.\n";
+            return false;
+        }
+        if(!existId){
+            std::cout<<"Debe indicar un id.\n";
+            return false;
+        }
+        break;
+     case fdisk:
+        //opciones obligatorias
+        //path name id
+        it = opt;
+        existPath = false;
+        existName = false;
+        existId = false;
+        while(it!=NULL){
+            switch (it->option) {
+            case Size:
+                if(it->num > 0){
+                    existSize = true;
+                }else{
+                    std::cout<<"El tamaño debe ser mayor o igual a cero. \n";
+                    return false;
+                }
+                break;
+            case Path:
+                existPath=true;
+                break;
+            case Name:
+                existName = true;
+                break;
+            case Id:
+                existId = true;
+                break;
+            case Unitt:
+            case Add:
+            case Type:
+            case Fitt:
+            case Delete:
+                break;
+            default:
+                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
+                break;
+            }
+         it = it->next;
+        }
+        if(!existPath){
+            std::cout<<"Debe indicar un archivo.\n";
+            return false;
+        }
+        if(!existName){
+            std::cout<<"Debe indicar un nombre.\n";
+            return false;
+        }
+        if(it->option != Delete)if(!existId){
+            std::cout<<"Debe indicar un id.\n";
+            return false;
+        }
+        if(it->option != Delete)if(!existSize){
+            std::cout<<"Debe indicar un tamaño.\n";
+            return false;
+        }
+        break;
+    }
+    return true;
+}
+
+string getNamePath(char *path,int *poss){
     string s(path);
     string delimiter = "/";
 
@@ -162,6 +384,7 @@ string getNamePath(char *path){
     pos_ = s.find(".");
     if(pos_>0){
         s = s.substr(0,pos_);
+        *poss = pos_;
     }
     return s;
 }
@@ -210,16 +433,19 @@ void letsExecCommands(Command *commands){
                 }
              it = it->next;
             }
+            /*
             cout<<"PATH COMPLETE: "<<path<<endl;
             cout<<"SIZE: "<<size <<endl;
             cout<<"FIT: "<<showFit(fit)<<endl;
             cout<<"UNIT: "<<showUnit(unit)<<endl;
-            ss = getNamePath(path);
+            */
+            int ext = 0;
+            ss = getNamePath(path,&ext);
             chh = &ss[0];
-            cout<<"NAME: "<<chh<<endl;
-            hh = getPathWithoutName(path,strlen(chh));
+            //cout<<"NAME: "<<chh<<endl;
+            hh = getPathWithoutName(path,strlen(chh)+ext);
             cout<<hh<<endl;
-            //newDisk(size,fit,unit,&hh[0],chh);
+            newDisk(size,fit,unit,&hh[0],chh);
             break;
         }
         first = first->next;

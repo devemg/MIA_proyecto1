@@ -59,7 +59,7 @@ public:
     }
 
     Options option;
-    char *text;
+    char text[200];
     int num;
     Fit fit;
     Unit unit;

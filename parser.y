@@ -17,220 +17,6 @@ std::cout<<"ERROR EN COMANDO: "<<mens<<" "<<yytext<< std::endl;
 return 0;
 }
 
-bool validateOptionCommand(CommandEnum cmd,Option *opt){
-    char *name;
-    char *path;
-    char *id;
-    int size = -1;
-    Option *it;
-
-    switch (cmd) {
-    case mkdisk:
-        //opciones obligatorias
-        it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Size:
-                if(it->num > 0){
-                    size = it->num;
-                }else{
-                    std::cout<<"El tamaño debe ser mayor o igual a cero. \n";
-                    return false;
-                }
-                break;
-            case Fitt:
-            case Unitt:
-                break;
-            case Path:
-                path = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-
-        if(size == -1){
-            std::cout<<"Debe indicar un tamaño en línea "<<yylineno<<"\n";
-            return false;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-    case rmdisk:
-        //opciones obligatorias
-        //path
-         it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Path:
-                path = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-    case mount:
-        //opciones obligatorias
-        //path name
-        it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Path:
-                path = it->text;
-                break;
-            case Name:
-                name = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(strcmp(name,"\0")==0){
-            std::cout<<"Debe indicar un nombre en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-    case unmount:
-        //opciones obligatorias
-        //name
-        it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Name:
-                name = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(name,"\0")==0){
-            std::cout<<"Debe indicar un nombre en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-   case rep:
-        //opciones obligatorias
-        //path name id
-        it = opt;
-        int len;
-        int index;
-        while(it!=NULL){
-            switch (it->option) {
-            case Path:
-                path = it->text;
-                break;
-            case Name:
-                name = it->text;
-                len = strlen(name);
-                for (index = 0; index < len; ++index)
-                   name[index] = tolower(name[index]);
-                if(strcmp(name,"mbr")!=0 && strcmp(name,"disk")!=0){
-                    std::cout<<"Debe indicar el tipo de reporte: \"mbr\" o \"disk\" en línea"<<yylineno<<".\n";
-                    return false;
-                }
-
-                break;
-            case Id:
-                id = it->text;
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(strcmp(name,"\0")==0){
-            std::cout<<"Debe indicar un nombre en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(strcmp(id,"\0")==0){
-            std::cout<<"Debe indicar un id en línea "<<yylineno<<".\n";
-            return false;
-        }
-        break;
-     case fdisk:
-        //opciones obligatorias
-        //path name id
-        it = opt;
-        while(it!=NULL){
-            switch (it->option) {
-            case Size:
-                if(it->num > 0){
-                    size = it->num;
-                }else{
-                    std::cout<<"El tamaño debe ser mayor o igual a cero. \n";
-                    return false;
-                }
-                break;
-            case Path:
-                path = it->text;
-                break;
-            case Name:
-                if(strcmp(path,"mbr")==0){
-                    std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-                    return false;
-                }
-                name = it->text;
-                break;
-            case Id:
-                id = it->text;
-                break;
-            case Unitt:
-            case Add:
-            case Type:
-            case Fitt:
-            case Delete:
-                break;
-            default:
-                std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
-                break;
-            }
-         it = it->next;
-        }
-        if(strcmp(path,"\0")==0){
-            std::cout<<"Debe indicar un archivo en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(strcmp(name,"\0")==0){
-            std::cout<<"Debe indicar un nombre en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(it->option != Delete)if(strcmp(id,"\0")==0){
-            std::cout<<"Debe indicar un id en línea "<<yylineno<<".\n";
-            return false;
-        }
-        if(it->option != Delete)if(size == -1){
-            std::cout<<"Debe indicar un tamaño en línea "<<yylineno<<"\n";
-            return false;
-        }
-        break;
-    }
-    return true;
-}
-
 %}
 
 %error-verbose
@@ -302,7 +88,11 @@ class Command *COMMAND;
 %%
 
 INICIO :COMMANDS_LIST{
-   letsExecCommands($1);
+Command *first = $1;
+if(first!=NULL){
+    letsExecCommands(first);
+}
+
 };
 
 COMMANDS_LIST: COMMANDS_LIST COMMAND{
@@ -318,19 +108,22 @@ COMMANDS_LIST: COMMANDS_LIST COMMAND{
     }else{
         if($2!=NULL){
             $$=$2;
+        }else{
+            $$=NULL;
         }
     }
-
 }
 |COMMAND{
    $$ = $1;
 };
 
 COMMAND: STATE_COMMANDS OPTIONS_LIST{
-
-    if(validateOptionCommand($1,$2)){
+   if(validateOptionCommand($1,$2)){
         $$ = new Command($1,$2);
-    }
+   }else{
+       $$=NULL;
+   }
+
 };
 
 STATE_COMMANDS: MKDISK{$$=mkdisk;}|RMDISK{$$=rmdisk;}|FDISK{$$=fdisk;}|MOUNT{$$=mount;}|UNMOUNT{$$=unmount;}|REP{$$=rep;}
@@ -352,7 +145,7 @@ $$ = $1;
 
 STATE_OPTION:NAME IGUAL WORD{
 $$ = new Option(Name);
-$$->text = $3;
+strcpy($$->text, $3);
 }
 |SIZE IGUAL NUMERO{
 $$ = new Option(Size);
@@ -368,11 +161,11 @@ $$->unit = $3;
 }
 |PATH IGUAL PATH_{
 $$ = new Option(Path);
-$$->text = $3;
+strcpy($$->text, $3);
 }
 |PATH IGUAL WORD{
 $$ = new Option(Path);
-$$->text = $3;
+strcpy($$->text, $3);
 }
 |TYPE IGUAL TYPE_OPTIONS{
 $$ = new Option(Type);
@@ -388,7 +181,7 @@ $$->num = getInt($3);
 }
 |ID IGUAL WORD{
  $$ = new Option(Id);
- $$->text = $3;
+ strcpy($$->text, $3);
 };
 
 DELETE_OPTIONS:FAST{$$=Fast;}|FULL{$$=Full;};

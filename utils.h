@@ -27,6 +27,8 @@ float getDecimal(float);
 
 char* showOption(Options);
 
+bool validateOptionCommand(CommandEnum,Option *);
+
 void letsExecCommands(Command*);
 
 int getInt(string);

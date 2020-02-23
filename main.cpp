@@ -9,40 +9,48 @@
 #include <scanner.h>
 
 using namespace std;
-/*
-void leerComando(void){
- char comando[200];
- while (1) {
-    printf(">");
-    fgets (comando, 200, stdin);
-    limpiar(comando);
-    if(strcmp("exit",comando)==0)break;
-    toLowerCase(comando);
-    printf("%s\n",comando);
-    analizarComando(comando);
-    printf("\n");
- }
-}*/
+
+void writeCommand(string command){
+    FILE * pFile;
+      pFile = fopen ("command.txt", "w+");
+      fwrite (command.c_str(), sizeof(char), strlen(command.c_str()), pFile);
+      fclose (pFile);
+}
+
+void readExecCommand(){
+    const char* x = "command.txt";
+            FILE* input = fopen(x, "r" );
+            yyrestart(input);//SE PASA LA CADENA DE ENTRADA A FLEX
+            yyparse();//SE INICIA LA COMPILACION
+            fclose(input);
+}
 
 int main()
 {
-   /* const char* x = "temp.txt";
-        FILE* input = fopen(x, "r" );
-        yyrestart(input);//SE PASA LA CADENA DE ENTRADA A FLEX
-        yyparse();//SE INICIA LA COMPILACION
-        */
+    std::string command;
+    while(true){
+        cout << ">";
+        getline (std::cin,command);
+        if(strcmp(command.c_str(),"exit")==0){
+            break;
+        }else if(strcmp(command.c_str(),"cls")==0){
+            system("clear");
+            continue;
+        }
+        writeCommand(command);
+        readExecCommand();
+    }
 
-
-
-  newDisk(3000,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
+  //newDisk(100,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
   //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
-  createPartition(1500,KB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion 1.2");
-  createPartition(500,KB,"/home/emely/Escritorio/testData","disk1",Extendida,BestFit,"particion 1");
-  mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1.2");
-  mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1");
-  showMounts();
-  unmountPart("vda1");
-  showMounts();
+  //createPartition(1500,KB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion 1.2");
+  //createPartition(500,KB,"/home/emely/Escritorio/testData","disk1",Extendida,BestFit,"particion 1");
+  //mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1.2");
+
+  //mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1");
+  //showMounts();
+  //unmountPart("vda1");
+  //showMounts();
 /*
   createPartition(250,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.3");
   createPartition(250,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.1");
