@@ -17,24 +17,6 @@ std::cout<<"ERROR EN COMANDO: "<<mens<<" "<<yytext<< std::endl;
 return 0;
 }
 
-int getInt(string s){
-    try
-        {
-            int i = std::stoi(s);
-            return i;
-        }
-        catch (std::invalid_argument const &e)
-        {
-            std::cout << "Bad input: std::invalid_argument thrown" << '\n';
-            return -12345678910;
-        }
-        catch (std::out_of_range const &e)
-        {
-            std::cout << "Integer overflow: std::out_of_range thrown" << '\n';
-            return -12345678910;
-        }
-}
-
 bool validateOptionCommand(CommandEnum cmd,Option *opt){
     char *name;
     char *path;

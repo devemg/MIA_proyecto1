@@ -64,6 +64,15 @@ void showMessageError(Response response){
     case ERROR_PARTITION_MOUNTED:
         cout<<"La partición ya está montada\n";
         break;
+    case ERROR_ID_MALFORMED:
+        cout<<"Id incorrecto\n";
+        break;
+    case ERROR_DISK_NOT_EXIST:
+        cout<<"El disco no existe\n";
+        break;
+    case ERROR_PARTITION_NOT_MOUNTED:
+        cout<<"La partición no fue montada\n";
+        break;
     default:
         break;
 
@@ -80,6 +89,24 @@ void fillSpaceWithZeros(char full_path[],int position,int size){
      }
     fseek(myFile,position , SEEK_SET);
     fwrite("\0", sizeof(char), size, myFile);
+}
+
+int getInt(string s){
+    try
+        {
+            int i = std::stoi(s);
+            return i;
+        }
+        catch (std::invalid_argument const &e)
+        {
+            std::cout << "Bad input: std::invalid_argument thrown" << '\n';
+            return -12345678910;
+        }
+        catch (std::out_of_range const &e)
+        {
+            std::cout << "Integer overflow: std::out_of_range thrown" << '\n';
+            return -12345678910;
+        }
 }
 
 float getDecimal(float val){

@@ -37,4 +37,6 @@ void showMounts();
 
 char* getPartId(char,int);
 
+Response unmountPart(char[]);
+
 #endif // HANDLERPARTITIONS_H

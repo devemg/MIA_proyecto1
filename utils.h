@@ -29,4 +29,5 @@ char* showOption(Options);
 
 void letsExecCommands(Command*);
 
+int getInt(string);
 #endif // UTILS_H

@@ -41,6 +41,8 @@ int main()
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1.2");
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1");
   showMounts();
+  unmountPart("vda1");
+  showMounts();
 /*
   createPartition(250,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.3");
   createPartition(250,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.1");

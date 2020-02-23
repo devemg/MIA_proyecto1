@@ -489,3 +489,43 @@ char* getPartId(char letra, int numero){
     str+=to_string(numero);
     return &str[0];
 }
+
+Response unmountPart(char id[]){
+    string str(id);
+    if(strlen(id)<4){
+        return ERROR_ID_MALFORMED;
+    }
+    char letra = str.at(2);
+    //BUSCAR LETRA
+    int contadorDiscos = 0;
+    bool existeDisco= false;
+    while(partsMounted[contadorDiscos]!=NULL){
+        if(partsMounted[contadorDiscos]->letter == letra){
+            existeDisco = true;
+            break;
+        }
+        contadorDiscos++;
+    }
+    if(!existeDisco){
+        return ERROR_DISK_NOT_EXIST;
+    }
+    //BUSCAR NUMERO
+    MountedDisk *disk = partsMounted[contadorDiscos];
+    int contadorPart = 0;
+    bool existePart = false;
+    while(disk->parts[contadorPart]!=NULL){
+        if(strcmp(disk->parts[contadorPart]->id,id)==0){
+            existePart = true;
+            break;
+        }
+        contadorPart++;
+    }
+    if(existePart){
+        delete disk->parts[contadorPart];
+        disk->parts[contadorPart] = NULL;
+    }else{
+        return ERROR_PARTITION_NOT_MOUNTED;
+    }
+
+    return SUCCESS;
+}
