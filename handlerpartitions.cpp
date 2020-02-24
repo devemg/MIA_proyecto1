@@ -62,6 +62,10 @@ Response newPrimaryPart(long size,Fit fit,char name[],MBR *disco,char path[]){
      if(partition->part_status==Inactivo){
          hayEspacio = true;
          break;
+     }else{
+         if(strcmp(partition->part_name,name)==0){
+             return ERROR_PARTITION_EXIST;
+         }
      }
  }
  if(hayEspacio){
@@ -201,6 +205,10 @@ Response newExtendedPart(long size, Fit fit, char name[], MBR *disco, char path[
         if(partition->part_status==Inactivo){
             hayEspacio = true;
             break;
+        }else{
+            if(strcmp(partition->part_name,name)==0){
+                return ERROR_PARTITION_EXIST;
+            }
         }
     }
 
