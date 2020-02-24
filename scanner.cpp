@@ -1002,7 +1002,7 @@ case 32:
 /* rule 32 can match eol */
 YY_RULE_SETUP
 #line 51 "scanner.l"
-{ std::cout<<yytext<<std::endl; }
+{ std::cout <<yytext<< std::endl; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP

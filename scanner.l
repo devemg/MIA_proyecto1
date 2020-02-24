@@ -48,7 +48,7 @@ path (\/[a-z]+[a-z0-9_\-\.]+)+|\"(\/[a-z]+[a-z0-9_\-\. ]+)+\"
 {path}          { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return PATH_; }
 {iden}          { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return WORD; }
 {Numero}        { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return NUMERO; }
-{comentario}    { std::cout<<yytext<<std::endl; }
+{comentario}    { std::cout <<yytext<< std::endl; }
 [[:blank:]]     { /*Se ignoran*/ }
 .               {std::cout <<yytext<<"Comando incorrecto"<< std::endl;}
 %%

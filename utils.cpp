@@ -509,6 +509,7 @@ Response getContadorDiscos(int *contadorDiscos,char *id){
 }
 
 void letsExecCommands(Command *commands){
+    if(commands->cmd==NULL)return;
     Command *first = commands;
     char *name;
     char *path;
