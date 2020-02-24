@@ -90,7 +90,7 @@ Response getStartAddress(MBR *disco,Fit fit,long size,int *startPoint){
     bool empty = true;
     for(i = 0;i<4;i++){
         if(disco->particiones[i].part_status == Activo){
-            parts[i] = new virtualBlock(disco->particiones[i].part_size,disco->particiones[i].part_start,OCUPADO);
+            parts[contadorParticiones] = new virtualBlock(disco->particiones[i].part_size,disco->particiones[i].part_start,OCUPADO);
             empty = false;
             contadorParticiones++;
         }
@@ -298,7 +298,7 @@ return SUCCESS;
 }
 
 //DELETE
-void deletePartition(char path[],char nameDisk[], char name[],TipoParticion tipoParticion,DeleteType dtype){
+Response deletePartition(char path[],char nameDisk[], char name[],TipoParticion tipoParticion,DeleteType dtype){
     char full_path[200];
     clearArray(full_path,sizeof(full_path));
     getFullPathDisk(path,nameDisk,full_path);
@@ -314,21 +314,9 @@ void deletePartition(char path[],char nameDisk[], char name[],TipoParticion tipo
         //ESCRIBIR RAID
         //Response response1 =
         rmPartition(full_path,name,tipoParticion,dtype);
-        switch (tipoParticion) {
-        case Primaria:
-            cout<<"¡La partición primaria fue eliminada con éxito!\n";
-            break;
-        case Extendida:
-            cout<<"¡La partición extendida fue eliminada con éxito!\n";
-            break;
-        case Logica:
-            cout<<"¡La partición lógica fue eliminada con éxito!\n";
-            break;
-        }
         //if(response1 != SUCCESS)cout<<"Error al hacer cambio en el raid\n";
-    }else{
-        showMessageError(response);
     }
+    return response;
 }
 
 Response rmPartition(char path[], char name[], TipoParticion tipoParticion,DeleteType dtype){

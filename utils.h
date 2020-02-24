@@ -40,7 +40,7 @@ void letsExecCommands(Command*);
 int getInt(string);
 
 void fillOptions(Option *it,int *size, int *add,Fit *fit,Unit *unit,TipoParticion *tipo,DeleteType *deltype,
-                 char **path,char *id,char *name);
+                 char **path,char *id,char *name,bool *isAdd,bool *isDelete);
 
 Response getContadorDiscos(int *contadorDiscos,char *id);
 

@@ -20,7 +20,7 @@ void newEBR(Partition *, char[]);
 
 void writeEBR(EBR *, char[],int);
 
-void deletePartition(char[], char[],char[],TipoParticion,DeleteType);
+Response deletePartition(char[], char[],char[],TipoParticion,DeleteType);
 
 Response rmPartition(char[],char[],TipoParticion,DeleteType);
 

@@ -372,6 +372,7 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
         existName = false;
         existId = false;
         bool isDelete = false;
+        bool isAdd = false;
         while(it!=NULL){
             switch (it->option) {
             case Size:
@@ -394,7 +395,9 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
             case Unitt:
             case Type:
             case Fitt:
+                break;
             case Add:
+                isAdd = true;
                 break;
             case Delete:
                 isDelete = true;
@@ -413,11 +416,7 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
             std::cout<<"Debe indicar un nombre.\n";
             return false;
         }
-        if(isDelete)if(!existId){
-            std::cout<<"Debe indicar un id.\n";
-            return false;
-        }
-        if(isDelete)if(!existSize){
+        if(!isDelete && !isAdd)if(!existSize){
             std::cout<<"Debe indicar un tamaño.\n";
             return false;
         }
@@ -457,7 +456,7 @@ string getPathWithoutName(char *path,int sizeName){
 }
 
 void fillOptions(Option *it,int *size, int *add,Fit *fit,Unit *unit,TipoParticion *tipo,DeleteType *deltype,
-                 char **path,char **id,char **name){
+                 char **path,char **id,char **name,bool *isAdd,bool *isDelete){
     while(it!=NULL){
         switch (it->option) {
         case Size:
@@ -482,9 +481,11 @@ void fillOptions(Option *it,int *size, int *add,Fit *fit,Unit *unit,TipoParticio
             *tipo = it->type;
             break;
         case Delete:
+            *isDelete = true;
             *deltype = it->delType;
             break;
         case Add:
+            *isAdd = true;
             *add = it->num;
             break;
         }
@@ -526,6 +527,8 @@ void letsExecCommands(Command *commands){
     string hh;
     char *chh;
     int add;
+    bool isAdd;
+    bool isDelete;
     DeleteType delType;
     TipoParticion tipoPart;
     Option *it;
@@ -536,7 +539,7 @@ void letsExecCommands(Command *commands){
             fit = FirstFit;
             unit = MB;
             it = first->opts;
-            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name,&isAdd,&isDelete);
             /*
             cout<<"PATH COMPLETE: "<<path<<endl;
             cout<<"SIZE: "<<size <<endl;
@@ -554,13 +557,13 @@ void letsExecCommands(Command *commands){
             break;
         case rmdisk:
             it = first->opts;
-            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name,&isAdd,&isDelete);
             //cout<<"PATH COMPLETE: "<<path<<endl;
             deleteDisk(path);
             break;
         case mount:
         {  it = first->opts;
-            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name,&isAdd,&isDelete);
             //cout<<"PATH COMPLETE: "<<path<<endl;
             //cout<<"NAME: "<<name<<endl;
             Response res = mountPart(path,name);
@@ -575,7 +578,7 @@ void letsExecCommands(Command *commands){
             break;
         case unmount:
         {    it = first->opts;
-            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name,&isAdd,&isDelete);
             //cout<<"ID: "<<id<<endl;        
             Response res = unmountPart(id);
             if(res!=SUCCESS){
@@ -590,7 +593,7 @@ void letsExecCommands(Command *commands){
         case rep:
          {   it = first->opts;
 
-            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name,&isAdd,&isDelete);
 
             /*cout<<"ID: "<<id<<endl;
             cout<<"PATH COMPLETE: "<<path<<endl;
@@ -624,7 +627,7 @@ void letsExecCommands(Command *commands){
         case exec:
         {
             it = first->opts;
-            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name,&isAdd,&isDelete);
             //cout<<"PATH COMPLETE: "<<path<<endl;
             //abrir archivo
             cout<<"Ejecutando script...\n\n";
@@ -643,14 +646,16 @@ void letsExecCommands(Command *commands){
         }
             break;
         case fdisk:
-            it = first->opts;
+        {   it = first->opts;
             size = 0;
             unit = KB;
             tipoPart = Primaria;
             fit = WorstFit;
             delType = Fast;
+            isDelete = false;
+            isAdd = false;
             add = 0;
-            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name,&isAdd,&isDelete);
             /*
             cout<<"PATH COMPLETE: "<<path<<endl;
             cout<<"SIZE: "<<size<<endl;
@@ -661,15 +666,23 @@ void letsExecCommands(Command *commands){
             cout<<"NAME: "<<name<<endl;
             cout<<"DELTYPE: "<<delType<<endl;
             */
-            {
             int ext = 0;
             ss = getNamePath(path,&ext);
             chh = &ss[0];
             hh = getPathWithoutName(path,strlen(chh)+ext);
-            }
             //cout<<"NAME: "<<chh<<endl;
             //cout<<"PATH: "<<hh<<endl;
-
+            if(isDelete){
+                //eliminar particion
+                Response res = deletePartition(&hh[0],chh,name,tipoPart,delType);
+                if(res==SUCCESS){
+                    cout<<"¡Partición eliminada con éxito!\n";
+                }else{
+                    showMessageError(res);
+                }
+            }else if(isAdd){
+                //modificar particion
+            }else{
             Response res =  createPartition(size,unit,&hh[0],chh,tipoPart,fit,name);
             if(res == SUCCESS){
                 switch (tipoPart) {
@@ -686,7 +699,8 @@ void letsExecCommands(Command *commands){
             }else{
                 showMessageError(res);
             }
-            break;
+            }
+        }break;
         }
         first = first->next;
     }
