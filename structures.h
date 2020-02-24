@@ -10,7 +10,7 @@ struct Partition
     char part_type;
     char part_fit;
     int part_start;
-    int part_size;
+    long part_size;
     char part_name[16];
 
 };
@@ -18,7 +18,7 @@ struct Partition
 //info of disk
 struct MBR
 {
-    int mbr_tamanio;
+    long mbr_tamanio;
     char mbr_fecha_creacion[16];
     int mbr_disk_signature;
     char disk_fit;
@@ -35,14 +35,14 @@ struct EBR
     char part_status;
     char part_fit;
     int part_start;
-    int part_size;
+    long part_size;
     int part_next;
     char part_name[16];
 };
 
 class virtualBlock{
 public:
-    int size;
+    long size;
     int start;
     statusBlock status;
     virtualBlock *next;

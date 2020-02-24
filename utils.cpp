@@ -20,7 +20,7 @@ void getFullPath(char path[],char name[],char full_path[]){
     strcat(full_path,name);
 }
 
-int getSize(int size,Unit unit){
+long getSize(int size,Unit unit){
     size_t final;
     switch(unit)
     {

@@ -31,7 +31,7 @@ Response newPartition(int size, Unit unit, char path[], TipoParticion tipoPartic
     if(disco==NULL){
         return ERROR_UNHANDLED;
     }
-    int final_size = getSize(size,unit);
+    long final_size = getSize(size,unit);
     if(final_size<=0){
         return ERROR_SIZE_MIN;
     }
@@ -47,7 +47,7 @@ Response newPartition(int size, Unit unit, char path[], TipoParticion tipoPartic
     return SUCCESS;
 }
 
-Response newPrimaryPart(int size,Fit fit,char name[],MBR *disco,char path[]){
+Response newPrimaryPart(long size,Fit fit,char name[],MBR *disco,char path[]){
      int i;
      int startPoint;
      Response resp = getStartAddress(disco,fit,size,&startPoint);
@@ -80,7 +80,7 @@ Response newPrimaryPart(int size,Fit fit,char name[],MBR *disco,char path[]){
  }
 }
 
-Response getStartAddress(MBR *disco,Fit fit,int size,int *startPoint){
+Response getStartAddress(MBR *disco,Fit fit,long size,int *startPoint){
     int i;
     *startPoint = -1;
     int contadorParticiones = 0;
@@ -175,7 +175,7 @@ Response getStartAddress(MBR *disco,Fit fit,int size,int *startPoint){
     return SUCCESS;
 }
 
-Response newExtendedPart(int size, Fit fit, char name[], MBR *disco, char path[]){
+Response newExtendedPart(long size, Fit fit, char name[], MBR *disco, char path[]){
     int i;
     int startPoint;
     Response resp = getStartAddress(disco,fit,size,&startPoint);
@@ -248,7 +248,7 @@ void writeEBR(EBR *extendedPart,char path[],int point){
      fclose (myFile);
 }
 
-Response newLogicPart(int size, Fit fit, char name[], MBR *disco, char path[]){
+Response newLogicPart(long size, Fit fit, char name[], MBR *disco, char path[]){
     EBR *firstEBR = getFirstEBR(disco,path);
     int newPosition = 0;
 

@@ -11,11 +11,11 @@ Response createPartition(int,Unit,char[],char[],TipoParticion,Fit,char[]);
 
 Response newPartition(int,Unit,char[],TipoParticion,Fit,char[]);
 
-Response newPrimaryPart(int,Fit,char[],MBR*,char[]);
+Response newPrimaryPart(long,Fit,char[],MBR*,char[]);
 
-Response newExtendedPart(int,Fit,char[],MBR*,char[]);
+Response newExtendedPart(long,Fit,char[],MBR*,char[]);
 
-Response newLogicPart(int,Fit,char[],MBR*,char[]);
+Response newLogicPart(long,Fit,char[],MBR*,char[]);
 
 void newEBR(Partition *, char[]);
 
@@ -29,7 +29,7 @@ Response deletePrimaryPart(MBR*,char[],DeleteType,char[]);
 
 Response deleteLogicPart(char[], MBR*, char[]);
 
-Response getStartAddress(MBR*,Fit,int,int*);
+Response getStartAddress(MBR*,Fit,long,int*);
 
 Response mountPart(char[],char[]);
 

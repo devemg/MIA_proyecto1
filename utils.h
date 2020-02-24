@@ -16,7 +16,7 @@ void getFullPathDisk(char [],char[],char[]);
 
 void getFullPath(char [],char[],char[]);
 
-int getSize(int,Unit);
+long getSize(int,Unit);
 
 void showMessageError(Response);
 
