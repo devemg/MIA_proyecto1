@@ -96,7 +96,9 @@ Response getStartAddress(MBR *disco,Fit fit,long size,int *startPoint){
         }
     }
     if(empty){
-       *startPoint = sizeof(MBR);
+        if(disco->mbr_tamanio>=size){
+            *startPoint = sizeof(MBR);
+        }
     }else{
         //ordenar
         virtualBlock *temporal;
