@@ -682,6 +682,12 @@ void letsExecCommands(Command *commands){
                 }
             }else if(isAdd){
                 //modificar particion
+                Response res = updatepartition(&hh[0],chh,name,add,unit);
+                if(res == SUCCESS){
+                    cout<<"¡La partición fue modificada cón éxito!\n";
+                }else{
+                    showMessageError(res);
+                }
             }else{
             Response res =  createPartition(size,unit,&hh[0],chh,tipoPart,fit,name);
             if(res == SUCCESS){
@@ -705,3 +711,4 @@ void letsExecCommands(Command *commands){
         first = first->next;
     }
 }
+

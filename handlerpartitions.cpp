@@ -22,6 +22,28 @@ Response createPartition(int size, Unit unit, char path[],char nameDisk[],TipoPa
     return response;
 }
 
+Response updatepartition(char path[],char nameDisk[],char namePart[],int sizeToMod,Unit unit){
+    char full_path[200];
+    clearArray(full_path,sizeof(full_path));
+    getFullPathDisk(path,nameDisk,full_path);
+    //ESCRIBIR ARCHIVO
+    Response response = modPartition(sizeToMod,unit,full_path,namePart);
+    if(response == SUCCESS){
+        char nameMirror[50];
+        clearArray(nameMirror,50);
+        strcat(nameMirror,nameDisk);
+        strcat(nameMirror,"_mirror");
+        clearArray(full_path,sizeof(full_path));
+        getFullPathDisk(path,nameMirror,full_path);
+        //ESCRIBIR RAID
+        //Response response1 =
+        modPartition(sizeToMod,unit,full_path,namePart);
+        //if(response1 != SUCCESS)cout<<"Error al hacer cambio en el raid\n";
+    }
+    return response;
+
+}
+
 Response newPartition(int size, Unit unit, char path[], TipoParticion tipoParticion, Fit fit, char name[]){
     MBR *disco = openMBR(path);
     if(disco==NULL){
@@ -39,6 +61,40 @@ Response newPartition(int size, Unit unit, char path[], TipoParticion tipoPartic
     case Logica:
         return newLogicPart(final_size,fit,name,disco,path);
         break;
+    }
+    return SUCCESS;
+}
+
+Response modPartition(int size, Unit unit, char path[], char name[]){
+    MBR *disco = openMBR(path);
+    if(disco==NULL){
+        return ERROR_UNHANDLED;
+    }
+    long final_size = getSize(size,unit);
+
+    Partition *part = NULL;
+    int i;
+    for(i=0;i<4;i++){
+        if(disco->particiones[i].part_status == Activo){
+            if(strcmp(disco->particiones[i].part_name,name)==0){
+                part =&disco->particiones[i];
+                break;
+            }
+        }
+    }
+
+    if(part==NULL){
+        //BUSCAR PARTICION LOGICA
+        //SI NO EXISTE, RETORNAR ERROR
+        return ERROR_PARTITION_NOT_EXIST;
+    }else{
+        //MODIFICAR TAMAÑO
+        if(part->part_size+final_size<=0){
+            return ERROR_SIZE_MIN;
+        }
+        part->part_size = part->part_size+final_size;
+        replaceMBR(disco,path);
+        //ESCRIBIR MBR
     }
     return SUCCESS;
 }

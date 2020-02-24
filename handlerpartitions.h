@@ -6,6 +6,10 @@
 #include <virtual_blocks.h>
 #include <vars.h>
 
+Response updatepartition(char path[],char nameDisk[],char namePart[],int sizeToMod,Unit unit);
+
+Response modPartition(int size, Unit unit, char path[], char name[]);
+
 Response createPartition(int,Unit,char[],char[],TipoParticion,Fit,char[]);
 
 Response newPartition(int,Unit,char[],TipoParticion,Fit,char[]);
