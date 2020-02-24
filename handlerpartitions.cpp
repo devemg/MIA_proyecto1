@@ -73,7 +73,7 @@ Response newPrimaryPart(long size,Fit fit,char name[],MBR *disco,char path[]){
          partition->part_type = Primaria;
          partition->part_status = Activo;
          replaceMBR(disco,path);
-         //fillSpaceWithZeros(path,partition->part_start,size);
+         fillSpaceWithZeros(path,partition->part_start,size);
          return SUCCESS;
  }else{
             return ERROR_FULL_PARTITION_PRIMARY;
@@ -215,6 +215,7 @@ Response newExtendedPart(long size, Fit fit, char name[], MBR *disco, char path[
                     partition->part_status = Activo;
                     replaceMBR(disco,path);
                     newEBR(partition,path);
+                    fillSpaceWithZeros(path,partition->part_start,size);
                     return SUCCESS;
             }else{
                 return ERROR_FULL_PARTITION_PRIMARY;

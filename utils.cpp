@@ -117,7 +117,7 @@ void fillSpaceWithZeros(char full_path[],int position,int size){
          return;
      }
     fseek(myFile,position , SEEK_SET);
-    fwrite("\0", sizeof(char), size, myFile);
+    fwrite("\0", sizeof(char),size, myFile);
 }
 
 int getInt(string s){

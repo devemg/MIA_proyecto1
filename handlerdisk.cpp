@@ -4,6 +4,7 @@ void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
 
      //VALIDAR TAMAÑO
      long final_size = getSize(size,unit);
+     final_size-=sizeof(MBR);
     //MBR
     MBR* disco = (MBR*)malloc(sizeof(MBR));
     getCurrentDate(disco->mbr_fecha_creacion);
@@ -35,7 +36,7 @@ void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
     clearArray(full_path,sizeof(full_path));
     getFullPathDisk(path,nameMirror,full_path);
     writeMBR(disco,path,full_path);
-
+    fillSpaceWithZeros(full_path,sizeof(MBR),final_size);
     cout<<"Disco \'"<<name<<"\' creado con éxito\n";
 }
 
