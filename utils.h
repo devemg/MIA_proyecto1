@@ -10,7 +10,6 @@
 
 using namespace std;
 
-
 void clearArray(char [],int);
 
 void getFullPathDisk(char [],char[],char[]);

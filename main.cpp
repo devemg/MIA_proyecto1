@@ -58,8 +58,6 @@ int main()
   //deletePartition("/home/emely/Escritorio/testData","disk1","particion 1.2",Primaria,Full);
   //deletePartition("/home/emely/Escritorio/testData","disk1","particion 2",Logica,Full);
 
-  reportMBR("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep.png");
-  reportDisk("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep2.png");
   //reportMBR("/home/emely/Escritorio/testData/disk1_mirror.disk","/home/emely/Escritorio/testData/disk1Rep_mirror.png");
 */
 
