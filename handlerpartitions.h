@@ -5,6 +5,8 @@
 #include <handlerdisk.h>
 #include <virtual_blocks.h>
 
+MountedDisk** getMountedObj();
+
 void createPartition(int,Unit,char[],char[],TipoParticion,Fit,char[]);
 
 Response newPartition(int,Unit,char[],TipoParticion,Fit,char[]);

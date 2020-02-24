@@ -18,7 +18,8 @@ enum Response {SUCCESS,
               ERROR_PARTITION_MOUNTED,
               ERROR_ID_MALFORMED,
               ERROR_DISK_NOT_EXIST,
-              ERROR_PARTITION_NOT_MOUNTED};
+              ERROR_PARTITION_NOT_MOUNTED,
+              ERROR_DISK_NOT_MOUNTED};
 enum DeleteType {Fast,Full};
 enum statusBlock {OCUPADO,LIBRE};
 enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec};

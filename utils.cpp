@@ -73,6 +73,9 @@ void showMessageError(Response response){
     case ERROR_PARTITION_NOT_MOUNTED:
         cout<<"La partición no fue montada\n";
         break;
+    case ERROR_DISK_NOT_MOUNTED:
+        cout<<"El disco no está montado\n";
+        break;
     default:
         break;
 
@@ -383,8 +386,9 @@ string getNamePath(char *path,int *poss){
     int pos_ = -1;
     pos_ = s.find(".");
     if(pos_>0){
+        int sizeAll = strlen(s.c_str());
         s = s.substr(0,pos_);
-        *poss = pos_;
+        *poss = sizeAll-pos_;
     }
     return s;
 }
@@ -443,15 +447,15 @@ Response getContadorDiscos(int *contadorDiscos,char *id){
     //BUSCAR LETRA
     *contadorDiscos = 0;
     bool existeDisco= false;
-    while(partsMounted[contadorDiscos]!=NULL){
-        if(partsMounted[contadorDiscos]->letter == letra){
+    while(getMountedObj()[*contadorDiscos]!=NULL){
+        if(getMountedObj()[*contadorDiscos]->letter == letra){
             existeDisco = true;
             break;
         }
         *contadorDiscos++;
     }
     if(!existeDisco){
-        return ERROR_DISK_NOT_EXIST;
+        return ERROR_DISK_NOT_MOUNTED;
     }
     return SUCCESS;
 }
@@ -513,7 +517,13 @@ void letsExecCommands(Command *commands){
             cout<<"PATH COMPLETE: "<<path<<endl;
             cout<<"NAME: "<<name<<endl;
 
-            //mountPart(path,name);
+        {
+            Response res = mountPart(path,name);
+            if(res!=SUCCESS){
+                showMessageError(res);
+                return;
+            }
+        }
             //showMounts();
             break;
         case unmount:
@@ -523,7 +533,13 @@ void letsExecCommands(Command *commands){
 
             cout<<"ID: "<<id<<endl;
 
-            //unmountPart(id);
+        {
+            Response res = unmountPart(id);
+            if(res!=SUCCESS){
+                showMessageError(res);
+                return;
+            }
+        }
             //showMounts();
             break;
         case rep:
@@ -534,29 +550,31 @@ void letsExecCommands(Command *commands){
             cout<<"ID: "<<id<<endl;
             cout<<"PATH COMPLETE: "<<path<<endl;
             cout<<"NAME: "<<name<<endl;
-            {
-            int ext = 0;
-            ss = getNamePath(path,&ext);
-            chh = &ss[0];
-            hh = getPathWithoutName(path,strlen(chh)+ext);
-
-            cout<<"PATH: "<<hh<<endl;
-            //CREAR DIRECTORIO SI NO EXISTE
-            mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-            //BUSCAR DISCO
+        {    //BUSCAR DISCO
             int contadorDiscos;
             Response res = getContadorDiscos(&contadorDiscos,id);
             if(res!=SUCCESS){
                 showMessageError(res);
                 return;
             }
-            MountedDisk *disk = partsMounted[contadorDiscos];
+
+
+        MountedDisk *disk = getMountedObj()[contadorDiscos];
+        int ext = 0;
+        ss = getNamePath(path,&ext);
+        chh = &ss[0];
+        hh = getPathWithoutName(path,strlen(chh)+ext);
+
+        cout<<"PATH: "<<hh<<endl;
+        //CREAR DIRECTORIO SI NO EXISTE
+        mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
             if(strcmp(it->text,"mbr")!=0){
                 reportMBR(disk->path,path);
             }else{
                 reportDisk(disk->path,path);
             }
-            }
+       }
             /*
             //BUSCAR NUMERO
 
@@ -578,7 +596,7 @@ void letsExecCommands(Command *commands){
             }else{
                 return ERROR_PARTITION_NOT_MOUNTED;
             }*/
-            break;
+        break;
         case exec:
             it = first->opts;
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
@@ -586,6 +604,7 @@ void letsExecCommands(Command *commands){
             cout<<"PATH COMPLETE: "<<path<<endl;
 
             //EJECUTAR ARCHIVO
+
             break;
         }
         first = first->next;

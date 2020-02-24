@@ -1,8 +1,10 @@
 #include "handlerpartitions.h"
 
-MountedDisk *partsMounted[27];
+MountedDisk** getMountedObj(){
+    static MountedDisk *partsMounted[27];
+    return partsMounted;
+}
 
-//CREATE
 void createPartition(int size, Unit unit, char path[],char nameDisk[],TipoParticion tipoParticion, Fit fit, char name[]){
     char full_path[200];
     clearArray(full_path,sizeof(full_path));
@@ -422,21 +424,21 @@ Response mountPart(char path[], char name[]){
     int contador = 0;
     bool exist= false;
     //MONTAR DISCO
-    while(partsMounted[contador]!=NULL){
-        if(strcmp(partsMounted[contador]->path,path)==0){
+    while(getMountedObj()[contador]!=NULL){
+        if(strcmp(getMountedObj()[contador]->path,path)==0){
             exist = true;
             break;
         }
         contador++;
     }
     if(!exist){
-        partsMounted[contador] = new MountedDisk();
-        strcpy(partsMounted[contador]->path,path);
-        partsMounted[contador]->letter = 97+contador;
+        getMountedObj()[contador] = new MountedDisk();
+        strcpy(getMountedObj()[contador]->path,path);
+        getMountedObj()[contador]->letter = 97+contador;
     }
     //MONTAR PARTICION
     bool existPart = false;
-    MountedDisk *mdisk = partsMounted[contador];
+    MountedDisk *mdisk = getMountedObj()[contador];
     int contador2=0;
     //VALIDAR QUE YA ESTÉ MONTADA LA PARTICION
     while(mdisk->parts[contador2]!=NULL){
@@ -472,15 +474,15 @@ Response mountPart(char path[], char name[]){
 void showMounts(){
     int contador = 0;
     int contador2=0;
-    while(partsMounted[contador]!=NULL){
+    while(getMountedObj()[contador]!=NULL){
         cout<<"--------------------------------------------------\n";
-        cout<<"DISCO \""<<partsMounted[contador]->letter<<"\" \n";
-        cout<<partsMounted[contador]->path<<endl;
+        cout<<"DISCO \""<<getMountedObj()[contador]->letter<<"\" \n";
+        cout<<getMountedObj()[contador]->path<<endl;
         cout<<"Particiones: \n";
             contador2 = 0;
-            while (partsMounted[contador]->parts[contador2]!=NULL) {
-                cout<<"Nombre: "<<partsMounted[contador]->parts[contador2]->name<<endl;
-                cout<<"Id: "<<partsMounted[contador]->parts[contador2]->id<<endl;
+            while (getMountedObj()[contador]->parts[contador2]!=NULL) {
+                cout<<"Nombre: "<<getMountedObj()[contador]->parts[contador2]->name<<endl;
+                cout<<"Id: "<<getMountedObj()[contador]->parts[contador2]->id<<endl;
                 contador2++;
             }
         contador++;
@@ -504,8 +506,8 @@ Response unmountPart(char id[]){
     //BUSCAR LETRA
     int contadorDiscos = 0;
     bool existeDisco= false;
-    while(partsMounted[contadorDiscos]!=NULL){
-        if(partsMounted[contadorDiscos]->letter == letra){
+    while(getMountedObj()[contadorDiscos]!=NULL){
+        if(getMountedObj()[contadorDiscos]->letter == letra){
             existeDisco = true;
             break;
         }
@@ -515,7 +517,7 @@ Response unmountPart(char id[]){
         return ERROR_DISK_NOT_EXIST;
     }
     //BUSCAR NUMERO
-    MountedDisk *disk = partsMounted[contadorDiscos];
+    MountedDisk *disk = getMountedObj()[contadorDiscos];
     int contadorPart = 0;
     bool existePart = false;
     while(disk->parts[contadorPart]!=NULL){
