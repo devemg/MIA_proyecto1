@@ -7,8 +7,14 @@
 #include <math.h>
 #include <handlerdisk.h>
 #include <handlerpartitions.h>
+#include <scanner.h>
+#include <parser.h>
 
 using namespace std;
+
+void writeCommand(string command,bool);
+
+void readExecCommand(bool);
 
 void clearArray(char [],int);
 
@@ -34,4 +40,7 @@ int getInt(string);
 
 void fillOptions(Option *it,int *size, int *add,Fit *fit,Unit *unit,TipoParticion *tipo,DeleteType *deltype,
                  char **path,char *id,char *name);
+
+Response getContadorDiscos(int *contadorDiscos,char *id);
+
 #endif // UTILS_H

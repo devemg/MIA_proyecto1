@@ -1,5 +1,31 @@
 #include "utils.h"
 
+void writeCommand(string command,bool isScript){
+    FILE * pFile;
+    if(isScript){
+        pFile = fopen ("command.txt", "w+");
+    }else{
+        pFile = fopen ("command_script.txt", "w+");
+    }
+      fwrite (command.c_str(), sizeof(char), strlen(command.c_str()), pFile);
+      fclose (pFile);
+}
+
+void readExecCommand(bool isScript){
+            FILE* input;
+            if(isScript){
+                input = fopen ("command.txt", "r");
+            }else{
+                input = fopen ("command_script.txt", "r");
+            }
+            if(input == NULL){
+                cout<<"Error al leer script\n";
+            }
+            yyrestart(input);//SE PASA LA CADENA DE ENTRADA A FLEX
+            yyparse();//SE INICIA LA COMPILACION
+            fclose(input);
+}
+
 void clearArray(char array[],int size){
         for(int i = 0; i < size; i++)
         {
@@ -486,12 +512,12 @@ void letsExecCommands(Command *commands){
             unit = MB;
             it = first->opts;
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
-
+            /*
             cout<<"PATH COMPLETE: "<<path<<endl;
             cout<<"SIZE: "<<size <<endl;
             cout<<"FIT: "<<showFit(fit)<<endl;
             cout<<"UNIT: "<<showUnit(unit)<<endl;
-
+            */
             int ext = 0;
             ss = getNamePath(path,&ext);
             chh = &ss[0];
@@ -569,12 +595,25 @@ void letsExecCommands(Command *commands){
        }
         break;
         case exec:
+        {
             it = first->opts;
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
-            cout<<"PATH COMPLETE: "<<path<<endl;
-
-            //EJECUTAR ARCHIVO
-
+            //cout<<"PATH COMPLETE: "<<path<<endl;
+            //abrir archivo
+            cout<<"Ejecutando script...\n\n";
+            FILE *myFile = fopen(path,"r");
+            if(myFile==NULL){
+                cout<<"Error al abrir el script.\n";
+                break;
+            }
+            char linea[1024];
+            while(fgets(linea, 1024, (FILE*) myFile)) {
+                    printf(linea);
+                    writeCommand(linea,true);
+                    readExecCommand(true);
+                }
+           fclose(myFile);
+        }
             break;
         case fdisk:
             it = first->opts;

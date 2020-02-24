@@ -10,21 +10,6 @@
 
 using namespace std;
 
-void writeCommand(string command){
-    FILE * pFile;
-      pFile = fopen ("command.txt", "w+");
-      fwrite (command.c_str(), sizeof(char), strlen(command.c_str()), pFile);
-      fclose (pFile);
-}
-
-void readExecCommand(){
-    const char* x = "command.txt";
-            FILE* input = fopen(x, "r" );
-            yyrestart(input);//SE PASA LA CADENA DE ENTRADA A FLEX
-            yyparse();//SE INICIA LA COMPILACION
-            fclose(input);
-}
-
 int main()
 {
     std::string command;
@@ -37,8 +22,8 @@ int main()
             system("clear");
             continue;
         }
-        writeCommand(command);
-        readExecCommand();
+        writeCommand(command,false);
+        readExecCommand(false);
     }
 
   //newDisk(100,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
@@ -59,8 +44,8 @@ int main()
   //deletePartition("/home/emely/Escritorio/testData","disk1","particion 2",Logica,Full);
 
 */
-    reportDisk("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep.png");
-    reportMBR("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep2.png");
+    //reportDisk("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep.png");
+    //reportMBR("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep2.png");
 
   return 0;
 }
