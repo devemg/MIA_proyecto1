@@ -135,7 +135,12 @@ void fillSpaceWithZeros(char full_path[],int position,int size){
          return;
      }
     fseek(myFile,position , SEEK_SET);
-    fwrite("\0", sizeof(char),size, myFile);
+    try {
+        fwrite("\0", sizeof(char),size, myFile);
+    }catch(exception ex){
+
+    }
+    fclose(myFile);
 }
 
 int getInt(string s){
@@ -495,8 +500,8 @@ Response getContadorDiscos(int *contadorDiscos,char *id){
     //BUSCAR LETRA
     *contadorDiscos = 0;
     bool existeDisco= false;
-    while(getMountedObj()[*contadorDiscos]!=NULL){
-        if(getMountedObj()[*contadorDiscos]->letter == letra){
+    while(partsMounted[*contadorDiscos]!=NULL){
+        if(partsMounted[*contadorDiscos]->letter == letra){
             existeDisco = true;
             break;
         }
@@ -562,6 +567,7 @@ void letsExecCommands(Command *commands){
                 showMessageError(res);
                 return;
             }else{
+                //showMounts();
                 cout<<"¡Partición montada con éxito!\n";
             }
         }
@@ -575,6 +581,7 @@ void letsExecCommands(Command *commands){
                 showMessageError(res);
                 return;
             }else{
+                //showMounts();
                 cout<<"¡Partición desmontada con éxito!\n";
             }
         }
@@ -596,7 +603,7 @@ void letsExecCommands(Command *commands){
                 return;
             }
 
-        MountedDisk *disk = getMountedObj()[contadorDiscos];
+        MountedDisk *disk = partsMounted[contadorDiscos];
         int ext = 0;
         ss = getNamePath(path,&ext);
         chh = &ss[0];

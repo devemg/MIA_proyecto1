@@ -103,5 +103,4 @@ class MountedDisk{
     }
 };
 
-
 #endif // STRUCTURES_H

@@ -80,10 +80,14 @@ void deleteDisk(char path[]){
     char response;
     cin>>response;
      if(response == 83 || response == 115){
-         if(remove(path) != 0 )
-             cout<<"Error al borrar el disco\n";
-           else
-             cout<<"¡El disco se borro con exito!\n";
+         if(canDeleteDisk(path)){
+             if(remove(path) != 0 )
+                 cout<<"Error al borrar el disco\n";
+               else
+                 cout<<"¡El disco se borro con exito!\n";
+         }else{
+              cout<<"El disco no se puede eliminar por qué tiene particiones montadas\n";
+         }
      }else if(response!=78 && response!=110){
          cout<<"Tecla inválida\n";
      }
@@ -464,4 +468,19 @@ void writeExtendedReport(FILE *myFile, MBR *disco, char path[]){
     }
     fputs("</tr>\n", myFile);
     fputs("</table>\n", myFile);
+}
+
+bool canDeleteDisk(char path[]){
+    int contadorDiscos = 0;
+    bool exist= false;
+    //MONTAR DISCO
+    while(partsMounted[contadorDiscos]!=NULL){
+        if(strcmp(partsMounted[contadorDiscos]->path,path)==0){
+            exist = true;
+            break;
+        }
+        contadorDiscos++;
+    }
+
+    return !exist;
 }

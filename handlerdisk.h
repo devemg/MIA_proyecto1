@@ -41,4 +41,6 @@ Partition* getExtendedPart(char[],MBR*);
 
 void writeExtendedReport(FILE*,MBR*,char[]);
 
+bool canDeleteDisk(char[]);
+
 #endif // HANDLERDISK_H
