@@ -5,7 +5,7 @@ MountedDisk** getMountedObj(){
     return partsMounted;
 }
 
-void createPartition(int size, Unit unit, char path[],char nameDisk[],TipoParticion tipoParticion, Fit fit, char name[]){
+Response createPartition(int size, Unit unit, char path[],char nameDisk[],TipoParticion tipoParticion, Fit fit, char name[]){
     char full_path[200];
     clearArray(full_path,sizeof(full_path));
     getFullPathDisk(path,nameDisk,full_path);
@@ -20,23 +20,10 @@ void createPartition(int size, Unit unit, char path[],char nameDisk[],TipoPartic
         getFullPathDisk(path,nameMirror,full_path);
         //ESCRIBIR RAID
         //Response response1 =
-        //newPartition(size,unit,full_path,tipoParticion,fit,name);
-        switch (tipoParticion) {
-        case Primaria:
-            cout<<"¡La partición primaria fue creada con éxito!\n";
-            break;
-        case Extendida:
-            cout<<"¡La partición extendida fue creada con éxito!\n";
-            break;
-        case Logica:
-            cout<<"¡La partición lógica fue creada con éxito!\n";
-            break;
-        }
+        newPartition(size,unit,full_path,tipoParticion,fit,name);
         //if(response1 != SUCCESS)cout<<"Error al hacer cambio en el raid\n";
-    }else{
-        showMessageError(response);
     }
-
+    return response;
 }
 
 Response newPartition(int size, Unit unit, char path[], TipoParticion tipoParticion, Fit fit, char name[]){

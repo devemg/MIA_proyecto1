@@ -46,4 +46,5 @@ int virtualBlock_tracker::getNewPoint(Fit fit,int size){
 
     node = this->start->next;
     }
+    return -1;
 }

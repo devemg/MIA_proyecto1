@@ -3,7 +3,7 @@
 void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
 
      //VALIDAR TAMAÑO
-     int final_size = getSize(size,unit);
+     long final_size = getSize(size,unit);
     //MBR
     MBR* disco = (MBR*)malloc(sizeof(MBR));
     getCurrentDate(disco->mbr_fecha_creacion);
@@ -11,8 +11,7 @@ void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
     disco->mbr_disk_signature=getSignature();
     disco->mbr_tamanio = final_size;
     //PARTITIONS
-    for(int i = 0; i < 4; i++)
-        {
+    for(int i = 0; i < 4; i++){
             disco->particiones[i].part_fit = fit;
             string nombre = "partition_"+to_string(i+1);
             clearArray(disco->particiones[i].part_name,16);

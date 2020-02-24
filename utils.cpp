@@ -21,18 +21,18 @@ void getFullPath(char path[],char name[],char full_path[]){
 }
 
 int getSize(int size,Unit unit){
+    size_t final;
     switch(unit)
     {
        case Byte:
-            return size;
+            final = size;
        case KB: //equivale a kilobytes
-           return size*1024;
+           final = size*1024;
        case MB: //equivale a MegaBytes
-           return size * 1024 * 1024;
-       default:
-           return size * 1024 * 1024;
+           final =  size * 1024;
+           final = final *  1024;
   }
-
+return final;
 }
 
 void showMessageError(Response response){
@@ -143,8 +143,8 @@ const char* showFit(Fit op){
 
 const char* showUnit(Unit op){
     switch (op) {
-    case MB:return "KB";
-    case KB:return "MB";
+    case MB:return "MB";
+    case KB:return "KB";
     case Byte:return "B";
     default:return "";
     }
@@ -314,12 +314,13 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
         }
         break;
      case fdisk:
-        //opciones obligatorias
+        {//opciones obligatorias
         //path name id
         it = opt;
         existPath = false;
         existName = false;
         existId = false;
+        bool isDelete = false;
         while(it!=NULL){
             switch (it->option) {
             case Size:
@@ -340,10 +341,12 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
                 existId = true;
                 break;
             case Unitt:
-            case Add:
             case Type:
             case Fitt:
+            case Add:
+                break;
             case Delete:
+                isDelete = true;
                 break;
             default:
                 std::cout<<"Opción \""<<showOption(it->option)<<"\" no válida para el comando.\n";
@@ -359,15 +362,15 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
             std::cout<<"Debe indicar un nombre.\n";
             return false;
         }
-        if(it->option != Delete)if(!existId){
+        if(isDelete)if(!existId){
             std::cout<<"Debe indicar un id.\n";
             return false;
         }
-        if(it->option != Delete)if(!existSize){
+        if(isDelete)if(!existSize){
             std::cout<<"Debe indicar un tamaño.\n";
             return false;
         }
-        break;
+        }break;
     }
     return true;
 }
@@ -478,9 +481,9 @@ void letsExecCommands(Command *commands){
     while(first!=NULL){
         switch (first->cmd) {
         case mkdisk:
+        {
             fit = FirstFit;
             unit = MB;
-
             it = first->opts;
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
 
@@ -489,68 +492,58 @@ void letsExecCommands(Command *commands){
             cout<<"FIT: "<<showFit(fit)<<endl;
             cout<<"UNIT: "<<showUnit(unit)<<endl;
 
-            {
             int ext = 0;
             ss = getNamePath(path,&ext);
             chh = &ss[0];
             hh = getPathWithoutName(path,strlen(chh)+ext);
-            }
-            cout<<"NAME: "<<chh<<endl;
-            cout<<"PATH: "<<hh<<endl;
-
+            //cout<<"NAME: "<<chh<<endl;
+            //cout<<"PATH: "<<hh<<endl;
             newDisk(size,fit,unit,&hh[0],chh);
+        }
             break;
         case rmdisk:
             it = first->opts;
-
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
-
-            cout<<"PATH COMPLETE: "<<path<<endl;
-
+            //cout<<"PATH COMPLETE: "<<path<<endl;
             deleteDisk(path);
             break;
         case mount:
-            it = first->opts;
-
+        {  it = first->opts;
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
-
-            cout<<"PATH COMPLETE: "<<path<<endl;
-            cout<<"NAME: "<<name<<endl;
-
-        {
+            //cout<<"PATH COMPLETE: "<<path<<endl;
+            //cout<<"NAME: "<<name<<endl;
             Response res = mountPart(path,name);
             if(res!=SUCCESS){
                 showMessageError(res);
                 return;
+            }else{
+                cout<<"¡Partición montada con éxito!\n";
             }
         }
-            //showMounts();
             break;
         case unmount:
-            it = first->opts;
-
+        {    it = first->opts;
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
-
-            cout<<"ID: "<<id<<endl;
-
-        {
+            //cout<<"ID: "<<id<<endl;        
             Response res = unmountPart(id);
             if(res!=SUCCESS){
                 showMessageError(res);
                 return;
+            }else{
+                cout<<"¡Partición desmontada con éxito!\n";
             }
         }
-            //showMounts();
             break;
         case rep:
-            it = first->opts;
+         {   it = first->opts;
 
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
 
-            cout<<"ID: "<<id<<endl;
+            /*cout<<"ID: "<<id<<endl;
             cout<<"PATH COMPLETE: "<<path<<endl;
             cout<<"NAME: "<<name<<endl;
-        {    //BUSCAR DISCO
+            */
+            //BUSCAR DISCO
             int contadorDiscos;
             Response res = getContadorDiscos(&contadorDiscos,id);
             if(res!=SUCCESS){
@@ -558,53 +551,75 @@ void letsExecCommands(Command *commands){
                 return;
             }
 
-
         MountedDisk *disk = getMountedObj()[contadorDiscos];
         int ext = 0;
         ss = getNamePath(path,&ext);
         chh = &ss[0];
         hh = getPathWithoutName(path,strlen(chh)+ext);
 
-        cout<<"PATH: "<<hh<<endl;
+        //cout<<"PATH: "<<hh<<endl;
         //CREAR DIRECTORIO SI NO EXISTE
-        mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        mkdir(hh.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-            if(strcmp(it->text,"mbr")!=0){
+            if(strcmp(name,"mbr")==0){
                 reportMBR(disk->path,path);
             }else{
                 reportDisk(disk->path,path);
             }
        }
-            /*
-            //BUSCAR NUMERO
-
-            int contadorPart = 0;
-            bool existePart = false;
-            while(disk->parts[contadorPart]!=NULL){
-                if(strcmp(disk->parts[contadorPart]->id,id)==0){
-                    existePart = true;
-                    break;
-                }
-                contadorPart++;
-            }
-            if(existePart){
-                if(strcmp(it->text,"mbr")!=0){
-                    reportMBR("/home/emely/Escritorio/testData/disk1.disk",path);
-                }else{
-                    reportDisk("/home/emely/Escritorio/testData/disk1.disk",path);
-                }
-            }else{
-                return ERROR_PARTITION_NOT_MOUNTED;
-            }*/
         break;
         case exec:
             it = first->opts;
             fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
-
             cout<<"PATH COMPLETE: "<<path<<endl;
 
             //EJECUTAR ARCHIVO
 
+            break;
+        case fdisk:
+            it = first->opts;
+            size = 0;
+            unit = KB;
+            tipoPart = Primaria;
+            fit = WorstFit;
+            delType = Fast;
+            add = 0;
+            fillOptions(it,&size,&add,&fit,&unit,&tipoPart,&delType,&path,&id,&name);
+            /*
+            cout<<"PATH COMPLETE: "<<path<<endl;
+            cout<<"SIZE: "<<size<<endl;
+            cout<<"UNIT: "<<showUnit(unit)<<endl;
+            cout<<"TIPO PART: "<<tipoPart<<endl;
+            cout<<"FIT: "<<showFit(fit)<<endl;
+            cout<<"DELTYPE: "<<delType<<endl;
+            cout<<"NAME: "<<name<<endl;
+            cout<<"DELTYPE: "<<delType<<endl;
+            */
+            {
+            int ext = 0;
+            ss = getNamePath(path,&ext);
+            chh = &ss[0];
+            hh = getPathWithoutName(path,strlen(chh)+ext);
+            }
+            //cout<<"NAME: "<<chh<<endl;
+            //cout<<"PATH: "<<hh<<endl;
+
+            Response res =  createPartition(size,unit,&hh[0],chh,tipoPart,fit,name);
+            if(res == SUCCESS){
+                switch (tipoPart) {
+                case Primaria:
+                    cout<<"¡La partición primaria fue creada con éxito!\n";
+                    break;
+                case Extendida:
+                    cout<<"¡La partición extendida fue creada con éxito!\n";
+                    break;
+                case Logica:
+                    cout<<"¡La partición lógica fue creada con éxito!\n";
+                    break;
+                }
+            }else{
+                showMessageError(res);
+            }
             break;
         }
         first = first->next;
