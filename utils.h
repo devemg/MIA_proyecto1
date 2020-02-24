@@ -11,6 +11,7 @@
 #include <parser.h>
 
 using namespace std;
+Command* ListCommand(Command *cmd,bool flag);
 
 void writeCommand(string command,bool);
 

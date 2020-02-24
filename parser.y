@@ -88,11 +88,7 @@ class Command *COMMAND;
 %%
 
 INICIO :COMMANDS_LIST{
-Command *first = $1;
-if(first!=NULL){
-    letsExecCommands(first);
-}
-
+ListCommand($1,true);
 };
 
 COMMANDS_LIST: COMMANDS_LIST COMMAND{

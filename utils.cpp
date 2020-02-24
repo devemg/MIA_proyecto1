@@ -1,8 +1,16 @@
 #include "utils.h"
 
+Command* ListCommand(Command *cmd,bool flag){
+    static Command *commandList;
+    if(flag){
+       commandList  = cmd;
+    }
+    return commandList;
+}
+
 void writeCommand(string command,bool isScript){
     FILE * pFile;
-    if(isScript){
+    if(!isScript){
         pFile = fopen ("command.txt", "w+");
     }else{
         pFile = fopen ("command_script.txt", "w+");
@@ -13,7 +21,7 @@ void writeCommand(string command,bool isScript){
 
 void readExecCommand(bool isScript){
             FILE* input;
-            if(isScript){
+            if(!isScript){
                 input = fopen ("command.txt", "r");
             }else{
                 input = fopen ("command_script.txt", "r");
@@ -22,7 +30,14 @@ void readExecCommand(bool isScript){
                 cout<<"Error al leer script\n";
             }
             yyrestart(input);//SE PASA LA CADENA DE ENTRADA A FLEX
-            yyparse();//SE INICIA LA COMPILACION
+            int res = yyparse();//SE INICIA LA COMPILACION
+            if(res == 0){
+                if(ListCommand(NULL,false)!=NULL){
+                    letsExecCommands(ListCommand(NULL,false));
+                    //limpiar comando
+                    ListCommand(NULL,true);
+                }
+            }
             fclose(input);
 }
 
@@ -52,11 +67,14 @@ long getSize(int size,Unit unit){
     {
        case Byte:
             final = size;
+        break;
        case KB: //equivale a kilobytes
            final = size*1024;
+        break;
        case MB: //equivale a MegaBytes
            final =  size * 1024;
            final = final *  1024;
+        break;
   }
 return final;
 }
@@ -129,12 +147,12 @@ int getInt(string s){
         catch (std::invalid_argument const &e)
         {
             std::cout << "Bad input: std::invalid_argument thrown" << '\n';
-            return -12345678910;
+            return -123456789;
         }
         catch (std::out_of_range const &e)
         {
             std::cout << "Integer overflow: std::out_of_range thrown" << '\n';
-            return -12345678910;
+            return -123456789;
         }
 }
 
@@ -222,6 +240,7 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
         }
         break;
     case rmdisk:
+    case exec:
         //opciones obligatorias
         //path
         existPath = false;
@@ -608,7 +627,7 @@ void letsExecCommands(Command *commands){
             }
             char linea[1024];
             while(fgets(linea, 1024, (FILE*) myFile)) {
-                    printf(linea);
+                    cout<<"---->"<<linea;
                     writeCommand(linea,true);
                     readExecCommand(true);
                 }
