@@ -111,7 +111,7 @@ void reportMBR(char path[],char path_report[]){
      //DATA OF MBR
      //TAMAÑO
      fputs("<tr><td bgcolor=\"lightblue\">mbr_tamaño</td><td bgcolor=\"lightblue\">",myFile);
-     fprintf(myFile, "%d", disco->mbr_tamanio);
+     fputs(&to_string(disco->mbr_tamanio)[0],myFile);
      fputs("</td></tr>\n",myFile);
      //FECHA
      fputs("<tr><td bgcolor=\"lightblue\">mbr_Fecha_creación</td><td bgcolor=\"lightblue\">",myFile);
@@ -137,6 +137,7 @@ void reportMBR(char path[],char path_report[]){
      strcat(colors[2],"#fcc292");
      clearArray(colors[3],10);
      strcat(colors[3],"#dfbcf7");
+
 
      for(i=0;i<4;i++){
         part = disco->particiones[i];
@@ -185,7 +186,7 @@ void reportMBR(char path[],char path_report[]){
         fputs("\">part_size</td><td bgcolor=\"",myFile);
         fputs(colors[i],myFile);
         fputs("\">",myFile);
-        fprintf(myFile, "%d", part.part_size);
+        fputs(&to_string(part.part_size)[0],myFile);
         fputs("</td></tr>\n",myFile);
      }
 
@@ -239,7 +240,7 @@ void addReportEBR(EBR *ebr,FILE *myFile,int index){
     fputs("</td></tr>\n",myFile);
     //PART SIZE
     fputs("<tr><td bgcolor=\"#fcc8c8\">part_size</td><td bgcolor=\"#fcc8c8\">",myFile);
-    fprintf(myFile, "%d", ebr->part_size);
+    fputs(&to_string(ebr->part_size)[0],myFile);
     fputs("</td></tr>\n",myFile);
     //PART NEXT
     fputs("<tr><td bgcolor=\"#fcc8c8\">part_next</td><td bgcolor=\"#fcc8c8\">",myFile);
