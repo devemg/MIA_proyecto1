@@ -4,7 +4,6 @@ void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
 
      //VALIDAR TAMAÑO
      long final_size = getSize(size,unit);
-     final_size-=sizeof(MBR);
     //MBR
     MBR* disco = (MBR*)malloc(sizeof(MBR));
     getCurrentDate(disco->mbr_fecha_creacion);
@@ -27,7 +26,8 @@ void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
     clearArray(full_path,sizeof(full_path));
     getFullPathDisk(path,name,full_path);
     //ESCRIBIR ARCHIVO
-    writeMBR(disco,path,full_path);
+    bool res= writeMBR(disco,path,full_path);
+    if(!res)return;
     //ESCRIBIR RAID
     char nameMirror[50];
     clearArray(nameMirror,50);
@@ -36,11 +36,10 @@ void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
     clearArray(full_path,sizeof(full_path));
     getFullPathDisk(path,nameMirror,full_path);
     writeMBR(disco,path,full_path);
-    fillSpaceWithZeros(full_path,sizeof(MBR),final_size);
     cout<<"Disco \'"<<name<<"\' creado con éxito\n";
 }
 
-void writeMBR(MBR *disco,char path[],char full_path[]){
+bool writeMBR(MBR *disco,char path[],char full_path[]){
     //CREAR DIRECTORIO SI NO EXISTE
     mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -49,7 +48,7 @@ void writeMBR(MBR *disco,char path[],char full_path[]){
      if (myFile==NULL)
      {
          cout<<"Error al crear el archivo\n";
-         return;
+         return false;
      }
      //inicializando con ceros
      fseek(myFile, disco->mbr_tamanio, SEEK_SET);
@@ -59,6 +58,7 @@ void writeMBR(MBR *disco,char path[],char full_path[]){
      fwrite(disco, sizeof(MBR), 1, myFile);
      //cerrando stream
      fclose (myFile);
+     return true;
 }
 
 int getSignature(){
@@ -363,14 +363,14 @@ void reportDisk(char path[], char path_report[]){
             fin = disco->particiones[i].part_start;
             if(fin-inicio > 0){
                 //ESPACIO LIBRE
-                fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">Libre<br/>\n", myFile);
-                fprintf(myFile, "%.2f\n",(getDecimal((float)((fin-inicio)*100)/disco->mbr_tamanio)));
+                fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">Libre<br/>", myFile);
+                fprintf(myFile, "%.2f",(getDecimal((float)((fin-inicio)*100)/disco->mbr_tamanio)));
                 fputs("%</td>\n", myFile);
             }
             inicio = disco->particiones[i].part_start+disco->particiones[i].part_size;
             //PARTICION PRIMARIA
             fputs("<td rowspan=\"2\" bgcolor =\"#50b104\" >Primaria <br/>",myFile);
-            fprintf(myFile, "%.2f\n",getDecimal((float)(disco->particiones[i].part_size*100)/disco->mbr_tamanio));
+            fprintf(myFile, "%.2f",getDecimal((float)(disco->particiones[i].part_size*100)/disco->mbr_tamanio));
             fputs("%</td>\n", myFile);
             break;
         case Extendida:
@@ -378,7 +378,7 @@ void reportDisk(char path[], char path_report[]){
             if(fin-inicio > 0){
                 //ESPACIO LIBRE
                 fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">Libre<br/>\n", myFile);
-                fprintf(myFile, "%.2f\n",getDecimal((float)((fin-inicio)*100)/disco->mbr_tamanio));
+                fprintf(myFile, "%.2f",getDecimal((float)((fin-inicio)*100)/disco->mbr_tamanio));
                 fputs("%</td>\n", myFile);
             }
             inicio = disco->particiones[i].part_start+disco->particiones[i].part_size;
@@ -393,7 +393,7 @@ void reportDisk(char path[], char path_report[]){
     if(disco->mbr_tamanio-inicio > 0){
         //ESPACIO LIBRE
         fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">Libre<br/>\n", myFile);
-        fprintf(myFile, "%.2f\n", getDecimal((float)((disco->mbr_tamanio-inicio)*100)/disco->mbr_tamanio));
+        fprintf(myFile, "%.2f", getDecimal((float)((disco->mbr_tamanio-inicio)*100)/disco->mbr_tamanio));
 
         fputs("%</td>\n", myFile);
     }
@@ -406,7 +406,7 @@ void reportDisk(char path[], char path_report[]){
      //cerrando stream
      fclose (myFile);
      string pathString(path_report);
-     string command = "dot -Tpng report_disk.dot -o \2"+pathString+"\"";//+"/report_disk.png";
+     string command = "dot -Tpng report_disk.dot -o \""+pathString+"\"";//+"/report_disk.png";
      system(command.c_str());
      cout<<"Reporte de disco creado...\n";
 }
@@ -439,7 +439,7 @@ void writeExtendedReport(FILE *myFile, MBR *disco, char path[]){
         if(fin-inicio > 0){
             //ESPACIO LIBRE
             fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">\n", myFile);
-            fprintf(myFile, "%.2f\n",getDecimal((float)((fin-inicio)*100)/disco->mbr_tamanio));
+            fprintf(myFile, "%.2f",getDecimal((float)((fin-inicio)*100)/disco->mbr_tamanio));
             fputs("%</td>\n", myFile);
         }
         inicio = first->part_start+first->part_size;
@@ -452,7 +452,7 @@ void writeExtendedReport(FILE *myFile, MBR *disco, char path[]){
         }else{
             fputs("Lógica <br/>",myFile);
         }
-        fprintf(myFile, "%.2f\n",getDecimal((float)(first->part_size*100)/disco->mbr_tamanio));
+        fprintf(myFile, "%.2f",getDecimal((float)(first->part_size*100)/disco->mbr_tamanio));
         fputs("%</td>\n",myFile);
         if(first->part_next!=-1){
            first = readEBR(first->part_next,path);
@@ -463,7 +463,7 @@ void writeExtendedReport(FILE *myFile, MBR *disco, char path[]){
     if(disco->mbr_tamanio-inicio > 0){
         //ESPACIO LIBRE
         fputs("<td rowspan=\"2\" bgcolor = \"#3ac9da\">Libre<br/>\n", myFile);
-        fprintf(myFile, "%.2f\n",getDecimal((float)(((extended->part_start+extended->part_size)-inicio)*100)/disco->mbr_tamanio));
+        fprintf(myFile, "%.2f",getDecimal((float)(((extended->part_start+extended->part_size)-inicio)*100)/disco->mbr_tamanio));
         fputs("%</td>\n", myFile);
     }
     fputs("</tr>\n", myFile);

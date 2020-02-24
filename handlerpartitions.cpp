@@ -124,7 +124,7 @@ Response getStartAddress(MBR *disco,Fit fit,long size,int *startPoint){
            }
            inicio = parts[i]->start+parts[i]->size;
         }
-        espaciosLibres[contadorEspacios] = new virtualBlock(disco->mbr_tamanio-inicio,inicio,LIBRE);
+        espaciosLibres[contadorEspacios] = new virtualBlock(disco->mbr_tamanio-inicio+sizeof(MBR),inicio,LIBRE);
         contadorEspacios++;
         //ordenar espacios libres por tamaño
         for (int i = 0;i < contadorEspacios; i++){

@@ -13,7 +13,10 @@ extern char *yytext; //lexema actual
 int yyerror(const char* mens){
 //metodo que se llama al haber un error sintactico
 //SE IMPRIME EN CONSOLA EL ERROR
-std::cout<<"ERROR EN COMANDO: "<<mens<<" "<<yytext<< std::endl;
+    if(strcmp(yytext,"$end")==1){
+        std::cout<<"ERROR EN COMANDO: "<<mens<<" "<<yytext<< std::endl;
+
+    }
 return 0;
 }
 

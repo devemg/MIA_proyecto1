@@ -17,7 +17,7 @@ void newDisk(int,Fit,Unit,char[],char[]);
 
 void deleteDisk(char[]);
 
-void writeMBR(MBR*,char[],char[]);
+bool writeMBR(MBR*,char[],char[]);
 
 void reportMBR(char[],char[]);
 

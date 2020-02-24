@@ -136,8 +136,9 @@ void fillSpaceWithZeros(char full_path[],int position,int size){
      }
     fseek(myFile,position , SEEK_SET);
     try {
-        fwrite("\0", sizeof(char),size, myFile);
-    }catch(exception ex){
+        fseek(myFile, size, SEEK_SET);
+        fwrite("\0", sizeof(char), 1, myFile);
+       }catch(exception ex){
 
     }
     fclose(myFile);
@@ -505,7 +506,7 @@ Response getContadorDiscos(int *contadorDiscos,char *id){
             existeDisco = true;
             break;
         }
-        *contadorDiscos++;
+        (*contadorDiscos)++;
     }
     if(!existeDisco){
         return ERROR_DISK_NOT_MOUNTED;
@@ -567,7 +568,7 @@ void letsExecCommands(Command *commands){
                 showMessageError(res);
                 return;
             }else{
-                //showMounts();
+                showMounts();
                 cout<<"¡Partición montada con éxito!\n";
             }
         }
@@ -581,7 +582,7 @@ void letsExecCommands(Command *commands){
                 showMessageError(res);
                 return;
             }else{
-                //showMounts();
+                showMounts();
                 cout<<"¡Partición desmontada con éxito!\n";
             }
         }
