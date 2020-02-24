@@ -213,7 +213,7 @@ void reportMBR(char path[],char path_report[]){
      //cerrando stream
      fclose (myFile);
      string pathString(path_report);
-     string command = "dot -Tpng report_mbr.dot -o "+pathString;//+"/report_mbr.png";
+     string command = "dot -Tpng report_mbr.dot -o \""+pathString+"\"";//+"/report_mbr.png";
      system(command.c_str());
      cout<<"Reporte de MBR creado...\n";
 }
@@ -402,7 +402,7 @@ void reportDisk(char path[], char path_report[]){
      //cerrando stream
      fclose (myFile);
      string pathString(path_report);
-     string command = "dot -Tpng report_disk.dot -o "+pathString;//+"/report_disk.png";
+     string command = "dot -Tpng report_disk.dot -o \2"+pathString+"\"";//+"/report_disk.png";
      system(command.c_str());
      cout<<"Reporte de disco creado...\n";
 }
