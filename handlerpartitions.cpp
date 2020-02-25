@@ -348,11 +348,13 @@ void writeEBR(EBR *extendedPart,char path[],int point){
 Response newLogicPart(long size, Fit fit, char name[], MBR *disco, char path[]){
     EBR *firstEBR = getFirstEBR(disco,path);
     int newPosition = 0;
-
     if(firstEBR==NULL){
         return ERROR_NOT_EXIST_EXTENDED_PARTITION;
     }
-
+    //Response resp = getStartAddressLogic(disco,firstEBR,(Fit)firstEBR->part_fit,size,&newPosition,path);
+    //if(resp!=SUCCESS){
+    //   return resp;
+    //}
     EBR *newEBR = (EBR*)malloc(sizeof(EBR));
     newEBR->part_fit = fit;
     strcpy(newEBR->part_name,name);
@@ -622,5 +624,91 @@ Response unmountPart(char id[]){
     }else{
         return ERROR_PARTITION_NOT_MOUNTED;
     }
+    return SUCCESS;
+}
+
+Response getStartAddressLogic(MBR *disco,EBR *part,Fit fit,long size,int *startPoint,char path[]){
+    //VIRTUALIZAR PARTICIONES
+    EBR *firstEBR = part;
+    virtualBlock *espaciosLibres = NULL;
+    bool flag = true;
+    int inicio = firstEBR->part_start;
+    int fin = firstEBR->part_start-1;
+    int contadorEspacios = 0;
+    while(flag){
+        if(firstEBR->part_next!=-1){
+            fin = firstEBR->part_start;
+            if(fin - inicio > 0){
+                if(espaciosLibres==NULL){
+                    espaciosLibres = new virtualBlock(fin-inicio,inicio,LIBRE);
+                }else{
+                    virtualBlock *newt = new virtualBlock(fin-inicio,inicio,LIBRE);
+                    espaciosLibres->next = newt;
+                    espaciosLibres = espaciosLibres->next;
+                }
+                contadorEspacios++;
+            }
+            inicio = firstEBR->part_start+firstEBR->part_size;
+           firstEBR = readEBR(firstEBR->part_next,path);
+       }else{
+           flag = false;
+       }
+    }
+    if(espaciosLibres==NULL){
+        espaciosLibres =  new virtualBlock(disco->mbr_tamanio-inicio+sizeof(MBR),inicio,LIBRE);
+    }
+    contadorEspacios++;
+
+    //ORDENAR
+    /*
+    for (int i = 0;i < contadorEspacios; i++){
+        for (int j = 0; j< contadorEspacios-1; j++){
+            if (espaciosLibres[j]->size > espaciosLibres[j+1]->size){
+            temporal = espaciosLibres[j];
+            espaciosLibres[j] = espaciosLibres[j+1];
+            espaciosLibres[j+1] = temporal;
+            }
+        }
+    }
+    */
+    //BUSCAR SEGUN AJUSTE
+    switch (fit) {
+    case FirstFit:
+    {
+        virtualBlock *it = espaciosLibres;
+        while(it!=NULL){
+            if(size<=it->size){
+                *startPoint = it->start;
+                break;
+            }
+            it = it->next;
+        }
+    }
+        break;
+    case WorstFit:
+
+        break;
+    case BestFit:
+        /*int tams[contadorEspacios];
+        for(i=0;i<contadorEspacios;i++){
+             tams[i] = espaciosLibres[i]->size-size;
+        }
+
+        int best =0;
+        for(i=0;i<contadorEspacios;i++){
+            if(tams[i]<tams[best]){
+                best = i;
+            }
+        }
+        if(best == -1){
+            return ERROR_INSUFICIENT_SPACE;
+        }
+        *startPoint = espaciosLibres[best]->start;*/
+        break;
+    }
+    if(*startPoint == -1){
+        return ERROR_INSUFICIENT_SPACE;
+    }
+
     return SUCCESS;
 }

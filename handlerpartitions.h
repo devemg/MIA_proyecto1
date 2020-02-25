@@ -42,4 +42,6 @@ char* getPartId(char,int);
 
 Response unmountPart(char[]);
 
+Response getStartAddressLogic(MBR *disco,EBR *part,Fit fit,long size,int *startPoint,char[]);
+
 #endif // HANDLERPARTITIONS_H
