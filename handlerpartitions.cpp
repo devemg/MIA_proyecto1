@@ -136,7 +136,7 @@ Response modPartition(int size, Unit unit, char path[], char name[]){
 Response newPrimaryPart(long size,Fit fit,char name[],MBR *disco,char path[]){
      int i;
      int startPoint;
-     Response resp = getStartAddress(disco,disco->disk_fit,size,&startPoint);
+     Response resp = getStartAddress(disco,(Fit)disco->disk_fit,size,&startPoint);
      if(resp!=SUCCESS){
         return resp;
      }
@@ -270,7 +270,7 @@ Response getStartAddress(MBR *disco,Fit fit,long size,int *startPoint){
 Response newExtendedPart(long size, Fit fit, char name[], MBR *disco, char path[]){
     int i;
     int startPoint;
-    Response resp = getStartAddress(disco,disco->disk_fit,size,&startPoint);
+    Response resp = getStartAddress(disco,(Fit)disco->disk_fit,size,&startPoint);
     if(resp!=SUCCESS){
        return resp;
     }
@@ -309,7 +309,7 @@ Response newExtendedPart(long size, Fit fit, char name[], MBR *disco, char path[
                     partition->part_status = Activo;
                     replaceMBR(disco,path);
                     newEBR(partition,path);
-                    fillSpaceWithZeros(path,partition->part_start,size);
+                    fillSpaceWithZeros(path,partition->part_start+sizeof(EBR),size);
                     return SUCCESS;
             }else{
                 return ERROR_FULL_PARTITION_PRIMARY;
@@ -377,6 +377,7 @@ Response newLogicPart(long size, Fit fit, char name[], MBR *disco, char path[]){
                flag = false;
            }
         }
+       newPosition = firstEBR->part_start+firstEBR->part_size;
        firstEBR->part_next = newPosition;
        writeEBR(firstEBR,path,firstEBR->part_start-sizeof(EBR));
        newEBR->part_start = newPosition+sizeof(EBR);
@@ -435,11 +436,11 @@ Response deletePrimaryPart(MBR *disco,char name[],DeleteType dtype,char path[]){
                 //delete partition
                 disco->particiones[i].part_status = Inactivo;
                 clearArray(disco->particiones[i].part_name,16);
+                if(dtype == Full){
+                  fillSpaceWithZeros(path,disco->particiones[i].part_start,disco->particiones[0].part_size);
+                }
                 disco->particiones[i].part_size = 0;
                 disco->particiones[i].part_start = 0;
-                if(dtype == Full){
-                  //fillSpaceWithZeros(path,0,0);
-                }
                 replaceMBR(disco,path);
                 return SUCCESS;
             }

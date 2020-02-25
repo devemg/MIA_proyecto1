@@ -140,12 +140,9 @@ void fillSpaceWithZeros(char full_path[],int position,int size){
          cout<<"Error al abrir el archivo\n";
          return;
      }
-    fseek(myFile,position , SEEK_SET);
-    try {
-        fseek(myFile, size, SEEK_SET);
+    fseek(myFile,position,SEEK_SET);
+    while(ftell(myFile)<size && ftell(myFile)!=-1){
         fwrite("\0", sizeof(char), 1, myFile);
-       }catch(exception ex){
-
     }
     fclose(myFile);
 }

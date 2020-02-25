@@ -428,8 +428,22 @@ void writeExtendedReport(FILE *myFile, MBR *disco, char path[]){
         if(extended==NULL){
             return;
         }
+  /* int contador = 0;
+   bool flag1 = true;
+   EBR *nodo = first;
+   while (flag1) {
+       if(nodo->part_next!=-1){
+          nodo = readEBR(nodo->part_next,path);
+      }else{
+          flag1 = false;
+      }
+       contador++;
+   }*/
     fputs("<table border = \"1\" cellborder=\"1\" bgcolor=\"#da3a85\">\n", myFile);
-    //fputs("<tr><td colspan=\"3\">Extendida</td></tr>\n", myFile);
+    //fputs("<tr><td colspan=\"", myFile);
+    //fputs(to_string(contador+2).c_str(), myFile);
+    //fputs("\">Extendida</td></tr>\n", myFile);
+
     fputs("<tr>\n", myFile);
     bool flag = true;
     int inicio = extended->part_start;
