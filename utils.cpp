@@ -123,6 +123,9 @@ void showMessageError(Response response){
     case ERROR_NOT_SPACE_ADD:
         cout<<"No hay espacio para agregar a la partición\n";
         break;
+    case ERROR_PARTITION_MOUNTED_DEL:
+        cout<<"No se puede eliminar la partición al estar montada.\n";
+        break;
     default:
         break;
 

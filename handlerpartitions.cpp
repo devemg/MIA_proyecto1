@@ -136,7 +136,7 @@ Response modPartition(int size, Unit unit, char path[], char name[]){
 Response newPrimaryPart(long size,Fit fit,char name[],MBR *disco,char path[]){
      int i;
      int startPoint;
-     Response resp = getStartAddress(disco,fit,size,&startPoint);
+     Response resp = getStartAddress(disco,disco->disk_fit,size,&startPoint);
      if(resp!=SUCCESS){
         return resp;
      }
@@ -270,7 +270,7 @@ Response getStartAddress(MBR *disco,Fit fit,long size,int *startPoint){
 Response newExtendedPart(long size, Fit fit, char name[], MBR *disco, char path[]){
     int i;
     int startPoint;
-    Response resp = getStartAddress(disco,fit,size,&startPoint);
+    Response resp = getStartAddress(disco,disco->disk_fit,size,&startPoint);
     if(resp!=SUCCESS){
        return resp;
     }
@@ -387,7 +387,6 @@ Response newLogicPart(long size, Fit fit, char name[], MBR *disco, char path[]){
 return SUCCESS;
 }
 
-//DELETE
 Response deletePartition(char path[],char nameDisk[], char name[],TipoParticion tipoParticion,DeleteType dtype){
     char full_path[200];
     clearArray(full_path,sizeof(full_path));
@@ -414,6 +413,9 @@ Response rmPartition(char path[], char name[], TipoParticion tipoParticion,Delet
     if(disco==NULL){
         return ERROR_UNHANDLED;
     }
+    /*if(!canDeletePart(path,name)){
+        return ERROR_PARTITION_MOUNTED_DEL;
+    }*/
     switch (tipoParticion) {
     case Primaria:
     case Extendida:

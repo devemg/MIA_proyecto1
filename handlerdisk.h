@@ -43,4 +43,5 @@ void writeExtendedReport(FILE*,MBR*,char[]);
 
 bool canDeleteDisk(char[]);
 
+bool canDeletePart(char [],char[]);
 #endif // HANDLERDISK_H

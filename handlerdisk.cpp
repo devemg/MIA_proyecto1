@@ -484,3 +484,31 @@ bool canDeleteDisk(char path[]){
 
     return !exist;
 }
+
+bool canDeletePart(char path[],char name[]){
+    int contadorDiscos = 0;
+    bool exist= false;
+    //MONTAR DISCO
+    while(partsMounted[contadorDiscos]!=NULL){
+        if(strcmp(partsMounted[contadorDiscos]->path,path)==0){
+            exist = true;
+            break;
+        }
+        contadorDiscos++;
+    }
+    //MONTAR PARTICION
+    bool existPart = false;
+    MountedDisk *mdisk = partsMounted[contadorDiscos];
+    int contador2=0;
+    //VALIDAR QUE YA ESTÉ MONTADA LA PARTICION
+    if(mdisk!=NULL){
+        while(mdisk->parts[contador2]!=NULL){
+            if(strcmp(mdisk->parts[contador2]->name,name)==0){
+                existPart = true;
+            }
+            contador2++;
+        }
+
+    }
+    return !false;
+}
