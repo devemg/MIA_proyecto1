@@ -72,16 +72,39 @@ Response modPartition(int size, Unit unit, char path[], char name[]){
     }
     long final_size = getSize(size,unit);
 
-    Partition *part = NULL;
+    virtualBlock *parts[4];
+    int contadorParticiones = 0;
     int i;
-    for(i=0;i<4;i++){
+    for(i = 0;i<4;i++){
         if(disco->particiones[i].part_status == Activo){
-            if(strcmp(disco->particiones[i].part_name,name)==0){
-                part =&disco->particiones[i];
-                break;
+            parts[contadorParticiones] = new virtualBlock(disco->particiones[i].part_size,disco->particiones[i].part_start,OCUPADO);
+            contadorParticiones++;
+        }
+    }
+    //ordenar
+    virtualBlock *temporal;
+    for (int i = 0;i < contadorParticiones; i++){
+        for (int j = 0; j< contadorParticiones-1; j++){
+            if (parts[j]->start > parts[j+1]->start){
+            temporal = parts[j];
+            parts[j] = parts[j+1];
+            parts[j+1] = temporal;
             }
         }
     }
+    //buscar SIGUIENTE particion o espacio antes del fin del disco
+    Partition *part = NULL;
+    int indicePart = 0;
+    for(i = 0;i<4;i++){
+        if(disco->particiones[i].part_status == Activo){
+            if(strcmp(disco->particiones[i].part_name,name)==0){
+                part = &disco->particiones[i];
+                break;
+            }
+            indicePart++;
+        }
+    }
+
 
     if(part==NULL){
         //BUSCAR PARTICION LOGICA
@@ -91,6 +114,17 @@ Response modPartition(int size, Unit unit, char path[], char name[]){
         //MODIFICAR TAMAÑO
         if(part->part_size+final_size<=0){
             return ERROR_SIZE_MIN;
+        }
+        if(indicePart == contadorParticiones-1){
+            int newt = part->part_start+part->part_size+final_size;
+            if(disco->mbr_tamanio < newt){
+                return ERROR_NOT_SPACE_ADD;
+            }
+        }else{
+            int newt = part->part_start+part->part_size+final_size;
+            if(parts[indicePart+1]->start < newt){
+                return ERROR_NOT_SPACE_ADD;
+            }
         }
         part->part_size = part->part_size+final_size;
         replaceMBR(disco,path);
@@ -140,7 +174,7 @@ Response getStartAddress(MBR *disco,Fit fit,long size,int *startPoint){
     int i;
     *startPoint = -1;
     int contadorParticiones = 0;
-   //VIRTUALIZANDO ESPACIOS LIBRES
+   //VIRTUALIZANDO particiones
     virtualBlock *parts[4];
 
     bool empty = true;

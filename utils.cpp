@@ -120,6 +120,9 @@ void showMessageError(Response response){
     case ERROR_DISK_NOT_MOUNTED:
         cout<<"El disco no está montado\n";
         break;
+    case ERROR_NOT_SPACE_ADD:
+        cout<<"No hay espacio para agregar a la partición\n";
+        break;
     default:
         break;
 
