@@ -351,10 +351,11 @@ Response newLogicPart(long size, Fit fit, char name[], MBR *disco, char path[]){
     if(firstEBR==NULL){
         return ERROR_NOT_EXIST_EXTENDED_PARTITION;
     }
-    //Response resp = getStartAddressLogic(disco,firstEBR,(Fit)firstEBR->part_fit,size,&newPosition,path);
-    //if(resp!=SUCCESS){
-    //   return resp;
-    //}
+    Response resp = SUCCESS;
+    //= getStartAddressLogic(disco,firstEBR,(Fit)firstEBR->part_fit,size,&newPosition,path);
+    if(resp!=SUCCESS){
+       return resp;
+    }
     EBR *newEBR = (EBR*)malloc(sizeof(EBR));
     newEBR->part_fit = fit;
     strcpy(newEBR->part_name,name);
@@ -686,7 +687,17 @@ Response getStartAddressLogic(MBR *disco,EBR *part,Fit fit,long size,int *startP
     }
         break;
     case WorstFit:
-
+       {
+        virtualBlock *it = espaciosLibres;
+        virtualBlock *ant;
+        while(it!=NULL){
+            ant = it;
+            it = it->next;
+        }
+        if(size<=ant->size){
+            *startPoint = it->start;
+        }
+        }
         break;
     case BestFit:
         /*int tams[contadorEspacios];
