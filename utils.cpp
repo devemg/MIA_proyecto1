@@ -339,7 +339,7 @@ bool validateOptionCommand(CommandEnum cmd,Option *opt){
                 len = strlen(it->text);
                 for (index = 0; index < len; ++index)
                    it->text[index] = tolower(it->text[index]);
-                if(strcmp(it->text,"mbr")!=0 && strcmp(it->text,"disk")!=0){
+                if(strcmp(it->text,"mbr")!=0 && strcmp(it->text,"disk")!=0 && strcmp(it->text,"mount")!=0){
                     std::cout<<"Debe indicar el tipo de reporte: \"mbr\" o \"disk\".\n";
                     return false;
                 }
@@ -603,6 +603,10 @@ void letsExecCommands(Command *commands){
             cout<<"NAME: "<<name<<endl;
             */
             //BUSCAR DISCO
+            if(strcmp(name,"mount")==0){
+                showMounts();
+                return;
+            }
             int contadorDiscos;
             Response res = getContadorDiscos(&contadorDiscos,id);
             if(res!=SUCCESS){
