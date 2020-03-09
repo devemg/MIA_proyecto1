@@ -31,7 +31,7 @@ int main()
   newDisk(50,FirstFit,MB,"/home/emely/Escritorio/testData","disk1");
   createPartition(30,MB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion_1");
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
-  SuperBlock *sb = readSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  /*SuperBlock *sb = readSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1");
   if(sb!=NULL){
       cout<<"CANTIDAD MONTADA: "<<sb->s_mnt_count<<endl;
   }
@@ -42,28 +42,10 @@ int main()
     if(sb!=NULL){
         cout<<"CANTIDAD MONTADA: "<<sb->s_mnt_count<<endl;
     }
-
-  //reportBitmap(0,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
-  //sreportBitmap(1,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
-
-  //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
-  //createPartition(500,KB,"/home/emely/Escritorio/testData","disk1",Extendida,BestFit,"particion 1");
-  //mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1.2");
-
-  //mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1");
-  //showMounts();
-  //unmountPart("vda1");
-  //showMounts();
-/*
-  createPartition(250,KB ,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.3");
-  createPartition(250,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.1");
-  //deletePartition("/home/emely/Escritorio/testData","disk1","particion 1",Primaria,Full);
-  //deletePartition("/home/emely/Escritorio/testData","disk1","particion 1.2",Primaria,Full);
-  //deletePartition("/home/emely/Escritorio/testData","disk1","particion 2",Logica,Full);
-
 */
-    //reportDisk("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep.png");
-    //reportMBR("/home/emely/Escritorio/testData/disk1.disk","/home/emely/Escritorio/testData/disk1Rep2.png");
+  //reportBitmap(0,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmapRep.txt");
+  reportBitmap(1,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmapRep2.txt");
+  //reportBitmap(1,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
   return 0;
 }

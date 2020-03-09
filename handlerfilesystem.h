@@ -16,6 +16,6 @@ SuperBlock* readSuperBlock(char[],char[]);
 
 void writeBitmap(int cantInodos,int init,char path[]);
 
-Response reportBitmap(int,char[],char[]);
+Response reportBitmap(int,char[],char[],char[]);
 
 #endif // HANDLERFILESISTEM_H

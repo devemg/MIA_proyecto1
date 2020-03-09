@@ -60,9 +60,9 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     sb->s_block_start = sb->s_inode_start + sizeInodos;
     writeSuperBlock(sb,path,initPart);
     //BITMAP DE INODOS
-    //writeBitmap(cantInodos,sb->s_bm_inode_start,path);
+    writeBitmap(cantInodos,sb->s_bm_inode_start,path);
     //BITMAP DE BLOQUES
-    //writeBitmap(cantBloques,sb->s_bm_block_start,path);
+    writeBitmap(cantBloques,sb->s_bm_block_start,path);
     delete disco;
     return SUCCESS;
 }
@@ -118,15 +118,15 @@ void writeBitmap(int cantInodos,int init,char path[]){
      }
      //escribir MBR en disco
      fseek(myFile, init, SEEK_SET);
-    while(contador<cantInodos){
-        fwrite("1", sizeof(char), 1, myFile);
+   while(contador<cantInodos){
+        fwrite("0", sizeof(char), 1, myFile);
         contador++;
     }
     //cerrando stream
     fclose (myFile);
 }
 
-Response reportBitmap(int rep, char path[], char name[]){
+Response reportBitmap(int rep, char path[], char name[],char path_rep[]){
     SuperBlock *sb = readSuperBlock(path,name);
     if(sb == NULL){
         return ERROR_UNHANDLED;
@@ -138,28 +138,43 @@ Response reportBitmap(int rep, char path[], char name[]){
          cout<<"Error al abrir el disco\n";
          return ERROR_UNHANDLED;
      }
+
+     FILE * fileReport;
+      fileReport = fopen (path_rep,"w+");
+      if (fileReport==NULL)
+      {
+          cout<<"Error al crear archivo de reporte\n";
+          return ERROR_UNHANDLED;
+      }
+    fseek(fileReport, 0, SEEK_SET);
     if(rep == 0){
         //reporte de inodos
-        char caracter='1';
+        char caracter;
         int contador = 0;
-         fseek(myFile, sb->s_inode_start, SEEK_SET);
+         fseek(myFile, sb->s_bm_inode_start, SEEK_SET);
         while(contador<sb->s_inodes_count){
             fread(&caracter, sizeof(char), 1, myFile);
-            cout<<caracter<<" ";
+            fwrite(&caracter, sizeof(char), 1, fileReport);
+            if((contador+1)%20==0 && contador!=0){
+                fwrite("\n", sizeof(char), 1, fileReport);
+            }
             contador++;
         }
     }else{
         //reporte de bloques
-        //reporte de inodos
         char caracter;
         int contador = 0;
-         fseek(myFile, sb->s_block_start, SEEK_SET);
+         fseek(myFile, sb->s_bm_block_start, SEEK_SET);
         while(contador<sb->s_blocks_count){
             fread(&caracter, sizeof(char), 1, myFile);
-            cout<<caracter<<" ";
+            fwrite(&caracter, sizeof(char), 1, fileReport);
+            if((contador+1)%20==0 && contador!=0){
+                fwrite("\n", sizeof(char), 1, fileReport);
+            }
             contador++;
         }
     }
+    fclose (fileReport);
     fclose (myFile);
     delete sb;
     return SUCCESS;
