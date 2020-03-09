@@ -11,7 +11,8 @@ SOURCES += \
     virtual_blocks.cpp \
     parser.cpp \
     scanner.cpp \
-    vars.cpp
+    vars.cpp \
+    handlerfilesistem.cpp
 
 HEADERS += \
     structures.h \
@@ -23,7 +24,8 @@ HEADERS += \
     parser.h \
     scanner.h \
     scanner.l \
-    vars.h
+    vars.h \
+    handlerfilesistem.h
 
 DISTFILES += \
     parser.y

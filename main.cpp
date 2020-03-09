@@ -7,11 +7,12 @@
 #include <handlerpartitions.h>
 #include <parser.h>
 #include <scanner.h>
-
+#include <handlerfilesistem.h>
 using namespace std;
 
 int main()
 {
+    /*
     std::string command;
     while(true){
         cout << ">";
@@ -25,10 +26,16 @@ int main()
         writeCommand(command,false);
         readExecCommand(false);
     }
+*/
 
-  //newDisk(100,FirstFit,KB,"/home/emely/Escritorio/testData","disk1");
+  newDisk(50,FirstFit,MB,"/home/emely/Escritorio/testData","disk1");
+  createPartition(30,MB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion_1");
+  formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
+  SuperBlock *sb = readSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  if(sb!=NULL){
+      cout<<"CANTIDAD MONTADA: "<<sb->s_mnt_count<<endl;
+  }
   //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
-  //createPartition(1500,KB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion 1.2");
   //createPartition(500,KB,"/home/emely/Escritorio/testData","disk1",Extendida,BestFit,"particion 1");
   //mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1.2");
 

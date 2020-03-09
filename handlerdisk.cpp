@@ -37,6 +37,7 @@ void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
     getFullPathDisk(path,nameMirror,full_path);
     writeMBR(disco,path,full_path);
     cout<<"Disco \'"<<name<<"\' creado con éxito\n";
+    delete disco;
 }
 
 bool writeMBR(MBR *disco,char path[],char full_path[]){

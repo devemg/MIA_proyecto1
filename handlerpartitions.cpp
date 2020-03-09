@@ -62,6 +62,7 @@ Response newPartition(int size, Unit unit, char path[], TipoParticion tipoPartic
         return newLogicPart(final_size,fit,name,disco,path);
         break;
     }
+    delete disco;
     return SUCCESS;
 }
 
@@ -163,7 +164,6 @@ Response newPrimaryPart(long size,Fit fit,char name[],MBR *disco,char path[]){
          partition->part_type = Primaria;
          partition->part_status = Activo;
          replaceMBR(disco,path);
-         fillSpaceWithZeros(path,partition->part_start,size);
          return SUCCESS;
  }else{
             return ERROR_FULL_PARTITION_PRIMARY;
@@ -709,3 +709,4 @@ Response getStartAddressLogic(MBR *disco,EBR *part,Fit fit,long size,int *startP
 
     return SUCCESS;
 }
+

@@ -103,4 +103,62 @@ class MountedDisk{
     }
 };
 
+//FASE 2 **************************************************************
+
+struct myDate
+{
+public:
+    int dia;
+    int mes;
+    int anio;
+
+    myDate(int dia_,int mes_,int anio_){
+        dia = dia_;
+        mes = mes_;
+        anio = anio_;
+    }
+
+};
+
+struct SuperBlock{
+    int s_filesystem_type;
+    int s_inodes_count;
+    int s_blocks_count;
+    int s_free_blocks_count;
+    int s_free_inodes_count;
+    myDate s_mtime;
+    myDate s_umtime;
+    int s_mnt_count;
+    int s_magic;
+    int s_inode_size;
+    int s_block_size;
+    int s_firts_ino;
+    int s_first_blo;
+    int s_bm_inode_start;
+    int s_bm_block_start;
+    int s_inode_start;
+    int s_block_start;
+};
+
+struct Inodo{
+    int i_uid;
+    int i_gid;
+    int i_size;
+    myDate i_atime;
+    myDate i_ctime;
+    myDate i_mtime;
+    int i_block;
+    int i_type;
+    int i_perm;
+};
+
+struct Block
+{
+
+};
+
+struct Journal{
+
+};
+
 #endif // STRUCTURES_H
