@@ -719,3 +719,6 @@ void letsExecCommands(Command *commands){
     }
 }
 
+void myPause(){
+    system("read -r -p \"Presione cualquier tecla para continuar...\" key");
+}

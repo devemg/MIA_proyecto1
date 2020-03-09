@@ -44,4 +44,6 @@ void fillOptions(Option *it,int *size, int *add,Fit *fit,Unit *unit,TipoParticio
 
 Response getContadorDiscos(int *contadorDiscos,char *id);
 
+void myPause();
+
 #endif // UTILS_H
