@@ -484,7 +484,6 @@ Response deleteLogicPart(char name[], MBR *disco, char path[]){
 }
 
 Response mountPart(char path[], char name[]){
-
     int contador = 0;
     bool exist= false;
     //MONTAR DISCO
@@ -518,9 +517,11 @@ Response mountPart(char path[], char name[]){
     }
     //BUSCAR PARTICION PRIMARIA/EXTENDIDA
     int i;
+    int init;
     for(i=0;i<4;i++){
         if(strcmp(disco->particiones[i].part_name,name)==0){
             existPart = true;
+            init = disco->particiones[i].part_start;
             break;
         }
     }
@@ -532,6 +533,14 @@ Response mountPart(char path[], char name[]){
     }else{
         return ERROR_PARTITION_NOT_EXIST;
     }
+    //MODIFICAR SUPERBLOCK
+    SuperBlock *sb =readSuperBlock(path,name);
+    if(sb==NULL){
+        return ERROR_UNHANDLED;
+    }
+    sb->s_mnt_count = sb->s_mnt_count+1;
+    writeSuperBlock(sb,path,init);
+
     return SUCCESS;
 }
 

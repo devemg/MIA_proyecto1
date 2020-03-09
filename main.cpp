@@ -7,7 +7,7 @@
 #include <handlerpartitions.h>
 #include <parser.h>
 #include <scanner.h>
-#include <handlerfilesistem.h>
+#include <handlerfilesystem.h>
 using namespace std;
 
 int main()
@@ -35,6 +35,17 @@ int main()
   if(sb!=NULL){
       cout<<"CANTIDAD MONTADA: "<<sb->s_mnt_count<<endl;
   }
+
+  mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
+
+  sb = readSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1");
+    if(sb!=NULL){
+        cout<<"CANTIDAD MONTADA: "<<sb->s_mnt_count<<endl;
+    }
+
+  //reportBitmap(0,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //sreportBitmap(1,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+
   //deleteDisk("/home/emely/Escritorio/testData/disk1.disk");
   //createPartition(500,KB,"/home/emely/Escritorio/testData","disk1",Extendida,BestFit,"particion 1");
   //mountPart("/home/emely/Escritorio/testData/disk1.disk","particion 1.2");
@@ -44,7 +55,7 @@ int main()
   //unmountPart("vda1");
   //showMounts();
 /*
-  createPartition(250,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.3");
+  createPartition(250,KB ,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.3");
   createPartition(250,KB,"/home/emely/Escritorio/testData","disk1",Logica,FirstFit,"particion 2.1");
   //deletePartition("/home/emely/Escritorio/testData","disk1","particion 1",Primaria,Full);
   //deletePartition("/home/emely/Escritorio/testData","disk1","particion 1.2",Primaria,Full);

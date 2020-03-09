@@ -1,4 +1,4 @@
-#include "handlerfilesistem.h"
+#include "handlerfilesystem.h"
 
 Response getStartPartition(MBR* disco, char name[], int *init){
     int i;
@@ -38,9 +38,8 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     if(res != SUCCESS){
         return res;
     }
-    int sizebmInodos = 10;
-    int sizebmBloques = 10;
     int sizeInodos = 10;
+    //BLOQUES
     SuperBlock *sb = (SuperBlock*)malloc(sizeof(SuperBlock));
     sb->s_filesystem_type = sistem;
     sb->s_inodes_count = cantInodos;
@@ -56,10 +55,14 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     sb->s_firts_ino = 0;
     sb->s_first_blo = 0;
     sb->s_bm_inode_start = initPart+sizeof(SuperBlock);
-    sb->s_bm_block_start = sb->s_bm_inode_start+sizebmInodos;
-    sb->s_inode_start = sb->s_bm_block_start + sizebmBloques;
+    sb->s_bm_block_start = sb->s_bm_inode_start+cantInodos;
+    sb->s_inode_start = sb->s_bm_block_start + cantBloques;
     sb->s_block_start = sb->s_inode_start + sizeInodos;
     writeSuperBlock(sb,path,initPart);
+    //BITMAP DE INODOS
+    //writeBitmap(cantInodos,sb->s_bm_inode_start,path);
+    //BITMAP DE BLOQUES
+    //writeBitmap(cantBloques,sb->s_bm_block_start,path);
     delete disco;
     return SUCCESS;
 }
@@ -69,7 +72,7 @@ void writeSuperBlock(SuperBlock *sb,char path[],int init){
      myFile = fopen (path,"rb+");
      if (myFile==NULL)
      {
-         cout<<"Error al abrir el archivo\n";
+         cout<<"Error al abrir el disco\n";
          return;
      }
      //escribir MBR en disco
@@ -90,16 +93,74 @@ SuperBlock* readSuperBlock(char path[], char name[]){
     if(res!=SUCCESS){
         return NULL;
     }
-
+    delete disco;
     FILE *myFile = fopen(path,"rb+");
     if(myFile==NULL){
-        cout<<"Error al abrir el archivo \n";
+        cout<<"Error al abrir el disco \n";
         return NULL;
     }
-    SuperBlock *sb = (SuperBlock*)malloc(sizeof(EBR));
+    SuperBlock *sb = (SuperBlock*)malloc(sizeof(SuperBlock));
 
     fseek(myFile, init, SEEK_SET);
     fread(sb, sizeof(SuperBlock), 1, myFile);
     fclose(myFile);
     return sb;
+}
+
+void writeBitmap(int cantInodos,int init,char path[]){
+    int contador = 0;
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return;
+     }
+     //escribir MBR en disco
+     fseek(myFile, init, SEEK_SET);
+    while(contador<cantInodos){
+        fwrite("1", sizeof(char), 1, myFile);
+        contador++;
+    }
+    //cerrando stream
+    fclose (myFile);
+}
+
+Response reportBitmap(int rep, char path[], char name[]){
+    SuperBlock *sb = readSuperBlock(path,name);
+    if(sb == NULL){
+        return ERROR_UNHANDLED;
+    }
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return ERROR_UNHANDLED;
+     }
+    if(rep == 0){
+        //reporte de inodos
+        char caracter='1';
+        int contador = 0;
+         fseek(myFile, sb->s_inode_start, SEEK_SET);
+        while(contador<sb->s_inodes_count){
+            fread(&caracter, sizeof(char), 1, myFile);
+            cout<<caracter<<" ";
+            contador++;
+        }
+    }else{
+        //reporte de bloques
+        //reporte de inodos
+        char caracter;
+        int contador = 0;
+         fseek(myFile, sb->s_block_start, SEEK_SET);
+        while(contador<sb->s_blocks_count){
+            fread(&caracter, sizeof(char), 1, myFile);
+            cout<<caracter<<" ";
+            contador++;
+        }
+    }
+    fclose (myFile);
+    delete sb;
+    return SUCCESS;
 }

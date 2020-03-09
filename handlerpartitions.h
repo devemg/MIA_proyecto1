@@ -5,6 +5,7 @@
 #include <handlerdisk.h>
 #include <virtual_blocks.h>
 #include <vars.h>
+#include <handlerfilesystem.h>
 
 Response updatepartition(char path[],char nameDisk[],char namePart[],int sizeToMod,Unit unit);
 
