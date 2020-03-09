@@ -46,8 +46,8 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     sb->s_blocks_count = cantBloques;
     sb->s_free_blocks_count = 0;
     sb->s_free_inodes_count = 0;
-    //sb.s_mtime = new myDate(8,3,2020);
-    //sb.s_umtime = new myDate(8,3,2020);
+    getCurrentDate(sb->s_mtime);
+    getCurrentDate(sb->s_umtime);
     sb->s_mnt_count = 0;
     sb->s_magic = 0xEF53;
     sb->s_inode_size = sizeof(Inodo);
@@ -58,6 +58,8 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     sb->s_bm_block_start = sb->s_bm_inode_start+cantInodos;
     sb->s_inode_start = sb->s_bm_block_start + cantBloques;
     sb->s_block_start = sb->s_inode_start + sizeInodos;
+    sb->s_free_blocks_count = cantBloques;
+    sb->s_free_inodes_count = cantInodos;
     writeSuperBlock(sb,path,initPart);
     //BITMAP DE INODOS
     writeBitmap(cantInodos,sb->s_bm_inode_start,path);
@@ -178,4 +180,75 @@ Response reportBitmap(int rep, char path[], char name[],char path_rep[]){
     fclose (myFile);
     delete sb;
     return SUCCESS;
+}
+
+void reportSuperBlock(char path[], char name[], char path_report[]){
+    SuperBlock *sb = readSuperBlock(path,name);
+
+        FILE * myFile;
+         myFile = fopen ("report_sb.dot","w+");
+         if (myFile==NULL)
+         {
+             cout<<"Error al crear el archivo\n";
+             return;
+         }
+         fseek(myFile, 0, SEEK_SET);
+         fputs("digraph {\ntbl [\nshape=plaintext\n label=<\n", myFile);
+         fputs("<table border='0' cellborder='1' cellspacing='0'>\n",myFile);
+         fputs("<tr><td colspan=\"3\">",myFile);
+         fputs(name,myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<th><td>Nombre</td><td>Valor</td></th>\n",myFile);
+         fputs("<tr><td bgcolor=\"#bcf7c1\">s_inodes_count</td><td bgcolor=\"#bcf7c1\">",myFile);
+         fputs(&to_string(sb->s_inodes_count)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"lightblue\">s_blocks_count</td><td bgcolor=\"lightblue\">",myFile);
+         fputs(&to_string(sb->s_blocks_count)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"#bcf7c1\">s_free_blocks_count</td><td bgcolor=\"#bcf7c1\">",myFile);
+         fprintf(myFile, "%d", sb->s_free_blocks_count);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"lightblue\">s_free_inodes_count</td><td bgcolor=\"lightblue\">",myFile);
+         fputs(&to_string(sb->s_free_inodes_count)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"#bcf7c1\">s_mtime</td><td bgcolor=\"#bcf7c1\">",myFile);
+         fputs(sb->s_mtime,myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"lightblue\">s_umtime</td><td bgcolor=\"lightblue\">",myFile);
+         fputs(sb->s_umtime,myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"#bcf7c1\">s_mnt_count</td><td bgcolor=\"#bcf7c1\">",myFile);
+         fputs(&to_string(sb->s_mnt_count)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"lightblue\">s_magic</td><td bgcolor=\"lightblue\">",myFile);
+         fputs(&to_string(sb->s_magic)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"#bcf7c1\">s_inode_size</td><td bgcolor=\"#bcf7c1\">",myFile);
+         fputs(&to_string(sb->s_inode_size)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"lightblue\">s_block_size</td><td bgcolor=\"lightblue\">",myFile);
+         fputs(&to_string(sb->s_block_size)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"#bcf7c1\">s_bm_inode_start</td><td bgcolor=\"#bcf7c1\">",myFile);
+         fputs(&to_string(sb->s_bm_inode_start)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+
+         fputs("<tr><td bgcolor=\"lightblue\">s_bm_block_start</td><td bgcolor=\"lightblue\">",myFile);
+         fputs(&to_string(sb->s_bm_block_start)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"#bcf7c1\">s_inode_start</td><td bgcolor=\"#bcf7c1\">",myFile);
+         fputs(&to_string(sb->s_inode_start)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+         fputs("<tr><td bgcolor=\"lightblue\">s_block_start</td><td bgcolor=\"lightblue\">",myFile);
+         fputs(&to_string(sb->s_block_start)[0],myFile);
+         fputs("</td></tr>\n",myFile);
+
+         fputs("</table>\n",myFile);
+         fputs(">];\n\n", myFile);
+         fputs("}\n",myFile);
+         //cerrando stream
+         fclose (myFile);
+         string pathString(path_report);
+         string command = "dot -Tpng report_sb.dot -o \""+pathString+"\"";//+"/report_mbr.png";
+         system(command.c_str());
 }

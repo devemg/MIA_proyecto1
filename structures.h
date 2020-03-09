@@ -105,29 +105,14 @@ class MountedDisk{
 
 //FASE 2 **************************************************************
 
-struct myDate
-{
-public:
-    int dia;
-    int mes;
-    int anio;
-
-    myDate(int dia_,int mes_,int anio_){
-        dia = dia_;
-        mes = mes_;
-        anio = anio_;
-    }
-
-};
-
 struct SuperBlock{
     int s_filesystem_type;
     int s_inodes_count;
     int s_blocks_count;
     int s_free_blocks_count;
     int s_free_inodes_count;
-    myDate s_mtime;
-    myDate s_umtime;
+    char s_mtime[16];
+    char s_umtime[16];
     int s_mnt_count;
     int s_magic;
     int s_inode_size;
@@ -144,9 +129,9 @@ struct Inodo{
     int i_uid;
     int i_gid;
     int i_size;
-    myDate i_atime;
-    myDate i_ctime;
-    myDate i_mtime;
+    char i_atime[16];
+    char i_ctime[16];
+    char i_mtime[16];
     int i_block;
     int i_type;
     int i_perm;

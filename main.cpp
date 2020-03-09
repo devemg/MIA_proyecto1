@@ -31,6 +31,7 @@ int main()
   newDisk(50,FirstFit,MB,"/home/emely/Escritorio/testData","disk1");
   createPartition(30,MB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion_1");
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
+  reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");
   /*SuperBlock *sb = readSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1");
   if(sb!=NULL){
       cout<<"CANTIDAD MONTADA: "<<sb->s_mnt_count<<endl;
@@ -43,9 +44,8 @@ int main()
         cout<<"CANTIDAD MONTADA: "<<sb->s_mnt_count<<endl;
     }
 */
-  //reportBitmap(0,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmapRep.txt");
-  reportBitmap(1,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmapRep2.txt");
-  //reportBitmap(1,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //reportBitmap(0,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmapRep1.txt");
+  //reportBitmap(1,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmapRep2.txt");
 
   return 0;
 }

@@ -18,4 +18,6 @@ void writeBitmap(int cantInodos,int init,char path[]);
 
 Response reportBitmap(int,char[],char[],char[]);
 
+void reportSuperBlock(char[],char[],char[]);
+
 #endif // HANDLERFILESISTEM_H
