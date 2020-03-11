@@ -31,9 +31,13 @@ int main()
   newDisk(50,FirstFit,MB,"/home/emely/Escritorio/testData","disk1");
   createPartition(30,MB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion_1");
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
-  myPause();
-  reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");
-  cout<<"REPORTE CREADO\n";
+  mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //createDir(true,"vda0","/root/emely");
+  showMounts();
+  reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
+  //myPause();
+  //reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");
+  //cout<<"REPORTE CREADO\n";
   /*SuperBlock *sb = readSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1");
   if(sb!=NULL){
       cout<<"CANTIDAD MONTADA: "<<sb->s_mnt_count<<endl;

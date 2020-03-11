@@ -530,6 +530,7 @@ Response mountPart(char path[], char name[]){
          mdisk->parts[contador2] = new MountedPart();
          strcpy(mdisk->parts[contador2]->id,getPartId(mdisk->letter,contador2));
          strcpy(mdisk->parts[contador2]->name, name);
+         mdisk->parts[contador2]->start = init;
     }else{
         return ERROR_PARTITION_NOT_EXIST;
     }
@@ -719,3 +720,70 @@ Response getStartAddressLogic(MBR *disco,EBR *part,Fit fit,long size,int *startP
     return SUCCESS;
 }
 
+MountedPart* getMountedPartition(char id[]){
+    string str(id);
+    if(strlen(id)<4){
+        showMessageError(ERROR_ID_MALFORMED);
+        return NULL;
+    }
+    char letra = str.at(2);
+    //BUSCAR LETRA
+    int contadorDiscos = 0;
+    bool existeDisco= false;
+    while(partsMounted[contadorDiscos]!=NULL){
+        if(partsMounted[contadorDiscos]->letter == letra){
+            existeDisco = true;
+            break;
+        }
+        contadorDiscos++;
+    }
+    if(!existeDisco){
+        showMessageError(ERROR_DISK_NOT_EXIST);
+        return NULL;
+    }
+    //BUSCAR NUMERO
+    int contadorPart = 0;
+    int sizeParts= 0;
+    bool existePart = false;
+
+    while((partsMounted[contadorDiscos])->parts[sizeParts]!=NULL){
+        sizeParts++;
+    }
+    while((partsMounted[contadorDiscos])->parts[contadorPart]!=NULL){
+        if(strcmp((partsMounted[contadorDiscos])->parts[contadorPart]->id,id)==0){
+            existePart = true;
+            break;
+        }
+        contadorPart++;
+    }
+    if(existePart){
+        return partsMounted[contadorDiscos]->parts[contadorPart];
+    }else{
+        showMessageError(ERROR_PARTITION_NOT_MOUNTED);
+        return NULL;
+    }
+}
+
+MountedDisk* getMountedDisk(char id[]){
+    string str(id);
+    if(strlen(id)<4){
+        showMessageError(ERROR_ID_MALFORMED);
+        return NULL;
+    }
+    char letra = str.at(2);
+    //BUSCAR LETRA
+    int contadorDiscos = 0;
+    bool existeDisco= false;
+    while(partsMounted[contadorDiscos]!=NULL){
+        if(partsMounted[contadorDiscos]->letter == letra){
+            existeDisco = true;
+            break;
+        }
+        contadorDiscos++;
+    }
+    if(!existeDisco){
+        showMessageError(ERROR_DISK_NOT_MOUNTED);
+        return NULL;
+    }
+    return partsMounted[contadorDiscos];
+}

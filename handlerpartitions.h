@@ -45,4 +45,8 @@ Response unmountPart(char[]);
 
 Response getStartAddressLogic(MBR *disco,EBR *part,Fit fit,long size,int *startPoint,char[]);
 
+MountedPart* getMountedPartition(char id[]);
+
+MountedDisk* getMountedDisk(char id[]);
+
 #endif // HANDLERPARTITIONS_H
