@@ -138,10 +138,26 @@ struct Inodo{
     int i_perm;
 };
 
-struct Block
-{
-
+struct Content{
+    char b_name[14];
+    int b_inodo;
 };
+
+struct BlockDirectory
+{
+    Content b_content[4];
+};
+
+struct BlockFile
+{
+    char b_content[64];
+};
+
+struct BlockPointer
+{
+    int b_pointers[16];
+};
+
 
 struct Journal{
 

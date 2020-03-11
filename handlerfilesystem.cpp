@@ -23,9 +23,9 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     int cantBloques;
     sizeN= disco->mbr_tamanio-sizeof(SuperBlock);
     if(sistem == ext2){
-        sizeN/=4+sizeof(Inodo)+3*sizeof(Block);
+        sizeN/=4+sizeof(Inodo)+3*sizeof(BlockFile);
     }else if(sistem == ext3){
-        sizeN/=4+sizeof(Inodo)+3*sizeof(Block)+sizeof(Journal);
+        sizeN/=4+sizeof(Inodo)+3*sizeof(BlockFile)+sizeof(Journal);
     }
     cantInodos = floor(sizeN);
     cantBloques = cantInodos*3;
@@ -51,7 +51,7 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     sb->s_mnt_count = 0;
     sb->s_magic = 0xEF53;
     sb->s_inode_size = sizeof(Inodo);
-    sb->s_block_size = sizeof(Block);
+    sb->s_block_size = sizeof(BlockFile);
     sb->s_firts_ino = 0;
     sb->s_first_blo = 0;
     sb->s_bm_inode_start = initPart+sizeof(SuperBlock);
@@ -66,11 +66,44 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     //BITMAP DE BLOQUES
     writeBitmap(cantBloques,sb->s_bm_block_start,path);
     //CREAR CARPETA RAIZ
-    Inodo *nuevo = getNewInodoDir();
-    writeInodo(nuevo,path,sb->s_inode_start);
+    createDirectory(sb,path,"/");
     delete disco;
-    delete nuevo;
+
     return SUCCESS;
+}
+
+Response createDirectory(SuperBlock *sb,char path[],char nameDir[]){
+    int indexI = getBitmapIndex(sb->s_bm_inode_start,sb->s_bm_block_start,path);
+    if(indexI == -1){
+       return ERROR_UNHANDLED;
+    }
+    Inodo *nuevo = getNewInodoDir();
+    BlockDirectory *dir = getNewBlockDir(indexI,nameDir);
+    int indexB = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
+    if(indexB==-1){
+        return ERROR_UNHANDLED;
+    }
+
+    nuevo->i_block[0] = indexB;
+
+    writeInodo(nuevo,path,sb->s_inode_start+(indexI*sb->s_inode_size));
+    writeBlockDirectory(dir,path,sb->s_block_start+(indexB*sb->s_block_size));
+    //Response res = addnewInodo(nuevo,index,DIRECTORY,dir,NULL,path,sb,nameDir);
+    delete nuevo;
+    delete dir;
+    return SUCCESS;
+}
+
+
+BlockDirectory* getNewBlockDir(int indexInodo,char name[]){
+    BlockDirectory *block= (BlockDirectory*)malloc(sizeof(BlockDirectory));
+    int i;
+    for(i=0;i<4;i++){
+        block->b_content[i].b_inodo = -1;
+    }
+    block->b_content[0].b_inodo = indexInodo;
+    strcpy(block->b_content[0].b_name,name);
+    return block;
 }
 
 void writeSuperBlock(SuperBlock *sb,char path[],int init){
@@ -84,6 +117,51 @@ void writeSuperBlock(SuperBlock *sb,char path[],int init){
      //escribir MBR en disco
      fseek(myFile, init, SEEK_SET);
      fwrite(sb, sizeof(SuperBlock), 1, myFile);
+     //cerrando stream
+     fclose (myFile);
+}
+
+void writeBlockDirectory(BlockDirectory *sb,char path[],int init){
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return;
+     }
+     //escribir MBR en disco
+     fseek(myFile, init, SEEK_SET);
+     fwrite(sb, sizeof(BlockDirectory), 1, myFile);
+     //cerrando stream
+     fclose (myFile);
+}
+
+void writeBlockFile(BlockFile *sb,char path[],int init){
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return;
+     }
+     //escribir MBR en disco
+     fseek(myFile, init, SEEK_SET);
+     fwrite(sb, sizeof(BlockFile), 1, myFile);
+     //cerrando stream
+     fclose (myFile);
+}
+
+void writeBlockPointer(BlockPointer *sb,char path[],int init){
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return;
+     }
+     //escribir MBR en disco
+     fseek(myFile, init, SEEK_SET);
+     fwrite(sb, sizeof(BlockPointer), 1, myFile);
      //cerrando stream
      fclose (myFile);
 }
@@ -259,51 +337,6 @@ void reportSuperBlock(char path[], char name[], char path_report[]){
          system(command.c_str());
 }
 
-Response createDir(bool createMk,char id[],char path[]){
-    MountedDisk *disk =getMountedDisk(id);
-    if(disk==NULL){
-        return ERROR_UNHANDLED;
-    }
-
-    MountedPart *partition =getMountedPartition(id);
-    if(partition==NULL){
-        return ERROR_UNHANDLED;
-    }
-
-    //VALIDAR QUE HAYA ESPACIO PARA CREAR INODOS Y BLOQUES
-
-    SuperBlock *sb = readSuperBlock(disk->path,partition->name);
-    if(sb==NULL){
-        return ERROR_UNHANDLED;
-    }
-
-    Inodo *inodoPivote=NULL;
-    if(sb->s_free_inodes_count <sb->s_inodes_count){
-       inodoPivote = readInodo(disk->path,sb->s_inode_start);
-    }
-
-    std::stringstream ss(path);
-        std::string token;
-        while (std::getline(ss, token, '/')) {
-            if(token!=""){
-                cout<<token<<endl;
-                if(createMk){
-                    //crear inodos
-
-                }else{
-                    //BUSCAR CARPETA EN INODO ACTUAL
-
-                   // inodoPivote = newFirstInodo(sb,disk,partition);
-
-                }
-            }
-        }
-
-
-
-return SUCCESS;
-}
-
 Inodo* getNewInodoDir(){
 Inodo *nuevo = (Inodo*)malloc(sizeof(Inodo));
 nuevo->i_uid=1;
@@ -318,7 +351,30 @@ for(i=0;i<16;i++){
 }
     nuevo->i_type = Dir;
     nuevo->i_perm =777;
+
 return nuevo;
+}
+
+int getBitmapIndex(int startBm,int finBm,char path[]){
+    FILE *myFile = fopen(path,"rb+");
+    if(myFile==NULL){
+        cout<<"Error al abrir el disco \n";
+        return -1;
+    }
+    char caracter;
+    fseek(myFile, startBm, SEEK_SET);
+    int contador = 0;
+
+    while (contador<finBm) {
+        fread(&caracter,sizeof(char),1,myFile);
+        if(caracter == '0'){
+            fseek(myFile, -1, SEEK_CUR);
+            fwrite("1",sizeof(char),1,myFile);
+            break;
+        }
+    }
+    fclose(myFile);
+    return contador;
 }
 
 Inodo* readInodo(char path[], int init){
@@ -337,6 +393,25 @@ Inodo* readInodo(char path[], int init){
     }
     return sb;
 }
+
+
+BlockDirectory* readBlockDirectory(char path[], int init){
+    FILE *myFile = fopen(path,"rb+");
+    if(myFile==NULL){
+        cout<<"Error al abrir el disco \n";
+        return NULL;
+    }
+    BlockDirectory *sb = (BlockDirectory*)malloc(sizeof(BlockDirectory));
+
+    fseek(myFile, init, SEEK_SET);
+    fread(sb, sizeof(BlockDirectory), 1, myFile);
+    fclose(myFile);
+    if(sb->b_content[0].b_name[0]=='\0'){
+        return NULL;
+    }
+    return sb;
+}
+
 
 void writeInodo(Inodo *inodo, char path[], int init){
     FILE *myFile = fopen(path,"rb+");
@@ -374,9 +449,10 @@ void reportTree(char path_report[], char id[]){
     fseek(myFile, 0, SEEK_SET);
     fputs("digraph G {\n", myFile);
     fputs("rankdir =LR;\n", myFile);
-    Inodo *pivote = readInodo(disk->path,sb->s_inode_start);
-    if(pivote != NULL){
-        graphInodo(pivote,myFile);
+    //graphAllInodes(sb,myFile,disk->path);
+    Inodo *inodo = readInodo(disk->path,sb->s_inode_start+(0*sb->s_inode_size));
+    if(inodo!=NULL){
+        graphInodo(inodo,0,myFile,sb->s_block_size,sb->s_block_start,disk->path);
     }
     fputs("}\n",myFile);
     //cerrando stream
@@ -386,50 +462,144 @@ void reportTree(char path_report[], char id[]){
     system(command.c_str());
 }
 
-void graphInodo(Inodo* inodo,FILE *myFile){
-fputs("nodo1[ shape=plaintext label=< \n", myFile);
-fputs("<table border='0' cellborder='1' cellspacing='0'>\n", myFile);
-fputs("<tr><td colspan=\"3\">Inodo",myFile);
-fputs("</td></tr>\n", myFile);
-fputs("<tr><td bgcolor=\"#fbffa8\">i_uid</td><td bgcolor=\"#fbffa8\">",myFile);
-fputs(&to_string(inodo->i_uid)[0],myFile);
-fputs("</td></tr>\n", myFile);
-fputs("<tr><td bgcolor=\"#fbffa8\">i_gid</td><td bgcolor=\"#fbffa8\">",myFile);
-fputs(&to_string(inodo->i_gid)[0],myFile);
-fputs("</td></tr>\n", myFile);
-fputs("<tr><td bgcolor=\"#fbffa8\">i_size</td><td bgcolor=\"#fbffa8\">",myFile);
-fputs(&to_string(inodo->i_size)[0],myFile);
-fputs("</td></tr>\n", myFile);
-fputs("<tr><td bgcolor=\"#fbffa8\">i_atime</td><td bgcolor=\"#fbffa8\">",myFile);
-fputs(inodo->i_atime,myFile);
-fputs("</td></tr>\n", myFile);
-fputs("<tr><td bgcolor=\"#fbffa8\">i_ctime</td><td bgcolor=\"#fbffa8\">",myFile);
-fputs(inodo->i_ctime,myFile);
-fputs("</td></tr>\n", myFile);
-fputs("<tr><td bgcolor=\"#fbffa8\">i_mtime</td><td bgcolor=\"#fbffa8\">",myFile);
-fputs(inodo->i_mtime,myFile);
-fputs("</td></tr>\n", myFile);
-fputs("<tr><td bgcolor=\"#fbffa8\">i_type</td><td bgcolor=\"#fbffa8\">",myFile);
-fputs(&to_string(inodo->i_type)[0],myFile);
-fputs("</td></tr>\n", myFile);
-fputs("<tr><td bgcolor=\"#fbffa8\">i_perm</td><td bgcolor=\"#fbffa8\">",myFile);
-fputs(&to_string(inodo->i_perm)[0],myFile);
-fputs("</td></tr>\n", myFile);
-int i=0;
-while(i<12){
-    fputs("<tr><td bgcolor=\"#ffd1a8\">AD1</td><td bgcolor=\"#ffd1a8\">",myFile);
-    fputs(&to_string(inodo->i_block[i])[0],myFile);
+void graphAllInodes(SuperBlock *sb,FILE *file_report,char path[]){
+    FILE * file_bitmap;
+     file_bitmap = fopen (path,"rb+");
+     if (file_bitmap==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return;
+     }
+     //reporte de inodos
+     char caracter;
+     int contador = 0;
+     fseek(file_bitmap, sb->s_bm_inode_start, SEEK_SET);
+     while(contador<sb->s_inodes_count){
+         fread(&caracter, sizeof(char), 1, file_bitmap);
+         if(caracter == '1'){
+             Inodo *inodo = readInodo(path,sb->s_inode_start+(contador*sb->s_inode_size));
+             if(inodo!=NULL){
+                 graphInodo(inodo,contador,file_report,sb->s_block_size,sb->s_block_start,path);
+             }
+             contador++;
+         }
+     }
+    fclose(file_bitmap);
+}
+
+void graphInodo(Inodo* inodo,int initInodo,FILE *myFile,int sizeBlock,int initBlocks,char path[]){
+    fputs("i_",myFile);
+    fputs(&to_string(initInodo)[0],myFile);
+    fputs("[ shape=plaintext label=< \n", myFile);
+    fputs("<table border='0' cellborder='1' cellspacing='0'>\n", myFile);
+    fputs("<tr><td colspan=\"3\">Inodo ",myFile);
+    fputs(&to_string(initInodo)[0],myFile);
     fputs("</td></tr>\n", myFile);
+    fputs("<tr><td bgcolor=\"#fbffa8\">i_uid</td><td bgcolor=\"#fbffa8\">",myFile);
+    fputs(&to_string(inodo->i_uid)[0],myFile);
+    fputs("</td></tr>\n", myFile);
+    fputs("<tr><td bgcolor=\"#fbffa8\">i_gid</td><td bgcolor=\"#fbffa8\">",myFile);
+    fputs(&to_string(inodo->i_gid)[0],myFile);
+    fputs("</td></tr>\n", myFile);
+    fputs("<tr><td bgcolor=\"#fbffa8\">i_size</td><td bgcolor=\"#fbffa8\">",myFile);
+    fputs(&to_string(inodo->i_size)[0],myFile);
+    fputs("</td></tr>\n", myFile);
+    fputs("<tr><td bgcolor=\"#fbffa8\">i_atime</td><td bgcolor=\"#fbffa8\">",myFile);
+    fputs(inodo->i_atime,myFile);
+    fputs("</td></tr>\n", myFile);
+    fputs("<tr><td bgcolor=\"#fbffa8\">i_ctime</td><td bgcolor=\"#fbffa8\">",myFile);
+    fputs(inodo->i_ctime,myFile);
+    fputs("</td></tr>\n", myFile);
+    fputs("<tr><td bgcolor=\"#fbffa8\">i_mtime</td><td bgcolor=\"#fbffa8\">",myFile);
+    fputs(inodo->i_mtime,myFile);
+    fputs("</td></tr>\n", myFile);
+    fputs("<tr><td bgcolor=\"#fbffa8\">i_type</td><td bgcolor=\"#fbffa8\">",myFile);
+    fputs(&to_string(inodo->i_type)[0],myFile);
+    fputs("</td></tr>\n", myFile);
+    fputs("<tr><td bgcolor=\"#fbffa8\">i_perm</td><td bgcolor=\"#fbffa8\">",myFile);
+    fputs(&to_string(inodo->i_perm)[0],myFile);
+    fputs("</td></tr>\n", myFile);
+    int i=0;
+
+    FILE * file_aux;
+     file_aux = fopen ("aux_blocks.txt","w+");
+     if (file_aux==NULL)
+     {
+         cout<<"Error al crear auxiliar\n";
+         return;
+     }
+
+    //APUNTADORES DIRECTOS
+    while(i<12){
+        fputs("<tr><td bgcolor=\"#ffd1a8\">AD1</td><td bgcolor=\"#ffd1a8\">",myFile);
+        fputs(&to_string(inodo->i_block[i])[0],myFile);
+        if(inodo->i_block[i]!=-1){
+            BlockDirectory *dir = readBlockDirectory(path,initBlocks + (inodo->i_block[i]*sizeBlock));
+            if(dir!=NULL){
+                graphBlockDirectory(dir,i,file_aux);
+            }
+        }
+        fputs("</td></tr>\n", myFile);
+        i++;
+    }
+
+    while (i<16) {
+      fputs("<tr><td bgcolor=\"#a8ffdf\">AI1</td><td bgcolor=\"#a8ffdf\">",myFile);
+      fputs(&to_string(inodo->i_block[i])[0],myFile);
+      fputs("</td></tr>\n", myFile);
     i++;
+    }
+
+    fputs("</table>\n",myFile);
+    fputs(">];\n",myFile);
+    //ESCRIBIR BLOQUES DE DIRECTORIOS
+    fseek(file_aux,0,SEEK_SET);
+    char linea[1024];
+    while(fgets(linea, 1024, (FILE*) file_aux)) {
+       fputs(linea,myFile);
+    }
+    fclose(file_aux);
 }
 
-while (i<16) {
-  fputs("<tr><td bgcolor=\"#a8ffdf\">AI1</td><td bgcolor=\"#a8ffdf\">",myFile);
-  fputs(&to_string(inodo->i_block[i])[0],myFile);
-  fputs("</td></tr>\n", myFile);
-i++;
-}
+void graphBlockDirectory(BlockDirectory *block, int initBlock, FILE *myFile){
+    fputs("b_",myFile);
+    fputs(&to_string(initBlock)[0],myFile);
+    fputs("[ shape=plaintext label=< \n", myFile);
+    fputs("<table border='0' cellborder='1' cellspacing='0'>\n", myFile);
+    fputs("<tr><td colspan=\"3\">Bloque ",myFile);
+    fputs(&to_string(initBlock)[0],myFile);
+    fputs("</td></tr>\n", myFile);
 
-fputs("</table>\n",myFile);
-fputs(">];\n",myFile);
+    char colors[4][10];
+    clearArray(colors[0],10);
+    strcat(colors[0],"#e5b7ff");
+    clearArray(colors[1],10);
+    strcat(colors[1],"#c0ffb7");
+    clearArray(colors[2],10);
+    strcat(colors[2],"#ffb7c0");
+    clearArray(colors[3],10);
+    strcat(colors[3],"#ffd2b7");
+
+    int i;
+    for(i=0;i<4;i++){
+        fputs("<tr><td bgcolor=\"",myFile);
+        fputs(colors[i],myFile);
+        fputs("\">b_name</td><td bgcolor=\"",myFile);
+        fputs(colors[i],myFile);
+        fputs("\">",myFile);
+        fputs(block->b_content[0].b_name,myFile);
+        fputs("</td></tr>\n",myFile);
+
+        fputs("<tr><td bgcolor=\"",myFile);
+        fputs(colors[i],myFile);
+        fputs("\">b_inodo</td><td bgcolor=\"",myFile);
+        fputs(colors[i],myFile);
+        fputs("\">",myFile);
+        fputs(&to_string(block->b_content[0].b_inodo)[0],myFile);
+        fputs("</td></tr>\n",myFile);
+
+    }
+
+    fputs("</table>\n",myFile);
+    fputs(">];\n",myFile);
 }

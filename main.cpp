@@ -35,6 +35,7 @@ int main()
   //createDir(true,"vda0","/root/emely");
   showMounts();
   reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
+  cout<<"reporte generado\n";
   //myPause();
   //reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");
   //cout<<"REPORTE CREADO\n";

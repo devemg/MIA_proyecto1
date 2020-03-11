@@ -28,4 +28,5 @@ enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec};
 enum Options {Id,Add,Delete,Type,Path,Unitt,Fitt,Size,Name};
 enum FileSistem {ext2 = 2,ext3 = 3};
 enum TypeInodo{Dir=0,File=1};
+enum TypeBlock{FILE_,DIRECTORY,PIONTERS};
 #endif // ENUMS_H
