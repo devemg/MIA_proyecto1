@@ -45,8 +45,10 @@ void reportSuperBlock(char[],char[],char[]);
 
 void graphInodo(Inodo*,int,FILE*,int,int,char[]);
 
-void graphBlockDirectory(BlockDirectory*,int initBlock,FILE *myFile);
+void graphBlockDirectory(BlockDirectory*,int initBlock,FILE *myFile,int indexInodo);
 
 void graphAllInodes(SuperBlock *sb,FILE *file_report,char path[]);
+
+void writeConnection(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
 
 #endif // HANDLERFILESISTEM_H

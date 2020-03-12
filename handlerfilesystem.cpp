@@ -487,13 +487,13 @@ void graphAllInodes(SuperBlock *sb,FILE *file_report,char path[]){
     fclose(file_bitmap);
 }
 
-void graphInodo(Inodo* inodo,int initInodo,FILE *myFile,int sizeBlock,int initBlocks,char path[]){
+void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,int sizeBlock,int initBlocks,char path[]){
     fputs("i_",myFile);
-    fputs(&to_string(initInodo)[0],myFile);
+    fputs(&to_string(indexInodo)[0],myFile);
     fputs("[ shape=plaintext label=< \n", myFile);
     fputs("<table border='0' cellborder='1' cellspacing='0'>\n", myFile);
     fputs("<tr><td colspan=\"3\">Inodo ",myFile);
-    fputs(&to_string(initInodo)[0],myFile);
+    fputs(&to_string(indexInodo)[0],myFile);
     fputs("</td></tr>\n", myFile);
     fputs("<tr><td bgcolor=\"#fbffa8\">i_uid</td><td bgcolor=\"#fbffa8\">",myFile);
     fputs(&to_string(inodo->i_uid)[0],myFile);
@@ -529,14 +529,30 @@ void graphInodo(Inodo* inodo,int initInodo,FILE *myFile,int sizeBlock,int initBl
          return;
      }
 
-    //APUNTADORES DIRECTOS
+     FILE * file_conections;
+      file_conections = fopen ("aux_conections.txt","w+");
+      if (file_conections==NULL)
+      {
+          cout<<"Error al crear auxiliar\n";
+          return;
+      }
+
+      //APUNTADORES DIRECTOS
     while(i<12){
-        fputs("<tr><td bgcolor=\"#ffd1a8\">AD1</td><td bgcolor=\"#ffd1a8\">",myFile);
+        fputs("<tr><td bgcolor=\"#ffd1a8\">AD1</td><td port=\"",myFile);
+        fputs(&to_string(indexInodo*sizeof(Inodo))[0],myFile);
+        fputs("\" bgcolor=\"#ffd1a8\">",myFile);
         fputs(&to_string(inodo->i_block[i])[0],myFile);
         if(inodo->i_block[i]!=-1){
             BlockDirectory *dir = readBlockDirectory(path,initBlocks + (inodo->i_block[i]*sizeBlock));
             if(dir!=NULL){
-                graphBlockDirectory(dir,i,file_aux);
+                graphBlockDirectory(dir,i,file_aux,indexInodo);
+                int j;
+                for(j=0;j<4;j++){
+                    if(dir->b_content[j].b_inodo!=-1){
+                        writeConnection(dir->b_content[j].b_inodo,inodo->i_block[i],indexInodo*sizeof(Inodo),file_conections);
+                    }
+                }
             }
         }
         fputs("</td></tr>\n", myFile);
@@ -558,10 +574,28 @@ void graphInodo(Inodo* inodo,int initInodo,FILE *myFile,int sizeBlock,int initBl
     while(fgets(linea, 1024, (FILE*) file_aux)) {
        fputs(linea,myFile);
     }
+    fseek(file_conections,0,SEEK_SET);
+    while(fgets(linea, 1024, (FILE*) file_conections)) {
+       fputs(linea,myFile);
+    }
     fclose(file_aux);
 }
 
-void graphBlockDirectory(BlockDirectory *block, int initBlock, FILE *myFile){
+void writeConnection(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile){
+    fputs("i_",myFile);
+    fputs(&to_string(indexnodo)[0],myFile);
+    fputs(":",myFile);
+    fputs(&to_string(indexPuerto)[0],myFile);
+    fputs("->",myFile);
+    fputs("b_",myFile);
+    fputs(&to_string(indexBloque)[0],myFile);
+    fputs(":",myFile);
+    fputs(&to_string(indexPuerto)[0],myFile);
+
+    fputs(";\n",myFile);
+}
+
+void graphBlockDirectory(BlockDirectory *block, int initBlock, FILE *myFile,int indexInodo){
     fputs("b_",myFile);
     fputs(&to_string(initBlock)[0],myFile);
     fputs("[ shape=plaintext label=< \n", myFile);
@@ -582,12 +616,14 @@ void graphBlockDirectory(BlockDirectory *block, int initBlock, FILE *myFile){
 
     int i;
     for(i=0;i<4;i++){
-        fputs("<tr><td bgcolor=\"",myFile);
+        fputs("<tr><td  port=\"",myFile);
+        fputs(&to_string(indexInodo*sizeof(Inodo))[0],myFile);
+        fputs("\" bgcolor=\"",myFile);
         fputs(colors[i],myFile);
         fputs("\">b_name</td><td bgcolor=\"",myFile);
         fputs(colors[i],myFile);
         fputs("\">",myFile);
-        fputs(block->b_content[0].b_name,myFile);
+        fputs(block->b_content[i].b_name,myFile);
         fputs("</td></tr>\n",myFile);
 
         fputs("<tr><td bgcolor=\"",myFile);
@@ -595,9 +631,8 @@ void graphBlockDirectory(BlockDirectory *block, int initBlock, FILE *myFile){
         fputs("\">b_inodo</td><td bgcolor=\"",myFile);
         fputs(colors[i],myFile);
         fputs("\">",myFile);
-        fputs(&to_string(block->b_content[0].b_inodo)[0],myFile);
+        fputs(&to_string(block->b_content[i].b_inodo)[0],myFile);
         fputs("</td></tr>\n",myFile);
-
     }
 
     fputs("</table>\n",myFile);
