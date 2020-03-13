@@ -66,43 +66,47 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     //BITMAP DE BLOQUES
     writeBitmap(cantBloques,sb->s_bm_block_start,path);
     //CREAR CARPETA RAIZ
-    createDirectory(sb,path,"/");
+    writeDirectory(sb,path,"/","/",0);
     delete disco;
-
     return SUCCESS;
 }
 
-Response createDirectory(SuperBlock *sb,char path[],char nameDir[]){
+int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad){
+    //INODO DE CARPETA NUEVA
     int indexI = getBitmapIndex(sb->s_bm_inode_start,sb->s_bm_block_start,path);
     if(indexI == -1){
        return ERROR_UNHANDLED;
     }
     Inodo *nuevo = getNewInodoDir();
-    BlockDirectory *dir = getNewBlockDir(indexI,nameDir);
+    //BLOQUE DE CARPETA NUEVA
+    BlockDirectory *dir = getNewBlockDir(nameDir,indexI,namePad,indexPad);
     int indexB = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
     if(indexB==-1){
         return ERROR_UNHANDLED;
     }
-
+    //ASIGNANDO BLOQUE A CARPETA
     nuevo->i_block[0] = indexB;
+
 
     writeInodo(nuevo,path,sb->s_inode_start+(indexI*sb->s_inode_size));
     writeBlockDirectory(dir,path,sb->s_block_start+(indexB*sb->s_block_size));
-    //Response res = addnewInodo(nuevo,index,DIRECTORY,dir,NULL,path,sb,nameDir);
     delete nuevo;
     delete dir;
-    return SUCCESS;
+    return indexI;
 }
 
-
-BlockDirectory* getNewBlockDir(int indexInodo,char name[]){
+BlockDirectory* getNewBlockDir(char name[],int indexDir,char namepad[],int indexPad){
     BlockDirectory *block= (BlockDirectory*)malloc(sizeof(BlockDirectory));
     int i;
     for(i=0;i<4;i++){
         block->b_content[i].b_inodo = -1;
     }
-    block->b_content[0].b_inodo = indexInodo;
     strcpy(block->b_content[0].b_name,name);
+    block->b_content[0].b_inodo = indexDir;
+
+    strcpy(block->b_content[1].b_name,namepad);
+    block->b_content[1].b_inodo = indexPad;
+
     return block;
 }
 
@@ -394,7 +398,6 @@ Inodo* readInodo(char path[], int init){
     return sb;
 }
 
-
 BlockDirectory* readBlockDirectory(char path[], int init){
     FILE *myFile = fopen(path,"rb+");
     if(myFile==NULL){
@@ -411,7 +414,6 @@ BlockDirectory* readBlockDirectory(char path[], int init){
     }
     return sb;
 }
-
 
 void writeInodo(Inodo *inodo, char path[], int init){
     FILE *myFile = fopen(path,"rb+");

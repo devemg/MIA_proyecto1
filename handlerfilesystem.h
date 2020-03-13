@@ -31,11 +31,11 @@ Inodo* readInodo(char[],int);
 
 Inodo* getNewInodoDir();
 
-BlockDirectory* getNewBlockDir(int indexInodo,char name[]);
+BlockDirectory* getNewBlockDir(char name[],int indexDir,char namepad[],int indexPad);
 
 Response addnewInodo(Inodo* nuevo,int indexI,TypeBlock tipoBloque,BlockDirectory *dir,BlockFile *file,char[],SuperBlock*,char[]);
 
-Response createDirectory(SuperBlock *sb,char path[],char nameDir[]);
+int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad);
 
 void reportTree(char path_report[],char id[]);
 
