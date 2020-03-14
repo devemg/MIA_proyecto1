@@ -101,6 +101,13 @@ Response createDirectory(bool createMk,char id[],char path[]){
                 if (ss.tellg() == -1) {
                     writeDirectory(sb,disk->path,&token[0],&dirPad[0],indexInodoPadre);
                     writeSuperBlock(sb,disk->path,startSb);
+                }else{
+                    if(createMk){
+                        indexInodoPadre = writeDirectory(sb,disk->path,&token[0],&dirPad[0],indexInodoPadre);
+                        writeSuperBlock(sb,disk->path,startSb);
+                    }else{
+                        return ERROR_DIR_NOT_EXIST;
+                    }
                 }
                 dirPad = token;
             }

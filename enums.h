@@ -21,7 +21,8 @@ enum Response {SUCCESS,
               ERROR_PARTITION_NOT_MOUNTED,
               ERROR_DISK_NOT_MOUNTED,
               ERROR_NOT_SPACE_ADD,
-              ERROR_PARTITION_MOUNTED_DEL};
+              ERROR_PARTITION_MOUNTED_DEL,
+              ERROR_DIR_NOT_EXIST};
 enum DeleteType {Fast,Full};
 enum statusBlock {OCUPADO,LIBRE};
 enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec};

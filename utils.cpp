@@ -126,6 +126,9 @@ void showMessageError(Response response){
     case ERROR_PARTITION_MOUNTED_DEL:
         cout<<"No se puede eliminar la partición al estar montada.\n";
         break;
+    case ERROR_DIR_NOT_EXIST:
+        cout<<"La carpeta no existe.\n";
+        break;
     default:
         break;
 
