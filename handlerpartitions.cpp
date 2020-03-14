@@ -535,6 +535,7 @@ Response mountPart(char path[], char name[]){
         return ERROR_PARTITION_NOT_EXIST;
     }
     //MODIFICAR SUPERBLOCK
+
     SuperBlock *sb =readSuperBlock(path,name);
     if(sb==NULL){
         return ERROR_UNHANDLED;

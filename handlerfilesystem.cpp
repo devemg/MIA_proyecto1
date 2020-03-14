@@ -58,8 +58,8 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     sb->s_bm_block_start = sb->s_bm_inode_start+cantInodos;
     sb->s_inode_start = sb->s_bm_block_start + cantBloques;
     sb->s_block_start = sb->s_inode_start + sizeInodos;
-    sb->s_free_blocks_count = cantBloques-1;
-    sb->s_free_inodes_count = cantInodos-1;
+    sb->s_free_blocks_count = cantBloques;
+    sb->s_free_inodes_count = cantInodos;
     writeSuperBlock(sb,path,initPart);
     //BITMAP DE INODOS
     writeBitmap(cantInodos,sb->s_bm_inode_start,path);
@@ -67,8 +67,51 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     writeBitmap(cantBloques,sb->s_bm_block_start,path);
     //CREAR CARPETA RAIZ
     writeDirectory(sb,path,"/","/",0);
+    writeSuperBlock(sb,path,initPart);
     delete disco;
     return SUCCESS;
+}
+
+Response createDirectory(bool createMk,char id[],char path[]){
+    MountedDisk *disk =getMountedDisk(id);
+    if(disk==NULL){
+        return ERROR_UNHANDLED;
+    }
+
+    MountedPart *partition =getMountedPartition(id);
+    if(partition==NULL){
+        return ERROR_UNHANDLED;
+    }
+
+    //VALIDAR QUE HAYA ESPACIO PARA CREAR INODOS Y BLOQUES
+    int startSb;
+    SuperBlock *sb = readSuperBlock(disk->path,partition->name,&startSb);
+    if(sb==NULL){
+        return ERROR_UNHANDLED;
+    }
+
+    int indexInodoPadre = 0;
+    std::stringstream ss(path);
+        std::string token;
+        std::string dirPad="/";
+        while (std::getline(ss, token, '/')) {
+            if(token!=""){
+                cout<<"padre: "<<dirPad<<endl;
+                cout<<"carpeta: "<<token<<endl;
+                if (ss.tellg() == -1) {
+                    writeDirectory(sb,disk->path,&token[0],&dirPad[0],indexInodoPadre);
+                    writeSuperBlock(sb,disk->path,startSb);
+                }
+                dirPad = token;
+            }
+        }
+return SUCCESS;
+}
+
+int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init){
+    int indexBlockDirectory = -1;
+
+    return indexBlockDirectory;
 }
 
 int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad){
@@ -90,6 +133,9 @@ int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int 
 
     writeInodo(nuevo,path,sb->s_inode_start+(indexI*sb->s_inode_size));
     writeBlockDirectory(dir,path,sb->s_block_start+(indexB*sb->s_block_size));
+    //restar un bloque y un inodo del super bloque
+    sb->s_free_blocks_count = sb->s_free_blocks_count-1;
+    sb->s_free_inodes_count = sb->s_free_inodes_count-1;
     delete nuevo;
     delete dir;
     return indexI;
@@ -170,6 +216,7 @@ void writeBlockPointer(BlockPointer *sb,char path[],int init){
      fclose (myFile);
 }
 
+
 SuperBlock* readSuperBlock(char path[], char name[]){
     MBR *disco = openMBR(path);
     if(disco==NULL){
@@ -190,6 +237,30 @@ SuperBlock* readSuperBlock(char path[], char name[]){
     SuperBlock *sb = (SuperBlock*)malloc(sizeof(SuperBlock));
 
     fseek(myFile, init, SEEK_SET);
+    fread(sb, sizeof(SuperBlock), 1, myFile);
+    fclose(myFile);
+    return sb;
+}
+
+SuperBlock* readSuperBlock(char path[], char name[],int *startSb){
+    MBR *disco = openMBR(path);
+    if(disco==NULL){
+        std::cout<<"Error al leer el disco\n";
+        return NULL;
+    }
+    Response res = getStartPartition(disco,name,startSb);
+    if(res!=SUCCESS){
+        return NULL;
+    }
+    delete disco;
+    FILE *myFile = fopen(path,"rb+");
+    if(myFile==NULL){
+        cout<<"Error al abrir el disco \n";
+        return NULL;
+    }
+    SuperBlock *sb = (SuperBlock*)malloc(sizeof(SuperBlock));
+
+    fseek(myFile, *startSb, SEEK_SET);
     fread(sb, sizeof(SuperBlock), 1, myFile);
     fclose(myFile);
     return sb;
@@ -435,7 +506,6 @@ void reportTree(char path_report[], char id[]){
     if(partition==NULL){
         return;
     }
-
     SuperBlock *sb = readSuperBlock(disk->path,partition->name);
     if(sb==NULL){
         return;

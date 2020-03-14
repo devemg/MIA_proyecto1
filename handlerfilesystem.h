@@ -25,6 +25,10 @@ void writeBitmap(int cantInodos,int init,char path[]);
 
 void writeInodo(Inodo*,char[],int);
 
+BlockDirectory* readBlockDirectory(char path[], int init);
+
+SuperBlock* readSuperBlock(char[],char[],int*);
+
 SuperBlock* readSuperBlock(char[],char[]);
 
 Inodo* readInodo(char[],int);
@@ -34,6 +38,8 @@ Inodo* getNewInodoDir();
 BlockDirectory* getNewBlockDir(char name[],int indexDir,char namepad[],int indexPad);
 
 Response addnewInodo(Inodo* nuevo,int indexI,TypeBlock tipoBloque,BlockDirectory *dir,BlockFile *file,char[],SuperBlock*,char[]);
+
+Response createDirectory(bool createMk,char id[],char path[]);
 
 int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad);
 
@@ -50,5 +56,7 @@ void graphBlockDirectory(BlockDirectory*,int initBlock,FILE *myFile,int indexIno
 void graphAllInodes(SuperBlock *sb,FILE *file_report,char path[]);
 
 void writeConnection(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
+
+int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init);
 
 #endif // HANDLERFILESISTEM_H
