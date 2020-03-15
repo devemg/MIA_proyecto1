@@ -170,20 +170,24 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                 //LEER APUNTADOR INDIRECTO
             }
         }else{
-            //CREAR UN NUEVO BLOQUE
-            BlockDirectory *nuevo = getNewBlockDir(dirblock->b_content[0].b_name,dirblock->b_content[0].b_inodo,
-                    dirblock->b_content[1].b_name,dirblock->b_content[1].b_inodo);
-            int indexB = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
-            if(indexB==-1){
-                return ERROR_UNHANDLED;
+            if(isDirect){
+                //CREAR UN NUEVO BLOQUE
+                BlockDirectory *nuevo = getNewBlockDir(dirblock->b_content[0].b_name,dirblock->b_content[0].b_inodo,
+                        dirblock->b_content[1].b_name,dirblock->b_content[1].b_inodo);
+                int indexB = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
+                if(indexB==-1){
+                    return ERROR_UNHANDLED;
+                }
+                inodo->i_block[idPointBlock] = indexB;
+                writeBlockDirectory(nuevo,path,sb->s_block_start+(indexB*sb->s_block_size));
+                writeInodo(inodo,path,sb->s_inode_start+(sb->s_inode_size*indexInodoActual));
+                //restar un bloque y un inodo del super bloque
+                sb->s_free_blocks_count = sb->s_free_blocks_count-1;
+                *indexBloqueActual = indexB;
+                *indexFree = 2;
+                found = true;
             }
-            inodo->i_block[idPointBlock] = indexB;
-            writeBlockDirectory(nuevo,path,sb->s_block_start+(indexB*sb->s_block_size));
-            writeInodo(inodo,path,sb->s_inode_start+(sb->s_inode_size*indexInodoActual));
-            //restar un bloque y un inodo del super bloque
-            sb->s_free_blocks_count = sb->s_free_blocks_count-1;
-            *indexFree = 2;
-            found = true;
+
         }
         if(idPointBlock>11){
             isDirect = false;
@@ -226,6 +230,7 @@ BlockDirectory* getNewBlockDir(char name[],int indexDir,char namepad[],int index
     BlockDirectory *block= (BlockDirectory*)malloc(sizeof(BlockDirectory));
     int i;
     for(i=0;i<4;i++){
+        clearArray(block->b_content[i].b_name,14);
         block->b_content[i].b_inodo = -1;
     }
     strcpy(block->b_content[0].b_name,name);
@@ -660,11 +665,13 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
     int i=0;
       //APUNTADORES DIRECTOS
     while(i<12){
-        fputs("<tr><td bgcolor=\"#ffd1a8\">AD1</td><td ",myFile);
+        fputs("<tr><td bgcolor=\"#ffd1a8\">AD", myFile);
+        fputs(&to_string(i+1)[0],myFile);
+        fputs("</td><td ",myFile);
 
         if(inodo->i_block[i]!=-1){
             fputs("port=\"",myFile);
-            fputs(&to_string(indexInodo*sizeof(Inodo))[0],myFile);
+            fputs(&to_string((indexInodo+inodo->i_block[i])*sizeof(Inodo))[0],myFile);
             fputs("\"",myFile);
         }
 
@@ -675,7 +682,9 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
     }
 
     while (i<16) {
-      fputs("<tr><td bgcolor=\"#a8ffdf\">AI1</td><td bgcolor=\"#a8ffdf\">",myFile);
+      fputs("<tr><td bgcolor=\"#a8ffdf\">AI", myFile);
+      fputs(&to_string(i-11)[0],myFile);
+      fputs("</td><td bgcolor=\"#a8ffdf\">",myFile);
       fputs(&to_string(inodo->i_block[i])[0],myFile);
       fputs("</td></tr>\n", myFile);
     i++;
@@ -692,7 +701,7 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
             BlockDirectory *dir = readBlockDirectory(path,pos);
             if(dir!=NULL){
                 graphBlockDirectory(dir,inodo->i_block[i],myFile,indexInodo,sb,path);
-                graphConnectionInodoBloque(indexInodo,inodo->i_block[i],indexInodo*sizeof(Inodo),myFile);
+                graphConnectionInodoBloque(indexInodo,inodo->i_block[i],(indexInodo+inodo->i_block[i])*sizeof(Inodo),myFile);
             }
         }
        i++;
@@ -735,7 +744,7 @@ void graphBlockDirectory(BlockDirectory *block,int initBlock, FILE *myFile,int i
     fputs("<table border='0' cellborder='1' cellspacing='0'>\n", myFile);
     fputs("<tr><td ",myFile);
         fputs("port=\"",myFile);
-        fputs(&to_string(indexInodo*sizeof(Inodo))[0],myFile);
+        fputs(&to_string((indexInodo+initBlock)*sizeof(Inodo))[0],myFile);
         fputs("\"",myFile);
     fputs(" colspan=\"3\">Bloque ",myFile);
     fputs(&to_string(initBlock)[0],myFile);
