@@ -33,8 +33,8 @@ int main()
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
   createDirectory(true,"vda0","/home");
-  createDirectory(true,"vda0","/bin");
-  createDirectory(true,"vda0","/usr");
+  //createDirectory(true,"vda0","/bin");
+  //createDirectory(true,"vda0","/usr");
   //showMounts();
   reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
   //cout<<"reporte generado\n";

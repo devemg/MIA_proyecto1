@@ -611,7 +611,7 @@ void reportTree(char path_report[], char id[]){
     //graphAllInodes(sb,myFile,disk->path);
     Inodo *inodo = readInodo(disk->path,sb->s_inode_start+(0*sb->s_inode_size));
     if(inodo!=NULL){
-        graphInodo(inodo,0,myFile,sb->s_block_size,sb->s_block_start,disk->path);
+        graphInodo(inodo,0,myFile,disk->path,sb);
     }
     fputs("}\n",myFile);
     //cerrando stream
@@ -621,32 +621,7 @@ void reportTree(char path_report[], char id[]){
     system(command.c_str());
 }
 
-void graphAllInodes(SuperBlock *sb,FILE *file_report,char path[]){
-    FILE * file_bitmap;
-     file_bitmap = fopen (path,"rb+");
-     if (file_bitmap==NULL)
-     {
-         cout<<"Error al abrir el disco\n";
-         return;
-     }
-     //reporte de inodos
-     char caracter;
-     int contador = 0;
-     fseek(file_bitmap, sb->s_bm_inode_start, SEEK_SET);
-     while(contador<sb->s_inodes_count){
-         fread(&caracter, sizeof(char), 1, file_bitmap);
-         if(caracter == '1'){
-             Inodo *inodo = readInodo(path,sb->s_inode_start+(contador*sb->s_inode_size));
-             if(inodo!=NULL){
-                 graphInodo(inodo,contador,file_report,sb->s_block_size,sb->s_block_start,path);
-             }
-             contador++;
-         }
-     }
-    fclose(file_bitmap);
-}
-
-void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,int sizeBlock,int initBlocks,char path[]){
+void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock *sb){
     fputs("i_",myFile);
     fputs(&to_string(indexInodo)[0],myFile);
     fputs("[ shape=plaintext label=< \n", myFile);
@@ -679,41 +654,18 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,int sizeBlock,int initB
     fputs(&to_string(inodo->i_perm)[0],myFile);
     fputs("</td></tr>\n", myFile);
     int i=0;
-
-    FILE * file_aux;
-     file_aux = fopen ("aux_blocks.txt","w+");
-     if (file_aux==NULL)
-     {
-         cout<<"Error al crear auxiliar\n";
-         return;
-     }
-
-     FILE * file_conections;
-      file_conections = fopen ("aux_conections.txt","w+");
-      if (file_conections==NULL)
-      {
-          cout<<"Error al crear auxiliar\n";
-          return;
-      }
-
       //APUNTADORES DIRECTOS
     while(i<12){
-        fputs("<tr><td bgcolor=\"#ffd1a8\">AD1</td><td port=\"",myFile);
-        fputs(&to_string(indexInodo*sizeof(Inodo))[0],myFile);
-        fputs("\" bgcolor=\"#ffd1a8\">",myFile);
-        fputs(&to_string(inodo->i_block[i])[0],myFile);
+        fputs("<tr><td bgcolor=\"#ffd1a8\">AD1</td><td ",myFile);
+
         if(inodo->i_block[i]!=-1){
-            BlockDirectory *dir = readBlockDirectory(path,initBlocks + (inodo->i_block[i]*sizeBlock));
-            if(dir!=NULL){
-                graphBlockDirectory(dir,i,file_aux,indexInodo);
-                int j;
-                for(j=0;j<4;j++){
-                    if(dir->b_content[j].b_inodo!=-1){
-                        writeConnection(dir->b_content[j].b_inodo,inodo->i_block[i],indexInodo*sizeof(Inodo),file_conections);
-                    }
-                }
-            }
+            fputs("port=\"",myFile);
+            fputs(&to_string(indexInodo*sizeof(Inodo))[0],myFile);
+            fputs("\"",myFile);
         }
+
+        fputs(" bgcolor=\"#ffd1a8\">",myFile);
+        fputs(&to_string(inodo->i_block[i])[0],myFile);
         fputs("</td></tr>\n", myFile);
         i++;
     }
@@ -727,21 +679,23 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,int sizeBlock,int initB
 
     fputs("</table>\n",myFile);
     fputs(">];\n",myFile);
-    //ESCRIBIR BLOQUES DE DIRECTORIOS
-    fseek(file_aux,0,SEEK_SET);
-    char linea[1024];
-    while(fgets(linea, 1024, (FILE*) file_aux)) {
-       fputs(linea,myFile);
+
+    //GRAFICAR BLOQUES
+    i=0;
+    while(i<12){
+        if(inodo->i_block[i]!=-1){
+            int pos = sb->s_block_start + (inodo->i_block[i]*sb->s_block_size);
+            BlockDirectory *dir = readBlockDirectory(path,pos);
+            if(dir!=NULL){
+                graphBlockDirectory(dir,inodo->i_block[i],myFile,indexInodo,sb,path);
+                graphConnectionInodoBloque(indexInodo,inodo->i_block[i],indexInodo*sizeof(Inodo),myFile);
+            }
+        }
+       i++;
     }
-    /*
-    fseek(file_conections,0,SEEK_SET);
-    while(fgets(linea, 1024, (FILE*) file_conections)) {
-       fputs(linea,myFile);
-    }*/
-    fclose(file_aux);
 }
 
-void writeConnection(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile){
+void graphConnectionInodoBloque(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile){
     fputs("i_",myFile);
     fputs(&to_string(indexnodo)[0],myFile);
     fputs(":",myFile);
@@ -755,7 +709,23 @@ void writeConnection(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile)
     fputs(";\n",myFile);
 }
 
-void graphBlockDirectory(BlockDirectory *block, int initBlock, FILE *myFile,int indexInodo){
+void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile){
+    fputs("i_",myFile);
+    fputs(&to_string(indexBloque)[0],myFile);
+    fputs(":",myFile);
+    fputs("ib",myFile);
+    fputs(&to_string(indexPuerto)[0],myFile);
+    fputs("->",myFile);
+    fputs("b_",myFile);
+    fputs(&to_string(indexnodo)[0],myFile);
+    fputs(":",myFile);
+    fputs("->",myFile);
+    fputs(&to_string(indexPuerto)[0],myFile);
+
+    fputs(";\n",myFile);
+}
+
+void graphBlockDirectory(BlockDirectory *block,int initBlock, FILE *myFile,int indexInodo,SuperBlock *sb,char path[]){
     fputs("b_",myFile);
     fputs(&to_string(initBlock)[0],myFile);
     fputs("[ shape=plaintext label=< \n", myFile);
@@ -776,9 +746,13 @@ void graphBlockDirectory(BlockDirectory *block, int initBlock, FILE *myFile,int 
 
     int i;
     for(i=0;i<4;i++){
-        fputs("<tr><td  port=\"",myFile);
-        fputs(&to_string(indexInodo*sizeof(Inodo))[0],myFile);
-        fputs("\" bgcolor=\"",myFile);
+        fputs("<tr><td ",myFile);
+        if(block->b_content[i].b_inodo!=-1){
+            fputs("port=\"",myFile);
+            fputs(&to_string(indexInodo*sizeof(Inodo))[0],myFile);
+            fputs("\"",myFile);
+        }
+        fputs(" bgcolor=\"",myFile);
         fputs(colors[i],myFile);
         fputs("\">b_name</td><td bgcolor=\"",myFile);
         fputs(colors[i],myFile);
@@ -797,4 +771,11 @@ void graphBlockDirectory(BlockDirectory *block, int initBlock, FILE *myFile,int 
 
     fputs("</table>\n",myFile);
     fputs(">];\n",myFile);
+    for(i=2;i<4;i++){
+        if(block->b_content[i].b_inodo!=-1){
+            Inodo *inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*block->b_content[i].b_inodo));
+            graphInodo(inodo,block->b_content[i].b_inodo,myFile,path,sb);
+        }
+    }
+
 }

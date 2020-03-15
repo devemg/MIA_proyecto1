@@ -49,13 +49,13 @@ Response reportBitmap(int,char[],char[],char[]);
 
 void reportSuperBlock(char[],char[],char[]);
 
-void graphInodo(Inodo*,int,FILE*,int,int,char[]);
+void graphInodo(Inodo*,int,FILE*,char[],SuperBlock*);
 
-void graphBlockDirectory(BlockDirectory*,int initBlock,FILE *myFile,int indexInodo);
+void graphBlockDirectory(BlockDirectory *block,int initBlock, FILE *myFile,int indexInodo,SuperBlock *sb,char path[]);
 
-void graphAllInodes(SuperBlock *sb,FILE *file_report,char path[]);
+void graphConnectionInodoBloque(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
 
-void writeConnection(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
+void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
 
 int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init);
 
