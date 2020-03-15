@@ -59,4 +59,6 @@ void writeConnection(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile)
 
 int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init);
 
+Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,int*);
+
 #endif // HANDLERFILESISTEM_H

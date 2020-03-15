@@ -129,6 +129,9 @@ void showMessageError(Response response){
     case ERROR_DIR_NOT_EXIST:
         cout<<"La carpeta no existe.\n";
         break;
+    case ERROR_INODO_NOT_DIR:
+        cout<<"El inodo no es de tipo carpeta\n";
+        break;
     default:
         break;
 
