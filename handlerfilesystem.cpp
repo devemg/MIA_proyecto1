@@ -1108,8 +1108,20 @@ Response reportBlocks(char path[], char name[], char path_report[]){
          return SUCCESS;
 }
 
-Response createFile(char newPath[], bool createPath, int size,char path[],char namePartition[]){
+Response createFile(char newPath[], bool createPath, char pathFile[], char path[], char namePartition[]){
+    FILE *fileText;
+    fileText = fopen(pathFile,"r+");
+    if(fileText==NULL){
+        cout<<"Error al abrir el archivo en ruta \""<<pathFile<<"\"\n";
+        return ERROR_UNHANDLED;
+    }
+    char txt[1024];
+    clearArray(txt,1024);
+    fread(txt,sizeof(char)*1024,1,fileText);
+    return createFileWithText(newPath,createPath,txt,sizeof(fileText),path,namePartition);
+}
 
+Response createFileWithText(char newPath[], bool createPath, char text[],int size, char path[], char namePartition[]){
     //VALIDAR QUE HAYA ESPACIO PARA CREAR INODOS Y BLOQUES
     int startSb;
     SuperBlock *sb = readSuperBlock(path,namePartition,&startSb);
@@ -1127,18 +1139,7 @@ Response createFile(char newPath[], bool createPath, int size,char path[],char n
                 cout<<"padre: "<<dirPad<<endl;
                 cout<<"archivo/carpeta: "<<token<<endl;
                 if (ss.tellg() == -1) {
-                    //generar texto
-                    char *txt = (char*)malloc(sizeof(char)*size);
-                    int i;
-                    char caracter = '0';
-                    for(i=0;i<size;i++){
-                        txt[i] =caracter;
-                        caracter++;
-                        if(caracter>'9'){
-                            caracter = '0';
-                        }
-                    }
-                    createChildFile(size,txt,path,&dirPad[0],&token[0],sb,indexBloqueActual,indexInodoPadre);
+                    createChildFile(size,text,path,&dirPad[0],&token[0],sb,indexBloqueActual,indexInodoPadre);
                 }else{
                     int indexBloque = findDirectory(&token[0],path,&indexInodoPadre,sb);
                     if(indexBloque!=-1){
@@ -1158,6 +1159,21 @@ Response createFile(char newPath[], bool createPath, int size,char path[],char n
             }
         }
     return SUCCESS;
+}
+
+Response createFile(char newPath[], bool createPath, int size,char path[],char namePartition[]){
+    //generar texto
+    char *txt = (char*)malloc(sizeof(char)*size);
+    int i;
+    char caracter = '0';
+    for(i=0;i<size;i++){
+        txt[i] =caracter;
+        caracter++;
+        if(caracter>'9'){
+            caracter = '0';
+        }
+    }
+    return createFileWithText(newPath,createPath,txt,size,path,namePartition);
 }
 
 int  createChildFile(int size,char *text,char path[],char dirPad[],char name[],SuperBlock *sb,int indexBloqueActual,int indexInodoPadre){
