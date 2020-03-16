@@ -957,19 +957,19 @@ Response reportInodes(char path[], char name[], char path_report[]){
                     int i=0;
                       //APUNTADORES DIRECTOS
                     while(i<12){
-                        fputs("<tr><td bgcolor=\"# FFC300 \">AD", fileReport);
+                        fputs("<tr><td bgcolor=\"#FFC300\">AD", fileReport);
                         fputs(&to_string(i+1)[0],fileReport);
                         fputs("</td><td ",fileReport);
-                        fputs(" bgcolor=\"# FFC300 \">",fileReport);
+                        fputs(" bgcolor=\"#FFC300\">",fileReport);
                         fputs(&to_string(inodo->i_block[i])[0],fileReport);
                         fputs("</td></tr>\n", fileReport);
                         i++;
                     }
 
                     while (i<16) {
-                      fputs("<tr><td bgcolor=\"# FF5733\">AI", fileReport);
+                      fputs("<tr><td bgcolor=\"#FF5733\">AI", fileReport);
                       fputs(&to_string(i-11)[0],fileReport);
-                      fputs("</td><td bgcolor=\"# FF5733\">",fileReport);
+                      fputs("</td><td bgcolor=\"#FF5733\">",fileReport);
                       fputs(&to_string(inodo->i_block[i])[0],fileReport);
                       fputs("</td></tr>\n", fileReport);
                     i++;
@@ -986,6 +986,114 @@ Response reportInodes(char path[], char name[], char path_report[]){
          fclose (myFile);
          string pathString(path_report);
          string command = "dot -Tpng report_inodes.dot -o \""+pathString+"\"";//+"/report_mbr.png";
+         system(command.c_str());
+         return SUCCESS;
+}
+
+Response reportBlocks(char path[], char name[], char path_report[]){
+    SuperBlock *sb = readSuperBlock(path,name);
+    if(sb == NULL){
+        return ERROR_UNHANDLED;
+    }
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return ERROR_UNHANDLED;
+     }
+
+     FILE * fileReport;
+      fileReport = fopen ("report_blocks.dot","w+");
+      if (fileReport==NULL)
+      {
+          cout<<"Error al crear archivo de reporte\n";
+          return ERROR_UNHANDLED;
+      }
+      fseek(fileReport, 0, SEEK_SET);
+      fputs("digraph di{\n", fileReport);
+            //reporte de inodos
+            char caracter;
+            int contador = 0;
+            Inodo *inodo;
+             fseek(myFile, sb->s_bm_inode_start, SEEK_SET);
+            while(contador<sb->s_inodes_count){
+                fread(&caracter, sizeof(char), 1, myFile);
+                if(caracter == '1'){
+                    inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size * contador));
+                    if(inodo == NULL){
+                        break;
+                    }
+                    int i;
+                    //apuntadores directos
+                    for(i=0;i<12;i++){
+                        if(inodo->i_block[i]!=-1){
+                            if(inodo->i_type == IN_DIRECTORY){
+                                BlockDirectory *block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size * inodo->i_block[i]));
+                                //******
+                                fputs("b_",fileReport);
+                                fputs(&to_string(inodo->i_block[i])[0],fileReport);
+                                fputs("[ shape=plaintext label=< \n", fileReport);
+                                fputs("<table border='0' cellborder='1' cellspacing='0'>\n", fileReport);
+                                fputs("<tr><td ",fileReport);
+                                    fputs("port=\"",fileReport);
+                                    fputs(&to_string((contador+inodo->i_block[i])*sizeof(Inodo))[0],fileReport);
+                                    fputs("\"",fileReport);
+                                fputs(" colspan=\"3\">Bloque ",fileReport);
+                                fputs(&to_string(inodo->i_block[i])[0],fileReport);
+                                fputs("</td></tr>\n", fileReport);
+
+                                char colors[4][10];
+                                clearArray(colors[0],10);
+                                strcat(colors[0],"#DAF7A6");
+                                clearArray(colors[1],10);
+                                strcat(colors[1],"#FFC300");
+                                clearArray(colors[2],10);
+                                strcat(colors[2],"#FF5733");
+                                clearArray(colors[3],10);
+                                strcat(colors[3],"#f0b27a");
+
+                                int i;
+                                for(i=0;i<4;i++){
+                                    fputs("<tr><td bgcolor=\"",fileReport);
+                                    fputs(colors[i],fileReport);
+                                    fputs("\">b_name</td><td bgcolor=\"",fileReport);
+                                    fputs(colors[i],fileReport);
+                                    fputs("\" ",fileReport);
+                                    if(block->b_content[i].b_inodo!=-1 && block->b_content[i].b_inodo!=contador){
+                                        fputs("port=\"ib",fileReport);
+                                        fputs(&to_string(block->b_content[i].b_inodo*sizeof(Inodo))[0],fileReport);
+                                        fputs("\"",fileReport);
+                                    }
+                                    fputs(">",fileReport);
+                                    fputs(block->b_content[i].b_name,fileReport);
+                                    fputs("</td></tr>\n",fileReport);
+                                    fputs("<tr><td bgcolor=\"",fileReport);
+                                    fputs(colors[i],fileReport);
+                                    fputs("\">b_inodo</td><td bgcolor=\"",fileReport);
+                                    fputs(colors[i],fileReport);
+                                    fputs("\">",fileReport);
+                                    fputs(&to_string(block->b_content[i].b_inodo)[0],fileReport);
+                                    fputs("</td></tr>\n",fileReport);
+                                }
+
+                                fputs("</table>\n",fileReport);
+                                fputs(">];\n",fileReport);
+                                //******
+                            }else if(inodo->i_type == IN_FILE){
+
+                            }
+                        }
+                    }
+                    //apuntadores indirectos
+                }
+                contador++;
+            }
+         fputs("}\n",fileReport);
+         fclose (fileReport);
+         fclose (myFile);
+         string pathString(path_report);
+         string command = "dot -Tpng report_blocks.dot -o \""+pathString+"\"";//+"/report_mbr.png";
          system(command.c_str());
          return SUCCESS;
 }

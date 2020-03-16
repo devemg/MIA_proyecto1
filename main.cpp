@@ -50,7 +50,8 @@ int main()
 
 
   //showMounts();
-  reportInodes("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/inodos.png");
+  reportBlocks("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/blocks.png");
+  //reportInodes("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/inodos.png");
   //reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
   //cout<<"reporte generado\n";
   //myPause();

@@ -81,4 +81,6 @@ int createChildFile(int size,char *text,char path[],SuperBlock *sb);
 
 Response reportInodes(char path[], char name[], char path_report[]);
 
+Response reportBlocks(char path[], char name[], char path_report[]);
+
 #endif // HANDLERFILESISTEM_H
