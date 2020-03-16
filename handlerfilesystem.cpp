@@ -1036,9 +1036,6 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                                 fputs("[ shape=plaintext label=< \n", fileReport);
                                 fputs("<table border='0' cellborder='1' cellspacing='0'>\n", fileReport);
                                 fputs("<tr><td ",fileReport);
-                                    fputs("port=\"",fileReport);
-                                    fputs(&to_string((contador+inodo->i_block[i])*sizeof(Inodo))[0],fileReport);
-                                    fputs("\"",fileReport);
                                 fputs(" colspan=\"3\">Bloque ",fileReport);
                                 fputs(&to_string(inodo->i_block[i])[0],fileReport);
                                 fputs("</td></tr>\n", fileReport);
@@ -1051,7 +1048,7 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                                 clearArray(colors[2],10);
                                 strcat(colors[2],"#FF5733");
                                 clearArray(colors[3],10);
-                                strcat(colors[3],"#f0b27a");
+                                strcat(colors[3],"#48c9b0");
 
                                 int i;
                                 for(i=0;i<4;i++){
@@ -1081,7 +1078,20 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                                 fputs(">];\n",fileReport);
                                 //******
                             }else if(inodo->i_type == IN_FILE){
-
+                                BlockFile *block = readBlockFile(path,sb->s_block_start+(sb->s_block_size * inodo->i_block[i]));
+                                fputs("b_",fileReport);
+                                fputs(&to_string(inodo->i_block[i])[0],fileReport);
+                                fputs("[ shape=plaintext label=< \n", fileReport);
+                                fputs("<table border='0' cellborder='1' cellspacing='0'>\n", fileReport);
+                                fputs("<tr><td ",fileReport);
+                                fputs(" colspan=\"3\">Bloque ",fileReport);
+                                fputs(&to_string(contador)[0],fileReport);
+                                fputs("</td></tr>\n", fileReport);
+                                fputs("<tr><td bgcolor = \"#FFA07A\">",fileReport);
+                                fputs(block->b_content,fileReport);
+                                fputs("</td></tr>\n",fileReport);
+                                fputs("</table>\n",fileReport);
+                                fputs(">];\n",fileReport);
                             }
                         }
                     }
