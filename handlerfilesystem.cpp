@@ -101,19 +101,7 @@ Response createDirectory(bool createMk,char id[],char path[]){
                 cout<<"padre: "<<dirPad<<endl;
                 cout<<"carpeta: "<<token<<endl;
                 if (ss.tellg() == -1) {
-
-                    Response res = getFreeIndexDirectory(&dirPad[0],disk->path,sb,&indexBloqueActual,&indexFree);
-                    if(res!=SUCCESS){
-                        return res;
-                    }
-
-                    int indexNew = writeDirectory(sb,disk->path,&token[0],&dirPad[0],indexInodoPadre);
-                    writeSuperBlock(sb,disk->path,startSb);
-                    BlockDirectory *block = readBlockDirectory(disk->path,sb->s_block_start+(sb->s_block_size*indexBloqueActual));
-                    block->b_content[indexFree].b_inodo = indexNew;
-                    strcpy(block->b_content[indexFree].b_name,token.c_str());
-                    writeBlockDirectory(block,disk->path,sb->s_block_start+(sb->s_block_size*indexBloqueActual));
-
+                    return createChildDirectory(&dirPad[0],&token[0],disk->path,sb,startSb,&indexInodoPadre,&indexBloqueActual);
                 }else{
                     if(createMk){
                         /*
@@ -135,6 +123,22 @@ Response createDirectory(bool createMk,char id[],char path[]){
             }
         }
 return SUCCESS;
+}
+
+Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int startSb,int *indexInodoPadre,int *indexBloqueActual){
+    int indexFree = -1;
+    Response res = getFreeIndexDirectory(dirPad,path,sb,indexBloqueActual,&indexFree);
+    if(res!=SUCCESS){
+        return res;
+    }
+
+    int indexNew = writeDirectory(sb,path,dirName,dirPad,*indexInodoPadre);
+    writeSuperBlock(sb,path,startSb);
+    BlockDirectory *block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*(*indexBloqueActual)));
+    block->b_content[indexFree].b_inodo = indexNew;
+    strcpy(block->b_content[indexFree].b_name,dirName);
+    writeBlockDirectory(block,path,sb->s_block_start+(sb->s_block_size*(*indexBloqueActual)));
+    return SUCCESS;
 }
 
 Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *indexBloqueActual,int *indexFree){

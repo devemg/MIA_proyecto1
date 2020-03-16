@@ -61,4 +61,6 @@ int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path
 
 Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,int*);
 
+Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int startSb,int *indexInodoPadre,int *indexBloqueActual);
+
 #endif // HANDLERFILESISTEM_H
