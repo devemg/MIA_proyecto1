@@ -69,7 +69,8 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     writeDirectory(sb,path,"/","/",0);
     writeSuperBlock(sb,path,initPart);
     //CREAR ARCHIVO DE USERS
-    //createFile("users.txt",true,15,path,partition);
+    char *users = "1,G,root,\n1,U,root,root,123\n";
+    createFileWithText("/users.txt",true,users,28,path,partition);
     delete disco;
     return SUCCESS;
 }

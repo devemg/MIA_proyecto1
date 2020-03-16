@@ -39,7 +39,7 @@ int main()
   createDirectory(true,"vda0","/home/roberto/fotos");
   */
   //createFile("/home/file.txt",true,65,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
-  createFile("/home/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //createFile("/home/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
 
   /*
