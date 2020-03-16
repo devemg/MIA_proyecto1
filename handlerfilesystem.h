@@ -59,7 +59,7 @@ void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FI
 
 int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init);
 
-Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,int*);
+Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,int*,int*);
 
 Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int startSb,int *indexInodoPadre,int *indexBloqueActual);
 

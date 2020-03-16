@@ -127,11 +127,10 @@ return SUCCESS;
 
 Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int startSb,int *indexInodoPadre,int *indexBloqueActual){
     int indexFree = -1;
-    Response res = getFreeIndexDirectory(dirPad,path,sb,indexBloqueActual,&indexFree);
+    Response res = getFreeIndexDirectory(dirPad,path,sb,indexBloqueActual,indexBloqueActual,&indexFree);
     if(res!=SUCCESS){
         return res;
     }
-
     int indexNew = writeDirectory(sb,path,dirName,dirPad,*indexInodoPadre);
     writeSuperBlock(sb,path,startSb);
     BlockDirectory *block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*(*indexBloqueActual)));
@@ -141,10 +140,9 @@ Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBloc
     return SUCCESS;
 }
 
-Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *indexBloqueActual,int *indexFree){
-    int indexInodoActual = 0;
+Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *indexBloqueActual,int *indexInodoActual,int *indexFree){
     Inodo *inodo = NULL;
-    inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*indexInodoActual));
+    inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
     if(inodo==NULL){
         return ERROR_DIR_NOT_EXIST;
     }
@@ -184,7 +182,7 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                 }
                 inodo->i_block[idPointBlock] = indexB;
                 writeBlockDirectory(nuevo,path,sb->s_block_start+(indexB*sb->s_block_size));
-                writeInodo(inodo,path,sb->s_inode_start+(sb->s_inode_size*indexInodoActual));
+                writeInodo(inodo,path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
                 //restar un bloque y un inodo del super bloque
                 sb->s_free_blocks_count = sb->s_free_blocks_count-1;
                 *indexBloqueActual = indexB;
