@@ -1192,6 +1192,7 @@ int  createChildFile(int size,char *text,char path[],char dirPad[],char name[],S
     //BLOQUE DE ARCHIVO
     BlockFile *block = getNewBlockFile();
     int indexBloque = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
+    sb->s_blocks_count--;
     if(indexBloque==-1){
         return -1;
     }
@@ -1208,6 +1209,7 @@ int  createChildFile(int size,char *text,char path[],char dirPad[],char name[],S
             indexofInodo++;
             writeBlockFile(block,path,sb->s_block_start+(indexBloque*sb->s_block_size));
             indexBloque = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
+            sb->s_blocks_count--;
             block = getNewBlockFile();
             contadorCaracteres = 0;
         }
