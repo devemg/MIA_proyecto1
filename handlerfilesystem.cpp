@@ -69,7 +69,7 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     writeDirectory(sb,path,"/","/",0);
     writeSuperBlock(sb,path,initPart);
     //CREAR ARCHIVO DE USERS
-    createFile("users.txt",true,15,path,partition);
+    //createFile("users.txt",true,15,path,partition);
     delete disco;
     return SUCCESS;
 }
@@ -886,6 +886,108 @@ void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo)
     fputs("</td></tr>\n",myFile);
     fputs("</table>\n",myFile);
     fputs(">];\n",myFile);
+}
+
+Response reportInodes(char path[], char name[], char path_report[]){
+    SuperBlock *sb = readSuperBlock(path,name);
+    if(sb == NULL){
+        return ERROR_UNHANDLED;
+    }
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return ERROR_UNHANDLED;
+     }
+
+     FILE * fileReport;
+      fileReport = fopen ("report_inodes.dot","w+");
+      if (fileReport==NULL)
+      {
+          cout<<"Error al crear archivo de reporte\n";
+          return ERROR_UNHANDLED;
+      }
+      fseek(fileReport, 0, SEEK_SET);
+      fputs("digraph {\n", fileReport);
+            //reporte de inodos
+            char caracter;
+            int contador = 0;
+            Inodo *inodo;
+             fseek(myFile, sb->s_bm_inode_start, SEEK_SET);
+            while(contador<sb->s_inodes_count){
+                fread(&caracter, sizeof(char), 1, myFile);
+                //******
+                if(caracter == '1'){
+                    inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size * contador));
+                    if(inodo == NULL){
+                        break;
+                    }
+                    fputs("i_",fileReport);
+                    fputs(&to_string(contador)[0],fileReport);
+                    fputs("[ shape=plaintext label=< \n", fileReport);
+                    fputs("<table border=\"1\" cellborder = \"0\" cellspacing='0'>\n", fileReport);
+                    fputs("<tr><td colspan=\"3\">Inodo ",fileReport);
+                    fputs(&to_string(contador)[0],fileReport);
+                    fputs("</td></tr>\n", fileReport);
+                    fputs("<tr><td bgcolor=\"#DAF7A6\">i_uid</td><td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(&to_string(inodo->i_uid)[0],fileReport);
+                    fputs("</td></tr>\n", fileReport);
+                    fputs("<tr><td bgcolor=\"#DAF7A6\">i_gid</td><td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(&to_string(inodo->i_gid)[0],fileReport);
+                    fputs("</td></tr>\n", fileReport);
+                    fputs("<tr><td bgcolor=\"#DAF7A6\">i_size</td><td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(&to_string(inodo->i_size)[0],fileReport);
+                    fputs("</td></tr>\n", fileReport);
+                    fputs("<tr><td bgcolor=\"#DAF7A6\">i_atime</td><td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(inodo->i_atime,fileReport);
+                    fputs("</td></tr>\n", fileReport);
+                    fputs("<tr><td bgcolor=\"#DAF7A6\">i_ctime</td><td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(inodo->i_ctime,fileReport);
+                    fputs("</td></tr>\n", fileReport);
+                    fputs("<tr><td bgcolor=\"#DAF7A6\">i_mtime</td><td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(inodo->i_mtime,fileReport);
+                    fputs("</td></tr>\n", fileReport);
+                    fputs("<tr><td bgcolor=\"#DAF7A6\">i_type</td><td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(&to_string(inodo->i_type)[0],fileReport);
+                    fputs("</td></tr>\n", fileReport);
+                    fputs("<tr><td bgcolor=\"#DAF7A6\">i_perm</td><td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(&to_string(inodo->i_perm)[0],fileReport);
+                    fputs("</td></tr>\n", fileReport);
+                    int i=0;
+                      //APUNTADORES DIRECTOS
+                    while(i<12){
+                        fputs("<tr><td bgcolor=\"# FFC300 \">AD", fileReport);
+                        fputs(&to_string(i+1)[0],fileReport);
+                        fputs("</td><td ",fileReport);
+                        fputs(" bgcolor=\"# FFC300 \">",fileReport);
+                        fputs(&to_string(inodo->i_block[i])[0],fileReport);
+                        fputs("</td></tr>\n", fileReport);
+                        i++;
+                    }
+
+                    while (i<16) {
+                      fputs("<tr><td bgcolor=\"# FF5733\">AI", fileReport);
+                      fputs(&to_string(i-11)[0],fileReport);
+                      fputs("</td><td bgcolor=\"# FF5733\">",fileReport);
+                      fputs(&to_string(inodo->i_block[i])[0],fileReport);
+                      fputs("</td></tr>\n", fileReport);
+                    i++;
+                    }
+
+                    fputs("</table>\n",fileReport);
+                    fputs(">];\n",fileReport);
+                }
+                //******
+                contador++;
+            }
+         fputs("}\n",fileReport);
+         fclose (fileReport);
+         fclose (myFile);
+         string pathString(path_report);
+         string command = "dot -Tpng report_inodes.dot -o \""+pathString+"\"";//+"/report_mbr.png";
+         system(command.c_str());
+         return SUCCESS;
 }
 
 Response createFile(char newPath[], bool createPath, int size,char path[],char namePartition[]){

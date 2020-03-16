@@ -40,20 +40,21 @@ int main()
   */
   //createFile("/home/file.txt",true,15,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
-  /*createDirectory(true,"vda0","/bin");
+  createDirectory(true,"vda0","/bin");
   createDirectory(true,"vda0","/usr");
   createDirectory(true,"vda0","/a");
   createDirectory(true,"vda0","/b");
   createDirectory(true,"vda0","/c");
   createDirectory(true,"vda0","/d");
   createDirectory(true,"vda0","/e");
-  */
+
 
   //showMounts();
-  reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
+  reportInodes("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/inodos.png");
+  //reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
   //cout<<"reporte generado\n";
   //myPause();
-  reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");
+  //reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");
   //reportBitmap(0,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmapRep1.txt");
   //reportBitmap(1,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmapRep2.txt");
 
