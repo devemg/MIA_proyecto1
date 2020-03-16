@@ -77,7 +77,7 @@ Response createFile(char newPath[],bool createPath,int size,char path[],char nam
 
 Response createFile(char newPath[],bool createPath,char pathFile[],char path[],char namePartition[]);
 
-int createChildFile(int size,char *text,char path[],SuperBlock *sb);
+int createChildFile(int size,char *text,char path[],char dirPad[],char name[],SuperBlock *sb,int indexBloqueActual,int indexInodoPadre);
 
 Response reportInodes(char path[], char name[], char path_report[]);
 
