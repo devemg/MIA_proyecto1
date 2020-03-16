@@ -135,20 +135,22 @@ int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *s
     BlockDirectory *block;
     for(indexBlock = 0;indexBlock<12;indexBlock++){
         if(inodo->i_block[indexBlock]!=-1){
-            block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*inodo->i_block[indexBlock]));
-            if(block == NULL){
-                return -1;
-            }
-            int i;
-            for(i=2;i<4;i++){
-                if(block->b_content[i].b_inodo!=-1){
-                    if(strcmp(block->b_content[i].b_name,namedir)==0){
-                        *indexInodoActual = block->b_content[i].b_inodo;
-                        inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
-                        if(inodo==NULL){
-                            return -1;
+            if(inodo->i_type == IN_DIRECTORY){
+                block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*inodo->i_block[indexBlock]));
+                if(block == NULL){
+                    return -1;
+                }
+                int i;
+                for(i=2;i<4;i++){
+                    if(block->b_content[i].b_inodo!=-1){
+                        if(strcmp(block->b_content[i].b_name,namedir)==0){
+                            *indexInodoActual = block->b_content[i].b_inodo;
+                            inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
+                            if(inodo==NULL){
+                                return -1;
+                            }
+                            return inodo->i_block[0];
                         }
-                        return inodo->i_block[0];
                     }
                 }
             }
@@ -1137,8 +1139,8 @@ Response createFileWithText(char newPath[], bool createPath, char text[],int siz
         int indexBloqueActual = 0;
         while (std::getline(ss, token, '/')) {
             if(token!=""){
-                cout<<"padre: "<<dirPad<<endl;
-                cout<<"archivo/carpeta: "<<token<<endl;
+                //cout<<"padre: "<<dirPad<<endl;
+                //cout<<"archivo/carpeta: "<<token<<endl;
                 if (ss.tellg() == -1) {
                     createChildFile(size,text,path,&dirPad[0],&token[0],sb,indexBloqueActual,indexInodoPadre);
                 }else{
