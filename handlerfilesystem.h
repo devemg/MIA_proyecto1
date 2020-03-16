@@ -63,4 +63,6 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,in
 
 Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int startSb,int *indexInodoPadre,int *indexBloqueActual);
 
+int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *sb);
+
 #endif // HANDLERFILESISTEM_H

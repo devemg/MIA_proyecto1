@@ -32,14 +32,19 @@ int main()
   createPartition(30,MB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion_1");
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
-  createDirectory(true,"vda0","/home");
-  createDirectory(true,"vda0","/bin");
+  //createDirectory(true,"vda0","/home");
+  createDirectory(true,"vda0","/home/emely");
+  createDirectory(true,"vda0","/home/emely/fotos");
+  createDirectory(true,"vda0","/home/flaca/fotos");
+  createDirectory(true,"vda0","/home/roberto/fotos");
+  /*createDirectory(true,"vda0","/bin");
   createDirectory(true,"vda0","/usr");
   createDirectory(true,"vda0","/a");
   createDirectory(true,"vda0","/b");
   createDirectory(true,"vda0","/c");
   createDirectory(true,"vda0","/d");
   createDirectory(true,"vda0","/e");
+  */
 
   //showMounts();
   reportTree("/home/emely/Escritorio/testData/tree.png","vda0");

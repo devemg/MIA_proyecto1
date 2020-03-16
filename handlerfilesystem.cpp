@@ -92,7 +92,6 @@ Response createDirectory(bool createMk,char id[],char path[]){
 
     int indexInodoPadre = 0;
     int indexBloqueActual = 0;
-    int indexFree = -1;
     std::stringstream ss(path);
         std::string token;
         std::string dirPad="/";
@@ -103,21 +102,20 @@ Response createDirectory(bool createMk,char id[],char path[]){
                 if (ss.tellg() == -1) {
                     return createChildDirectory(&dirPad[0],&token[0],disk->path,sb,startSb,&indexInodoPadre,&indexBloqueActual);
                 }else{
-                    if(createMk){
-                        /*
-                        Response res = getFreeIndexDirectory(&dirPad[0],disk->path,sb,&indexBloqueActual,&indexFree);
-                        if(res!=SUCCESS){
-                            return res;
-                        }
-                        int indexNew = writeDirectory(sb,disk->path,&token[0],&dirPad[0],indexInodoPadre);
-                        writeSuperBlock(sb,disk->path,startSb);
-                        BlockDirectory *block = readBlockDirectory(disk->path,sb->s_block_start+(sb->s_block_size*indexBloqueActual));
-                        block->b_content[indexFree].b_inodo = indexNew;
-                        strcmp(block->b_content[indexFree].b_name,&token[0]);
-                        */
+                    int indexBloque = findDirectory(&token[0],disk->path,&indexInodoPadre,sb);
+                    if(indexBloque!=-1){
+                        indexBloqueActual = indexBloque;
                     }else{
-                        return ERROR_DIR_NOT_EXIST;
+                        if(createMk){
+                            Response res = createChildDirectory(&dirPad[0],&token[0],disk->path,sb,startSb,&indexInodoPadre,&indexBloqueActual);;
+                            if(res!=SUCCESS){
+                                return res;
+                            }
+                        }else{
+                            return ERROR_DIR_NOT_EXIST;
+                        }
                     }
+
                 }
                 dirPad = token;
             }
@@ -125,18 +123,53 @@ Response createDirectory(bool createMk,char id[],char path[]){
 return SUCCESS;
 }
 
+int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *sb){
+    Inodo *inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
+    if(inodo==NULL){
+        return -1;
+    }
+    int indexBlock;
+    BlockDirectory *block;
+    for(indexBlock = 0;indexBlock<12;indexBlock++){
+        if(inodo->i_block[indexBlock]!=-1){
+            block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*inodo->i_block[indexBlock]));
+            if(block == NULL){
+                return -1;
+            }
+            int i;
+            for(i=2;i<4;i++){
+                if(block->b_content[i].b_inodo!=-1){
+                    if(strcmp(block->b_content[i].b_name,namedir)==0){
+                        *indexInodoActual = block->b_content[i].b_inodo;
+                        inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
+                        if(inodo==NULL){
+                            return -1;
+                        }
+                        return inodo->i_block[0];
+                    }
+                }
+            }
+        }
+    }
+    //buscar en simble
+    //buscar en doble
+    //buscar en triple
+    return -1;
+}
+
 Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int startSb,int *indexInodoPadre,int *indexBloqueActual){
     int indexFree = -1;
-    Response res = getFreeIndexDirectory(dirPad,path,sb,indexBloqueActual,indexBloqueActual,&indexFree);
+    Response res = getFreeIndexDirectory(dirPad,path,sb,indexBloqueActual,indexInodoPadre,&indexFree);
     if(res!=SUCCESS){
         return res;
     }
-    int indexNew = writeDirectory(sb,path,dirName,dirPad,*indexInodoPadre);
+    int indexnew = writeDirectory(sb,path,dirName,dirPad,*indexInodoPadre);
     writeSuperBlock(sb,path,startSb);
     BlockDirectory *block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*(*indexBloqueActual)));
-    block->b_content[indexFree].b_inodo = indexNew;
+    block->b_content[indexFree].b_inodo = indexnew;
     strcpy(block->b_content[indexFree].b_name,dirName);
     writeBlockDirectory(block,path,sb->s_block_start+(sb->s_block_size*(*indexBloqueActual)));
+    *indexInodoPadre = indexnew;
     return SUCCESS;
 }
 
