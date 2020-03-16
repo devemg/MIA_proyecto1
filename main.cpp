@@ -38,8 +38,8 @@ int main()
   createDirectory(true,"vda0","/home/flaca/fotos");
   createDirectory(true,"vda0","/home/roberto/fotos");
   */
-  createFile("/home/file.txt",true,15,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
-  createFile("/home/file2.txt",true,30,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  createFile("/home/file.txt",true,65,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //createFile("/home/file2.txt",true,30,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
   //createFile("/home/file3.txt",true,30,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 /*
   createDirectory(true,"vda0","/bin");

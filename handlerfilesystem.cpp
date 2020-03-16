@@ -1182,8 +1182,6 @@ int  createChildFile(int size,char *text,char path[],char dirPad[],char name[],S
     int contadorCaracteres = 0;
     int indexCaracteres = 0;
     while(indexCaracteres<size){
-        block->b_content[contadorCaracteres] = text[indexCaracteres];
-
         if(contadorCaracteres>=64){
             if(indexofInodo<12){
                 inodo->i_block[indexofInodo] = indexInodo;
@@ -1196,12 +1194,14 @@ int  createChildFile(int size,char *text,char path[],char dirPad[],char name[],S
             block = getNewBlockFile();
             contadorCaracteres = 0;
         }
+
+        block->b_content[contadorCaracteres] = text[indexCaracteres];
         contadorCaracteres++;
         indexCaracteres++;
     }
     if(contadorCaracteres>0){
         if(indexofInodo<12){
-            inodo->i_block[indexofInodo] = indexInodo;
+            inodo->i_block[indexofInodo] = indexBloque;
         }else{
             //apuntadores indirectos
         }
