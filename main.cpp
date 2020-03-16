@@ -32,13 +32,13 @@ int main()
   createPartition(30,MB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion_1");
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
-  createDirectory(true,"vda0","/home");
+  //createDirectory(true,"vda0","/home");
  /* createDirectory(true,"vda0","/home/emely");
   createDirectory(true,"vda0","/home/emely/fotos");
   createDirectory(true,"vda0","/home/flaca/fotos");
   createDirectory(true,"vda0","/home/roberto/fotos");
   */
-  createFile("/home/file.txt",true,15,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //createFile("/home/file.txt",true,15,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
   /*createDirectory(true,"vda0","/bin");
   createDirectory(true,"vda0","/usr");

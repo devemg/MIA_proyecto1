@@ -33,7 +33,11 @@ SuperBlock* readSuperBlock(char[],char[]);
 
 Inodo* readInodo(char[],int);
 
-Inodo* getNewInodo(TypeInodo type,int permisos,int size);
+BlockPointer* readBlockPointer(char path[], int init);
+
+BlockFile* readBlockFile(char path[], int init);
+
+Inodo* getNewInodo(TypeInode type,int permisos,int size);
 
 BlockDirectory* getNewBlockDir(char name[],int indexDir,char namepad[],int indexPad);
 
@@ -58,6 +62,8 @@ void graphBlockDirectory(BlockDirectory *block,int initBlock, FILE *myFile,int i
 void graphConnectionInodoBloque(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
 
 void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
+
+void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo);
 
 int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init);
 

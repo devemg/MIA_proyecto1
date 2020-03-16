@@ -68,6 +68,8 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     //CREAR CARPETA RAIZ
     writeDirectory(sb,path,"/","/",0);
     writeSuperBlock(sb,path,initPart);
+    //CREAR ARCHIVO DE USERS
+    createFile("users.txt",true,15,path,partition);
     delete disco;
     return SUCCESS;
 }
@@ -240,7 +242,7 @@ int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int 
     if(indexI == -1){
        return ERROR_UNHANDLED;
     }
-    Inodo *nuevo = getNewInodo(Dir,777,-1);
+    Inodo *nuevo = getNewInodo(IN_DIRECTORY,777,-1);
     //BLOQUE DE CARPETA NUEVA
     BlockDirectory *dir = getNewBlockDir(nameDir,indexI,namePad,indexPad);
     int indexB = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
@@ -532,7 +534,7 @@ void reportSuperBlock(char path[], char name[], char path_report[]){
          system(command.c_str());
 }
 
-Inodo* getNewInodo(TypeInodo type,int permisos,int size){
+Inodo* getNewInodo(TypeInode type,int permisos,int size){
 Inodo *nuevo = (Inodo*)malloc(sizeof(Inodo));
 nuevo->i_uid=1;
 nuevo->i_gid=1;
@@ -610,6 +612,34 @@ BlockDirectory* readBlockDirectory(char path[], int init){
             bd->b_content[i].b_inodo=-1;
         }
     }
+    return bd;
+}
+
+BlockFile* readBlockFile(char path[], int init){
+    FILE *myFile = fopen(path,"rb+");
+    if(myFile==NULL){
+        cout<<"Error al abrir el disco \n";
+        return NULL;
+    }
+    BlockFile *bd = (BlockFile*)malloc(sizeof(BlockFile));
+
+    fseek(myFile, init, SEEK_SET);
+    fread(bd, sizeof(BlockFile), 1, myFile);
+    fclose(myFile);
+    return bd;
+}
+
+BlockPointer* readBlockPointer(char path[], int init){
+    FILE *myFile = fopen(path,"rb+");
+    if(myFile==NULL){
+        cout<<"Error al abrir el disco \n";
+        return NULL;
+    }
+    BlockPointer *bd = (BlockPointer*)malloc(sizeof(BlockPointer));
+
+    fseek(myFile, init, SEEK_SET);
+    fread(bd, sizeof(BlockPointer), 1, myFile);
+    fclose(myFile);
     return bd;
 }
 
@@ -733,11 +763,18 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
     while(i<12){
         if(inodo->i_block[i]!=-1){
             int pos = sb->s_block_start + (inodo->i_block[i]*sb->s_block_size);
-            BlockDirectory *dir = readBlockDirectory(path,pos);
-            if(dir!=NULL){
-                graphBlockDirectory(dir,inodo->i_block[i],myFile,indexInodo,sb,path);
-                graphConnectionInodoBloque(indexInodo,inodo->i_block[i],(indexInodo+inodo->i_block[i])*sizeof(Inodo),myFile);
-            }
+                if(inodo->i_type == IN_DIRECTORY){
+                    BlockDirectory *dir = readBlockDirectory(path,pos);
+                    if(dir!=NULL){
+                        graphBlockDirectory(dir,inodo->i_block[i],myFile,indexInodo,sb,path);
+                    }
+                }else if(inodo->i_type == IN_FILE){
+                    BlockFile *dir = readBlockFile(path,pos);
+                    if(dir!=NULL){
+                        graphBlockFile(dir,inodo->i_block[i],myFile,indexInodo);
+                    }
+                }
+             graphConnectionInodoBloque(indexInodo,inodo->i_block[i],(indexInodo+inodo->i_block[i])*sizeof(Inodo),myFile);
         }
        i++;
     }
@@ -832,6 +869,25 @@ void graphBlockDirectory(BlockDirectory *block,int initBlock, FILE *myFile,int i
 
 }
 
+void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo){
+    fputs("b_",myFile);
+    fputs(&to_string(initBlock)[0],myFile);
+    fputs("[ shape=plaintext label=< \n", myFile);
+    fputs("<table border='0' cellborder='1' cellspacing='0'>\n", myFile);
+    fputs("<tr><td ",myFile);
+        fputs("port=\"",myFile);
+        fputs(&to_string((indexInodo+initBlock)*sizeof(Inodo))[0],myFile);
+        fputs("\"",myFile);
+    fputs(" colspan=\"3\">Bloque ",myFile);
+    fputs(&to_string(initBlock)[0],myFile);
+    fputs("</td></tr>\n", myFile);
+    fputs("<tr><td>",myFile);
+    fputs("CONTENIDO",myFile);
+    fputs("</td></tr>\n",myFile);
+    fputs("</table>\n",myFile);
+    fputs(">];\n",myFile);
+}
+
 Response createFile(char newPath[], bool createPath, int size,char path[],char namePartition[]){
 
     //VALIDAR QUE HAYA ESPACIO PARA CREAR INODOS Y BLOQUES
@@ -845,6 +901,7 @@ Response createFile(char newPath[], bool createPath, int size,char path[],char n
     std::stringstream ss(newPath);
         std::string token;
         std::string dirPad="/";
+        int indexBloqueActual = 0;
         while (std::getline(ss, token, '/')) {
             if(token!=""){
                 cout<<"padre: "<<dirPad<<endl;
@@ -865,6 +922,19 @@ Response createFile(char newPath[], bool createPath, int size,char path[],char n
                     if(indexInodo == -1){
                         return ERROR_DIR_NOT_EXIST;
                     }
+                    int indexFree = -1;
+                    Response res = getFreeIndexDirectory(&dirPad[0],path,sb,&indexBloqueActual,&indexInodoPadre,&indexFree);
+                    if(res!=SUCCESS){
+                        return res;
+                    }
+                    BlockDirectory *blockAc = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size+indexBloqueActual));
+                    if(blockAc == NULL){
+                        return ERROR_DIR_NOT_EXIST;
+                    }
+                    blockAc->b_content[indexFree].b_inodo = indexInodo;
+                    strcmp(blockAc->b_content[indexFree].b_name,&token[0]);
+                    writeBlockDirectory(blockAc,path,sb->s_block_start+(sb->s_block_size+indexBloqueActual));
+                    writeSuperBlock(sb,path,startSb);
                 }else{
                     /*
                     int indexBloque = findDirectory(&token[0],disk->path,&indexInodoPadre,sb);
@@ -884,7 +954,7 @@ Response createFile(char newPath[], bool createPath, int size,char path[],char n
                 dirPad = token;
             }
         }
-return SUCCESS;
+    return SUCCESS;
 }
 
 int  createChildFile(int size,char *text,char path[],SuperBlock *sb){
@@ -892,7 +962,7 @@ int  createChildFile(int size,char *text,char path[],SuperBlock *sb){
     if(indexInodo == -1){
        return -1;
     }
-    Inodo *inodo = getNewInodo(File,664,size);
+    Inodo *inodo = getNewInodo(IN_FILE,664,size);
     //BLOQUE DE ARCHIVO
     BlockFile *block = getNewBlockFile();
     int indexBloque = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
@@ -906,7 +976,11 @@ int  createChildFile(int size,char *text,char path[],SuperBlock *sb){
         block->b_content[contadorCaracteres] = text[indexCaracteres];
 
         if(contadorCaracteres>=64){
-            inodo->i_block[indexofInodo] = indexInodo;
+            if(indexofInodo<12){
+                inodo->i_block[indexofInodo] = indexInodo;
+            }else{
+                //apuntadores indirectos
+            }
             indexofInodo++;
             writeBlockFile(block,path,sb->s_block_start+(indexBloque*sb->s_block_size));
             indexBloque = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
@@ -917,8 +991,11 @@ int  createChildFile(int size,char *text,char path[],SuperBlock *sb){
         indexCaracteres++;
     }
     if(contadorCaracteres>0){
-        inodo->i_block[indexofInodo] = indexInodo;
-        indexofInodo++;
+        if(indexofInodo<12){
+            inodo->i_block[indexofInodo] = indexInodo;
+        }else{
+            //apuntadores indirectos
+        }
     }
 
     writeInodo(inodo,path,sb->s_inode_start+(indexInodo*sb->s_inode_size));

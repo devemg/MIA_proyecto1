@@ -134,7 +134,7 @@ struct Inodo{
     char i_ctime[16];
     char i_mtime[16];
     int i_block[16];
-    TypeInodo i_type;
+    TypeInode i_type;
     int i_perm;
 };
 
