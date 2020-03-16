@@ -97,8 +97,8 @@ Response createDirectory(bool createMk,char id[],char path[]){
         std::string dirPad="/";
         while (std::getline(ss, token, '/')) {
             if(token!=""){
-                cout<<"padre: "<<dirPad<<endl;
-                cout<<"carpeta: "<<token<<endl;
+                //cout<<"padre: "<<dirPad<<endl;
+                //cout<<"carpeta: "<<token<<endl;
                 if (ss.tellg() == -1) {
                     return createChildDirectory(&dirPad[0],&token[0],disk->path,sb,startSb,&indexInodoPadre,&indexBloqueActual);
                 }else{
@@ -240,7 +240,7 @@ int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int 
     if(indexI == -1){
        return ERROR_UNHANDLED;
     }
-    Inodo *nuevo = getNewInodoDir();
+    Inodo *nuevo = getNewInodo(Dir,777,-1);
     //BLOQUE DE CARPETA NUEVA
     BlockDirectory *dir = getNewBlockDir(nameDir,indexI,namePad,indexPad);
     int indexB = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
@@ -532,11 +532,11 @@ void reportSuperBlock(char path[], char name[], char path_report[]){
          system(command.c_str());
 }
 
-Inodo* getNewInodoDir(){
+Inodo* getNewInodo(TypeInodo type,int permisos,int size){
 Inodo *nuevo = (Inodo*)malloc(sizeof(Inodo));
 nuevo->i_uid=1;
 nuevo->i_gid=1;
-nuevo->i_size=-1;
+nuevo->i_size=size;
 getCurrentDate(nuevo->i_atime);
 getCurrentDate(nuevo->i_ctime);
 getCurrentDate(nuevo->i_mtime);
@@ -544,8 +544,8 @@ int i;
 for(i=0;i<16;i++){
     nuevo->i_block[i]=-1;
 }
-    nuevo->i_type = Dir;
-    nuevo->i_perm =777;
+    nuevo->i_type = type;
+    nuevo->i_perm =permisos;
 
 return nuevo;
 }
@@ -830,4 +830,102 @@ void graphBlockDirectory(BlockDirectory *block,int initBlock, FILE *myFile,int i
         }
     }
 
+}
+
+Response createFile(char newPath[], bool createPath, int size,char path[],char namePartition[]){
+
+    //VALIDAR QUE HAYA ESPACIO PARA CREAR INODOS Y BLOQUES
+    int startSb;
+    SuperBlock *sb = readSuperBlock(path,namePartition,&startSb);
+    if(sb==NULL){
+        return ERROR_UNHANDLED;
+    }
+
+    int indexInodoPadre = 0;
+    std::stringstream ss(newPath);
+        std::string token;
+        std::string dirPad="/";
+        while (std::getline(ss, token, '/')) {
+            if(token!=""){
+                cout<<"padre: "<<dirPad<<endl;
+                cout<<"archivo/carpeta: "<<token<<endl;
+                if (ss.tellg() == -1) {
+                    //generar texto
+                    char *txt = (char*)malloc(sizeof(char)*size);
+                    int i;
+                    char caracter = '0';
+                    for(i=0;i<size;i++){
+                        txt[i] =caracter;
+                        caracter++;
+                        if(caracter>'9'){
+                            caracter = '0';
+                        }
+                    }
+                    int indexInodo = createChildFile(size,txt,path,sb);
+                    if(indexInodo == -1){
+                        return ERROR_DIR_NOT_EXIST;
+                    }
+                }else{
+                    /*
+                    int indexBloque = findDirectory(&token[0],disk->path,&indexInodoPadre,sb);
+                    if(indexBloque!=-1){
+                        indexBloqueActual = indexBloque;
+                    }else{
+                        if(createMk){
+                            Response res = createChildDirectory(&dirPad[0],&token[0],disk->path,sb,startSb,&indexInodoPadre,&indexBloqueActual);;
+                            if(res!=SUCCESS){
+                                return res;
+                            }
+                        }else{
+                            return ERROR_DIR_NOT_EXIST;
+                        }
+                    }*/
+                }
+                dirPad = token;
+            }
+        }
+return SUCCESS;
+}
+
+int  createChildFile(int size,char *text,char path[],SuperBlock *sb){
+    int indexInodo = getBitmapIndex(sb->s_bm_inode_start,sb->s_bm_block_start,path);
+    if(indexInodo == -1){
+       return -1;
+    }
+    Inodo *inodo = getNewInodo(File,664,size);
+    //BLOQUE DE ARCHIVO
+    BlockFile *block = getNewBlockFile();
+    int indexBloque = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
+    if(indexBloque==-1){
+        return -1;
+    }
+    int indexofInodo = 0;
+    int contadorCaracteres = 0;
+    int indexCaracteres = 0;
+    while(indexCaracteres<size){
+        block->b_content[contadorCaracteres] = text[indexCaracteres];
+
+        if(contadorCaracteres>=64){
+            inodo->i_block[indexofInodo] = indexInodo;
+            indexofInodo++;
+            writeBlockFile(block,path,sb->s_block_start+(indexBloque*sb->s_block_size));
+            indexBloque = getBitmapIndex(sb->s_bm_block_start,sb->s_inode_start,path);
+            block = getNewBlockFile();
+            contadorCaracteres = 0;
+        }
+        contadorCaracteres++;
+        indexCaracteres++;
+    }
+    if(contadorCaracteres>0){
+        inodo->i_block[indexofInodo] = indexInodo;
+        indexofInodo++;
+    }
+
+    writeInodo(inodo,path,sb->s_inode_start+(indexInodo*sb->s_inode_size));
+    writeBlockFile(block,path,sb->s_block_start+(indexBloque*sb->s_block_size));
+    return indexInodo;
+}
+
+BlockFile* getNewBlockFile(){
+    return (BlockFile*)malloc(sizeof(BlockFile));
 }

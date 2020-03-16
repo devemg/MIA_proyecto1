@@ -33,9 +33,11 @@ SuperBlock* readSuperBlock(char[],char[]);
 
 Inodo* readInodo(char[],int);
 
-Inodo* getNewInodoDir();
+Inodo* getNewInodo(TypeInodo type,int permisos,int size);
 
 BlockDirectory* getNewBlockDir(char name[],int indexDir,char namepad[],int indexPad);
+
+BlockFile* getNewBlockFile();
 
 Response addnewInodo(Inodo* nuevo,int indexI,TypeBlock tipoBloque,BlockDirectory *dir,BlockFile *file,char[],SuperBlock*,char[]);
 
@@ -64,5 +66,12 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,in
 Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int startSb,int *indexInodoPadre,int *indexBloqueActual);
 
 int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *sb);
+
+Response createFile(char newPath[],bool createPath,int size,char path[],char namePartition[]);
+
+Response createFile(char newPath[],bool createPath,char pathFile[],char path[],char namePartition[]);
+
+int createChildFile(int size,char *text,char path[],SuperBlock *sb);
+
 
 #endif // HANDLERFILESISTEM_H
