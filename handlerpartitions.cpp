@@ -541,6 +541,7 @@ Response mountPart(char path[], char name[]){
         return ERROR_UNHANDLED;
     }
     sb->s_mnt_count = sb->s_mnt_count+1;
+    getCurrentDate(sb->s_mtime);
     writeSuperBlock(sb,path,init);
 
     return SUCCESS;
