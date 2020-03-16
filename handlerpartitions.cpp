@@ -614,6 +614,15 @@ Response unmountPart(char id[]){
         sizeParts--;
         if(sizeParts == 0){
             //desmontar disco
+            SuperBlock *sb =readSuperBlock(partsMounted[contadorDiscos]->path,
+                                           partsMounted[contadorDiscos]->parts[contadorPart]->name);
+            if(sb==NULL){
+                return ERROR_UNHANDLED;
+            }
+            sb->s_mnt_count = sb->s_mnt_count+1;
+            getCurrentDate(sb->s_mtime);
+            writeSuperBlock(sb,partsMounted[contadorDiscos]->path,partsMounted[contadorDiscos]->parts[contadorPart]->start);
+
             while((partsMounted[contadorDiscos])!=NULL){
                 delete partsMounted[contadorDiscos];
                 (partsMounted[contadorDiscos]) = (partsMounted[contadorDiscos+1]);
