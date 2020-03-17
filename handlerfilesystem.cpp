@@ -1121,11 +1121,13 @@ Response createFile(char newPath[], bool createPath, char pathFile[], char path[
         cout<<"Error al abrir el archivo en ruta \""<<pathFile<<"\"\n";
         return ERROR_UNHANDLED;
     }
-    char txt[1024];
-    clearArray(txt,1024);
-     fread(txt,sizeof(char)*1024,1,fileText);
      fseek(fileText, 0L, SEEK_END);
      int file_size = ftell(fileText);
+
+     char txt[file_size];
+     fseek(fileText,0L,SEEK_SET);
+     fread(txt,file_size,1,fileText);
+
      fclose(fileText);
     return createFileWithText(newPath,createPath,txt,file_size,path,namePartition);
 }
@@ -1315,6 +1317,7 @@ Response findFile(char filePath[], char path[], char partition[],char **content,
             }
           }
         }
+  return ERROR_UNHANDLED;
 }
 
 Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content){
@@ -1333,6 +1336,7 @@ Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **conten
             }
         }
     }
+    return SUCCESS;
 }
 
 Response reportFile(char filePath[], char path[], char partition[], char reportPath[]){

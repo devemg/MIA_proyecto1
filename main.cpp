@@ -47,11 +47,10 @@ int main()
   catFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
 
-  /*
-   * reportFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk",
+  /* reportFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk",
              "particion_1",
              "/home/emely/Escritorio/testData/file.png");
-  */
+*/
   /*
   createDirectory(true,"vda0","/bin");
   createDirectory(true,"vda0","/usr");
