@@ -39,9 +39,8 @@ int main()
   createDirectory(true,"vda0","/home/roberto/fotos");
   */
   createFile("/home/file1.txt",true,10,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
-  createFile("/home/fil2.txt",true,10,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
-  createFile("/home/fil3.txt",true,10,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
-  createFile("/file.txt",true,70,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  createFile("/home/fil2.txt",true,100,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  createFile("/home/fil2.txt",true,100,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
   //createFile("/home/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
 
