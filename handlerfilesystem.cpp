@@ -1123,8 +1123,11 @@ Response createFile(char newPath[], bool createPath, char pathFile[], char path[
     }
     char txt[1024];
     clearArray(txt,1024);
-    fread(txt,sizeof(char)*1024,1,fileText);
-    return createFileWithText(newPath,createPath,txt,sizeof(fileText),path,namePartition);
+     fread(txt,sizeof(char)*1024,1,fileText);
+     fseek(fileText, 0L, SEEK_END);
+     int file_size = ftell(fileText);
+     fclose(fileText);
+    return createFileWithText(newPath,createPath,txt,file_size,path,namePartition);
 }
 
 Response createFileWithText(char newPath[], bool createPath, char text[],int size, char path[], char namePartition[]){
@@ -1244,4 +1247,76 @@ BlockFile* getNewBlockFile(){
     BlockFile *bl = (BlockFile*)malloc(sizeof(BlockFile));
     clearArray(bl->b_content,64);;
     return bl;
+}
+
+Response catFile(char filePath[], char path[], char partition[]){
+    //VALIDAR QUE HAYA ESPACIO PARA CREAR INODOS Y BLOQUES
+    int startSb;
+    SuperBlock *sb = readSuperBlock(path,partition,&startSb);
+    if(sb==NULL){
+        return ERROR_UNHANDLED;
+    }
+
+    int indexInodoPadre = 0;
+    std::stringstream ss(filePath);
+        std::string token;
+        std::string dirPad="/";
+        int indexBloqueActual = 0;
+        while (std::getline(ss, token, '/')) {
+            if(token!=""){
+                cout<<"padre: "<<dirPad<<endl;
+                cout<<"carpeta: "<<token<<endl;
+               if (ss.tellg() == -1) {
+                   //inodo de directorio
+                   Inodo *inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*indexInodoPadre));
+                    if(inodo == NULL){
+                        return ERROR_DIR_NOT_EXIST;
+                    }
+                    if(inodo->i_type == IN_DIRECTORY){
+                        int indexBloqueInodo;
+                        for(indexBloqueInodo = 0;indexBloqueInodo<12;indexBloqueInodo++){
+                            if(inodo->i_block[indexBloqueInodo]!=-1){
+                                BlockDirectory *directory = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*inodo->i_block[indexBloqueInodo]));
+                                if(directory == NULL){
+                                    return ERROR_UNHANDLED;
+                                }
+                                int indexInodoBloque;
+                                for(indexInodoBloque = 2;indexInodoBloque <4;indexInodoBloque++){
+                                    if(strcmp(directory->b_content[indexInodoBloque].b_name,&token[0])==0){
+                                        //encontrado
+                                       return showFile(directory->b_content[indexInodoBloque].b_inodo,path,sb);
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        return ERROR_UNHANDLED;
+                    }
+                }else{
+                    int indexBloque = findDirectory(&token[0],path,&indexInodoPadre,sb);
+                    if(indexBloque!=-1){
+                        indexBloqueActual = indexBloque;
+                    }else{
+                        return ERROR_DIR_NOT_EXIST;
+                }
+                dirPad = token;
+            }
+          }
+        }
+}
+
+Response showFile(int indexInodo, char path[],SuperBlock *sb){
+    Inodo *inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*indexInodo));
+    if(inodo->i_type == IN_FILE){
+        int indexBloque;
+        for(indexBloque = 0;indexBloque<12;indexBloque++){
+            if(inodo->i_block[indexBloque]!=-1){
+                BlockFile *file = readBlockFile(path,sb->s_block_start+(sb->s_block_size*inodo->i_block[indexBloque]));
+                if(file== NULL){
+                    return ERROR_UNHANDLED;
+                }
+                cout<<file->b_content<<endl;
+            }
+        }
+    }
 }

@@ -85,4 +85,8 @@ Response reportInodes(char path[], char name[], char path_report[]);
 
 Response reportBlocks(char path[], char name[], char path_report[]);
 
+Response catFile(char filePath[],char path[],char partition[]);
+
+Response showFile(int indexInodo,char path[],SuperBlock *sb);
+
 #endif // HANDLERFILESISTEM_H
