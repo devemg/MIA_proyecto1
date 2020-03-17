@@ -71,7 +71,7 @@ int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path
 
 Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,int*,int*);
 
-Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int startSb,int *indexInodoPadre,int *indexBloqueActual);
+Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int *indexInodoPadre,int *indexBloqueActual);
 
 int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *sb);
 
