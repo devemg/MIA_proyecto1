@@ -1250,6 +1250,16 @@ BlockFile* getNewBlockFile(){
 }
 
 Response catFile(char filePath[], char path[], char partition[]){
+    char *content;
+     char *title;
+    Response res = findFile(filePath,path,partition,&content,&title);
+    if(res!=SUCCESS)return res;
+    cout<<"--->"<<title<<"<---\n";
+    cout<<content<<endl;
+    return SUCCESS;
+}
+
+Response findFile(char filePath[], char path[], char partition[],char **content,char **title){
     //VALIDAR QUE HAYA ESPACIO PARA CREAR INODOS Y BLOQUES
     int startSb;
     SuperBlock *sb = readSuperBlock(path,partition,&startSb);
@@ -1284,7 +1294,9 @@ Response catFile(char filePath[], char path[], char partition[]){
                                 for(indexInodoBloque = 2;indexInodoBloque <4;indexInodoBloque++){
                                     if(strcmp(directory->b_content[indexInodoBloque].b_name,&token[0])==0){
                                         //encontrado
-                                       return showFile(directory->b_content[indexInodoBloque].b_inodo,path,sb);
+                                        *title=(char*)malloc(sizeof(directory->b_content[indexInodoBloque].b_name));
+                                        strcpy(*title,directory->b_content[indexInodoBloque].b_name);
+                                       return getContentFile(directory->b_content[indexInodoBloque].b_inodo,path,sb,content);
                                     }
                                 }
                             }
@@ -1305,9 +1317,11 @@ Response catFile(char filePath[], char path[], char partition[]){
         }
 }
 
-Response showFile(int indexInodo, char path[],SuperBlock *sb){
+Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content){
     Inodo *inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*indexInodo));
     if(inodo->i_type == IN_FILE){
+        (*content) =(char*)malloc(inodo->i_size);
+        clearArray(*content,inodo->i_size);
         int indexBloque;
         for(indexBloque = 0;indexBloque<12;indexBloque++){
             if(inodo->i_block[indexBloque]!=-1){
@@ -1315,8 +1329,39 @@ Response showFile(int indexInodo, char path[],SuperBlock *sb){
                 if(file== NULL){
                     return ERROR_UNHANDLED;
                 }
-                cout<<file->b_content<<endl;
+                strcat((*content),file->b_content);
             }
         }
     }
+}
+
+Response reportFile(char filePath[], char path[], char partition[], char reportPath[]){
+    char *content;
+    char *title;
+    findFile(filePath,path,partition,&content,&title);
+    return graphFile(content,title,reportPath);
+}
+
+Response graphFile(char *text, char *title,char reportPath[]){
+    FILE * fileReport;
+     fileReport = fopen ("report_file.dot","w+");
+     if (fileReport==NULL)
+     {
+         cout<<"Error al crear archivo de reporte\n";
+         return ERROR_UNHANDLED;
+     }
+     fseek(fileReport, 0, SEEK_SET);
+     fputs("digraph di{\n", fileReport);
+     fputs("nodo[label=\"",fileReport);
+     fputs(text,fileReport);
+     fputs("\"\n shape=\"note\"];\n",fileReport);
+     fputs("labelloc=\"t\";\nlabel=\"",fileReport);
+     fputs(title,fileReport);
+     fputs("\";",fileReport);
+     fputs("}\n",fileReport);
+     fclose (fileReport);
+     string pathString(reportPath);
+     string command = "dot -Tpng report_file.dot -o \""+pathString+"\"";//+"/report_mbr.png";
+     system(command.c_str());
+     return SUCCESS;
 }

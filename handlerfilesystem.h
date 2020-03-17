@@ -65,6 +65,8 @@ void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FI
 
 void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo);
 
+Response graphFile(char *text,char *title,char reportPath[]);
+
 int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init);
 
 Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,int*,int*);
@@ -87,6 +89,10 @@ Response reportBlocks(char path[], char name[], char path_report[]);
 
 Response catFile(char filePath[],char path[],char partition[]);
 
-Response showFile(int indexInodo,char path[],SuperBlock *sb);
+Response findFile(char filePath[], char path[], char partition[],char **content,char **title);
+
+Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content);
+
+Response reportFile(char pathFile[],char path[],char partition[],char reportPath[]);
 
 #endif // HANDLERFILESISTEM_H

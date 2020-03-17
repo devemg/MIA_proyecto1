@@ -44,7 +44,14 @@ int main()
   //createFile("/home/fil2.txt",true,100,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
   createFile("/home/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
-    catFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  catFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+
+
+  /*
+   * reportFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk",
+             "particion_1",
+             "/home/emely/Escritorio/testData/file.png");
+  */
   /*
   createDirectory(true,"vda0","/bin");
   createDirectory(true,"vda0","/usr");
