@@ -283,14 +283,14 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
     i = 12;
     while(i<15){
         if(inodo->i_block[i]!=-1){
-            graphBlockPointer(i-11,indexInodo,inodo->i_block[i],myFile,path,sb,inodo->i_type);
+            graphBlockPointer(i-11,indexInodo,inodo->i_block[i],myFile,path,sb);
             graphConnectionInodoBloque(indexInodo,inodo->i_block[i],(indexInodo+inodo->i_block[i])*sizeof(Inodo),myFile);
         }
         i++;
     }
 }
 
-void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,char path[],SuperBlock *sb,TypeInode type){
+void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,char path[],SuperBlock *sb){
     BlockPointer *block = readBlockPointer(path,getInitBlock(sb,indexBlock));
     if(block==NULL) return;
     fputs("b_",fileReport);

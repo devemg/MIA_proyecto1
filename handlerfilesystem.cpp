@@ -244,8 +244,10 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                 }
             }else{
                 //LEER APUNTADOR INDIRECTO
-              // return getFromBlockPointer(idPointBlock-11,indexBloqueActual,indexInodoActual,path);
-            }
+                *type = POINTERS;
+                *indexBloqueActual = inodo->i_block[idPointBlock];
+                return getFreeIndexFromBlockPointer(idPointBlock-11,indexBloqueActual,indexInodoActual,nameDir,path,sb,indexFree);
+              }
         }else{
             if(isDirect){
                 //CREAR UN NUEVO BLOQUE
@@ -305,16 +307,19 @@ Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int
     return SUCCESS;
 }
 
-Response getFromBlockPointer(int level,int *idBloque,int *indexInodo,char path[]){
-    BlockPointer *pointers = readBlockPointer(path,*idBloque);
+Response getFreeIndexFromBlockPointer(int level,int *idBloque,int *indexInodo,char nameDir[],char path[],SuperBlock *sb,int *freeIndex){
+    BlockPointer *pointers = readBlockPointer(path,getInitBlock(sb,*idBloque));
     if(pointers == NULL){
         return ERROR_DIR_NOT_EXIST;
     }
     int indexInBlockP;
     for(indexInBlockP = 0;indexInBlockP<16;indexInBlockP++){
-        if(pointers->b_pointers[indexInBlockP]!=-1){
+        if(pointers->b_pointers[indexInBlockP]==-1){
+            *freeIndex = indexInBlockP;
+            break;
         }
     }
+    return SUCCESS;
 }
 
 int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad){

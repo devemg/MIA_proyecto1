@@ -73,7 +73,7 @@ Response findFile(char filePath[], char path[], char partition[],char **content,
 
 Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content);
 
-Response getFromBlockPointer(int level,int *idBloque,int *indexInodo,char path[]);
+Response getFreeIndexFromBlockPointer(int level,int *idBloque,int *indexInodo,char nameDir[],char path[],SuperBlock *sb,int *freeIndex);
 
 BlockPointer* getNewBlockPointer();
 
