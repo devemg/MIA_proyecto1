@@ -120,9 +120,15 @@ Response createDirectory(bool createMk,char id[],char path[]){
     if(sb==NULL){
         return ERROR_UNHANDLED;
     }
-
     int indexInodoPadre = 0;
     int indexBloqueActual = 0;
+
+    Inodo *inodo = readInodo(disk->path,sb->s_inode_start+(sb->s_inode_size*indexInodoPadre));
+    createPointersInd(12-11,sb,disk->path,inodo,12,indexInodoPadre);
+    writeSuperBlock(sb,disk->path,startSb);
+    return SUCCESS;
+
+
     std::stringstream ss(path);
         std::string token;
         std::string dirPad="/";
@@ -237,6 +243,7 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                 }
             }else{
                 //LEER APUNTADOR INDIRECTO
+              // return getFromBlockPointer(idPointBlock-11,indexBloqueActual,indexInodoActual,path);
             }
         }else{
             if(isDirect){
@@ -252,17 +259,54 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                 found = true;
                 sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
                 sb->s_free_blocks_count--;
+            }else{
+               // getFromBlockPointer(idPointBlock-11,indexBloqueActual,indexInodoActual,path);
             }
 
         }
+        idPointBlock++;
         if(idPointBlock>11){
             isDirect = false;
         }
-        idPointBlock++;
     }
     delete inodo;
     delete dirblock;
     return SUCCESS;
+}
+
+Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int idPointBlock,int idInodoActual){
+    int i;
+    for(i=0;i<level;i++){
+        BlockPointer *newPoints = getNewBlockPointer();
+        writeBlockPointer(newPoints,path,sb->s_block_start+(sb->s_first_blo*sb->s_block_size));
+        switch (level) {
+        case 1:
+            inodo->i_block[idPointBlock] = sb->s_first_blo;
+            writeInodo(inodo,path,sb->s_inode_start+(idInodoActual*sb->s_inode_size));
+            sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
+            sb->s_free_blocks_count--;
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        default:
+            return ERROR_LEVEL_FULL;
+            break;
+        }
+    }
+}
+
+Response getFromBlockPointer(int level,int *idBloque,int *indexInodo,char path[]){
+    BlockPointer *pointers = readBlockPointer(path,*idBloque);
+    if(pointers == NULL){
+        return ERROR_DIR_NOT_EXIST;
+    }
+    int indexInBlockP;
+    for(indexInBlockP = 0;indexInBlockP<16;indexInBlockP++){
+        if(pointers->b_pointers[indexInBlockP]!=-1){
+        }
+    }
 }
 
 int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad){
@@ -347,7 +391,7 @@ void writeBlockFile(BlockFile *sb,char path[],int init){
      fclose (myFile);
 }
 
-void writeBlockPointer(BlockPointer *sb,char path[],int init){
+void writeBlockPointer(BlockPointer *newPoints,char path[],int init){
     FILE * myFile;
      myFile = fopen (path,"rb+");
      if (myFile==NULL)
@@ -355,9 +399,8 @@ void writeBlockPointer(BlockPointer *sb,char path[],int init){
          cout<<"Error al abrir el disco\n";
          return;
      }
-     //escribir MBR en disco
      fseek(myFile, init, SEEK_SET);
-     fwrite(sb, sizeof(BlockPointer), 1, myFile);
+     fwrite(newPoints, sizeof(BlockPointer), 1, myFile);
      //cerrando stream
      fclose (myFile);
 }
@@ -1120,6 +1163,11 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                         }
                     }
                     //apuntadores indirectos
+                    for(i=12;i<15;i++){
+                        if(inodo->i_block[i]!=-1){
+                            graphBlockPointer(inodo->i_block[i],sb->s_block_start+(sb->s_block_size*inodo->i_block[i]),fileReport,path);
+                        }
+                    }
                 }
                 contador++;
             }
@@ -1131,6 +1179,30 @@ Response reportBlocks(char path[], char name[], char path_report[]){
          system(command.c_str());
          return SUCCESS;
 }
+
+
+void graphBlockPointer(int indexBlock,int init,FILE *fileReport,char path[]){
+    BlockPointer *block = readBlockPointer(path,init);
+    if(block==NULL) return;
+    fputs("b_",fileReport);
+    fputs(&to_string(indexBlock)[0],fileReport);
+    fputs("[ shape=plaintext label=< \n", fileReport);
+    fputs("<table border='0' cellborder='1' cellspacing='0'>\n", fileReport);
+    fputs("<tr><td ",fileReport);
+    fputs(" colspan=\"3\">Bloque ",fileReport);
+    fputs(&to_string(indexBlock)[0],fileReport);
+    fputs("</td></tr>\n", fileReport);
+    fputs("<tr><td bgcolor = \"#FFA07A\">",fileReport);
+    int i;
+    for(i=0;i<16;i++){
+        fputs(&to_string(block->b_pointers[i])[0],fileReport);
+        fputs(", ",fileReport);
+    }
+    fputs("</td></tr>\n",fileReport);
+    fputs("</table>\n",fileReport);
+    fputs(">];\n",fileReport);
+}
+
 
 Response createFile(char newPath[], bool createPath, char pathFile[], char path[], char namePartition[]){
     FILE *fileText;
@@ -1266,6 +1338,14 @@ BlockFile* getNewBlockFile(){
     return bl;
 }
 
+BlockPointer* getNewBlockPointer(){
+    BlockPointer *bl = (BlockPointer*)malloc(sizeof(BlockPointer));
+    int j;
+    for(j = 0;j<16;j++){
+        bl->b_pointers[j]=-1;
+    }
+    return bl;
+}
 Response catFile(char filePath[], char path[], char partition[]){
     char *content;
      char *title;

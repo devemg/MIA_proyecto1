@@ -44,8 +44,8 @@ bool writeMBR(MBR *disco,char path[],char full_path[]){
     //CREAR DIRECTORIO SI NO EXISTE
     mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-    FILE * myFile;
-     myFile = fopen (full_path,"wb+");
+    FILE *myFile;
+     myFile =  fopen(full_path,"wb+");
      if (myFile==NULL)
      {
          cout<<"Error al crear el archivo\n";
@@ -102,8 +102,8 @@ void reportMBR(char path[],char path_report[]){
         return;
     }
 
-    FILE * myFile;
-     myFile = fopen ("report_mbr.dot","w+");
+    FILE *myFile;
+     myFile =  fopen("report_mbr.dot","w+");
      if (myFile==NULL)
      {
          cout<<"Error al crear el archivo\n";
@@ -271,8 +271,8 @@ return mbr;
 }
 
 void replaceMBR(MBR *disco,char path[]){
-    FILE * myFile;
-     myFile = fopen (path,"rb+");
+    FILE *myFile;
+     myFile =  fopen(path,"rb+");
      if (myFile==NULL)
      {
          cout<<"Error al abrir el archivo\n";
@@ -335,8 +335,8 @@ void reportDisk(char path[], char path_report[]){
         return;
     }
 
-    FILE * myFile;
-     myFile = fopen ("report_disk.dot","w+");
+    FILE *myFile;
+     myFile =  fopen("report_disk.dot","w+");
      if (myFile==NULL)
      {
          cout<<"Error al crear el archivo de reporte\n";

@@ -23,7 +23,8 @@ enum Response {SUCCESS,
               ERROR_NOT_SPACE_ADD,
               ERROR_PARTITION_MOUNTED_DEL,
               ERROR_DIR_NOT_EXIST,
-              ERROR_INODO_NOT_DIR};
+              ERROR_INODO_NOT_DIR,
+              ERROR_LEVEL_FULL};
 enum DeleteType {Fast,Full};
 enum statusBlock {OCUPADO,LIBRE};
 enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec};

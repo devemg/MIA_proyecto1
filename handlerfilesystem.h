@@ -65,6 +65,8 @@ void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FI
 
 void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo);
 
+void graphBlockPointer(int indexBlock,int init,FILE *myFile,char path[]);
+
 Response graphFile(char *text,char *title,char reportPath[]);
 
 int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init);
@@ -94,5 +96,11 @@ Response findFile(char filePath[], char path[], char partition[],char **content,
 Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content);
 
 Response reportFile(char pathFile[],char path[],char partition[],char reportPath[]);
+
+Response getFromBlockPointer(int level,int *idBloque,int *indexInodo,char path[]);
+
+BlockPointer* getNewBlockPointer();
+
+Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int idPointBlock,int idInodoActual);
 
 #endif // HANDLERFILESISTEM_H

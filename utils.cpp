@@ -132,6 +132,9 @@ void showMessageError(Response response){
     case ERROR_INODO_NOT_DIR:
         cout<<"El inodo no es de tipo carpeta\n";
         break;
+    case ERROR_LEVEL_FULL:
+        cout<<"No hay suficiente espacio para crear más directorios/archivos\n";
+        break;
     default:
         break;
 
