@@ -151,7 +151,6 @@ void reportSuperBlock(char path[], char name[], char path_report[]){
          system(command.c_str());
 }
 
-
 void reportTree(char path_report[], char id[]){
     MountedDisk *disk = getMountedDisk(id);
     if(disk == NULL){
@@ -177,7 +176,7 @@ void reportTree(char path_report[], char id[]){
     fputs("digraph G {\n", myFile);
     fputs("rankdir =LR;\n", myFile);
     //graphAllInodes(sb,myFile,disk->path);
-    Inodo *inodo = readInodo(disk->path,sb->s_inode_start+(0*sb->s_inode_size));
+    Inodo *inodo = readInodo(disk->path,getInitInode(sb,0));
     if(inodo!=NULL){
         graphInodo(inodo,0,myFile,disk->path,sb);
     }
@@ -231,13 +230,11 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
         fputs("<tr><td bgcolor=\"#ffd1a8\">AD", myFile);
         fputs(&to_string(i+1)[0],myFile);
         fputs("</td><td ",myFile);
-
         if(inodo->i_block[i]!=-1){
             fputs("port=\"",myFile);
             fputs(&to_string((indexInodo+inodo->i_block[i])*sizeof(Inodo))[0],myFile);
             fputs("\"",myFile);
         }
-
         fputs(" bgcolor=\"#ffd1a8\">",myFile);
         fputs(&to_string(inodo->i_block[i])[0],myFile);
         fputs("</td></tr>\n", myFile);
@@ -247,7 +244,13 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
     while (i<16) {
       fputs("<tr><td bgcolor=\"#a8ffdf\">AI", myFile);
       fputs(&to_string(i-11)[0],myFile);
-      fputs("</td><td bgcolor=\"#a8ffdf\">",myFile);
+      fputs("</td><td ",myFile);
+      if(inodo->i_block[i]!=-1){
+          fputs("port=\"",myFile);
+          fputs(&to_string((indexInodo+inodo->i_block[i])*sizeof(Inodo))[0],myFile);
+          fputs("\"",myFile);
+      }
+      fputs(" bgcolor=\"#a8ffdf\">",myFile);
       fputs(&to_string(inodo->i_block[i])[0],myFile);
       fputs("</td></tr>\n", myFile);
     i++;
@@ -258,9 +261,10 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
 
     //GRAFICAR BLOQUES
     i=0;
+    /*
     while(i<12){
         if(inodo->i_block[i]!=-1){
-            int pos = sb->s_block_start + (inodo->i_block[i]*sb->s_block_size);
+            int pos = getInitBlock(sb,inodo->i_block[i]);
                 if(inodo->i_type == IN_DIRECTORY){
                     BlockDirectory *dir = readBlockDirectory(path,pos);
                     if(dir!=NULL){
@@ -275,6 +279,55 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
              graphConnectionInodoBloque(indexInodo,inodo->i_block[i],(indexInodo+inodo->i_block[i])*sizeof(Inodo),myFile);
         }
        i++;
+    }*/
+    i = 12;
+    while(i<15){
+        if(inodo->i_block[i]!=-1){
+            graphBlockPointer(i-11,indexInodo,inodo->i_block[i],myFile,path,sb,inodo->i_type);
+            graphConnectionInodoBloque(indexInodo,inodo->i_block[i],(indexInodo+inodo->i_block[i])*sizeof(Inodo),myFile);
+        }
+        i++;
+    }
+}
+
+void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,char path[],SuperBlock *sb,TypeInode type){
+    BlockPointer *block = readBlockPointer(path,getInitBlock(sb,indexBlock));
+    if(block==NULL) return;
+    fputs("b_",fileReport);
+    fputs(&to_string(indexBlock)[0],fileReport);
+    fputs("[ shape=plaintext label=< \n", fileReport);
+    fputs("<table border='0' cellborder='1' cellspacing='0'>\n", fileReport);
+    fputs("<tr><td ",fileReport);
+    fputs("port=\"",fileReport);
+    fputs(&to_string((indexPadre+indexBlock)*sizeof(Inodo))[0],fileReport);
+    fputs("\"",fileReport);
+    fputs(">Bloque ",fileReport);
+    fputs(&to_string(indexBlock)[0],fileReport);
+    fputs("</td></tr>\n", fileReport);
+    int i;
+    for(i=0;i<16;i++){
+        fputs("<tr><td bgcolor = \"#FFA07A\" ",fileReport);
+        if(block->b_pointers[i]!=-1){
+            fputs("port=\"ib",fileReport);
+            fputs(&to_string(block->b_pointers[i]*sizeof(Inodo))[0],fileReport);
+            fputs("\"",fileReport);
+        }
+        fputs(">",fileReport);
+        fputs(&to_string(block->b_pointers[i])[0],fileReport);
+        fputs("</td></tr>\n",fileReport);
+    }
+    fputs("</table>\n",fileReport);
+    fputs(">];\n",fileReport);
+    if(level==1){
+        for(i=0;i<16;i++){
+            if(block->b_pointers[i]!=-1){
+                Inodo *ind = readInodo(path,getInitInode(sb,block->b_pointers[i]));
+                if(ind!=NULL){
+                    graphInodo(ind,block->b_pointers[i],fileReport,path,sb);
+                    graphConnectionBloqueInodo(block->b_pointers[i],indexBlock,block->b_pointers[i]*sizeof(Inodo),fileReport);
+                }
+            }
+        }
     }
 }
 
@@ -358,7 +411,7 @@ void graphBlockDirectory(BlockDirectory *block,int initBlock, FILE *myFile,int i
     fputs(">];\n",myFile);
     for(i=2;i<4;i++){
         if(block->b_content[i].b_inodo!=-1){
-            Inodo *inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*block->b_content[i].b_inodo));
+            Inodo *inodo = readInodo(path,sb->s_inode_start+getInitInode(sb,block->b_content[i].b_inodo));
             graphInodo(inodo,block->b_content[i].b_inodo,myFile,path,sb);
             graphConnectionBloqueInodo(block->b_content[i].b_inodo,initBlock,block->b_content[i].b_inodo*sizeof(Inodo),myFile);
 
@@ -417,7 +470,7 @@ Response reportInodes(char path[], char name[], char path_report[]){
                 fread(&caracter, sizeof(char), 1, myFile);
                 //******
                 if(caracter == '1'){
-                    inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size * contador));
+                    inodo = readInodo(path,getInitInode(sb,contador));
                     if(inodo == NULL){
                         break;
                     }
@@ -518,7 +571,7 @@ Response reportBlocks(char path[], char name[], char path_report[]){
             while(contador<sb->s_inodes_count){
                 fread(&caracter, sizeof(char), 1, myFile);
                 if(caracter == '1'){
-                    inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size * contador));
+                    inodo = readInodo(path,getInitInode(sb,contador));
                     if(inodo == NULL){
                         break;
                     }
@@ -527,7 +580,7 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                     for(i=0;i<12;i++){
                         if(inodo->i_block[i]!=-1){
                             if(inodo->i_type == IN_DIRECTORY){
-                                BlockDirectory *block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size * inodo->i_block[i]));
+                                BlockDirectory *block = readBlockDirectory(path,getInitBlock(sb,inodo->i_block[i]));
                                 //******
                                 fputs("b_",fileReport);
                                 fputs(&to_string(inodo->i_block[i])[0],fileReport);
@@ -576,7 +629,7 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                                 fputs(">];\n",fileReport);
                                 //******
                             }else if(inodo->i_type == IN_FILE){
-                                BlockFile *block = readBlockFile(path,sb->s_block_start+(sb->s_block_size * inodo->i_block[i]));
+                                BlockFile *block = readBlockFile(path,getInitBlock(sb,inodo->i_block[i]));
                                 fputs("b_",fileReport);
                                 fputs(&to_string(inodo->i_block[i])[0],fileReport);
                                 fputs("[ shape=plaintext label=< \n", fileReport);
@@ -594,11 +647,11 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                         }
                     }
                     //apuntadores indirectos
-                    for(i=12;i<15;i++){
+                   /* for(i=12;i<15;i++){
                         if(inodo->i_block[i]!=-1){
                             graphBlockPointer(inodo->i_block[i],fileReport,path,sb);
                         }
-                    }
+                    }*/
                 }
                 contador++;
             }
@@ -610,38 +663,6 @@ Response reportBlocks(char path[], char name[], char path_report[]){
          system(command.c_str());
          return SUCCESS;
 }
-
-
-void graphBlockPointer(int indexBlock,FILE *fileReport,char path[],SuperBlock *sb){
-    BlockPointer *block = readBlockPointer(path,sb->s_block_start+(sb->s_block_size*indexBlock));
-    if(block==NULL) return;
-    fputs("b_",fileReport);
-    fputs(&to_string(indexBlock)[0],fileReport);
-    fputs("[ shape=plaintext label=< \n", fileReport);
-    fputs("<table border='0' cellborder='1' cellspacing='0'>\n", fileReport);
-    fputs("<tr><td ",fileReport);
-    fputs(" colspan=\"3\">Bloque ",fileReport);
-    fputs(&to_string(indexBlock)[0],fileReport);
-    fputs("</td></tr>\n", fileReport);
-    fputs("<tr><td bgcolor = \"#FFA07A\">",fileReport);
-    int i;
-    for(i=0;i<16;i++){
-        fputs(&to_string(block->b_pointers[i])[0],fileReport);
-        fputs(", ",fileReport);
-    }
-    fputs("</td></tr>\n",fileReport);
-    fputs("</table>\n",fileReport);
-    fputs(">];\n",fileReport);
-    if(indexBlock>1){
-
-        for(i = 0;i<16;i++){
-            if(block->b_pointers[i]!=-1){
-                graphBlockPointer(block->b_pointers[i],fileReport,path,sb);
-            }
-        }
-    }
-}
-
 
 Response reportFile(char filePath[], char path[], char partition[], char reportPath[]){
     char *content;

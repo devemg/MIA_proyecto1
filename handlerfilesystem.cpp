@@ -121,13 +121,6 @@ Response createDirectory(bool createMk,char id[],char path[]){
     }
     int indexInodoPadre = 0;
     int indexBloqueActual = 0;
-
-    Inodo *inodo = readInodo(disk->path,sb->s_inode_start+(sb->s_inode_size*indexInodoPadre));
-    createPointersInd(12-11,sb,disk->path,inodo,12,indexInodoPadre);
-    writeSuperBlock(sb,disk->path,startSb);
-    return SUCCESS;
-
-
     std::stringstream ss(path);
         std::string token;
         std::string dirPad="/";
@@ -162,7 +155,7 @@ Response createDirectory(bool createMk,char id[],char path[]){
 }
 
 int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *sb){
-    Inodo *inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
+    Inodo *inodo = readInodo(path,getInitInode(sb,*indexInodoActual));
     if(inodo==NULL){
         return -1;
     }
@@ -171,7 +164,7 @@ int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *s
     for(indexBlock = 0;indexBlock<12;indexBlock++){
         if(inodo->i_block[indexBlock]!=-1){
             if(inodo->i_type == IN_DIRECTORY){
-                block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*inodo->i_block[indexBlock]));
+                block = readBlockDirectory(path,getInitBlock(sb,inodo->i_block[indexBlock]));
                 if(block == NULL){
                     return -1;
                 }
@@ -180,7 +173,7 @@ int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *s
                     if(block->b_content[i].b_inodo!=-1){
                         if(strcmp(block->b_content[i].b_name,namedir)==0){
                             *indexInodoActual = block->b_content[i].b_inodo;
-                            inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
+                            inodo = readInodo(path,getInitInode(sb,*indexInodoActual));
                             if(inodo==NULL){
                                 return -1;
                             }
@@ -199,26 +192,35 @@ int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *s
 
 Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int *indexInodoPadre,int *indexBloqueActual){
     int indexFree = -1;
-    Response res = getFreeIndexDirectory(dirPad,path,sb,indexBloqueActual,indexInodoPadre,&indexFree);
+    TypeBlock type = DIRECTORY;
+    Response res = getFreeIndexDirectory(dirPad,path,sb,indexBloqueActual,indexInodoPadre,&indexFree,&type);
     if(res!=SUCCESS){
         return res;
     }
     int indexnew = writeDirectory(sb,path,dirName,dirPad,*indexInodoPadre);
-    BlockDirectory *block = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*(*indexBloqueActual)));
-    block->b_content[indexFree].b_inodo = indexnew;
-    strcpy(block->b_content[indexFree].b_name,dirName);
-    writeBlockDirectory(block,path,sb->s_block_start+(sb->s_block_size*(*indexBloqueActual)));
+    if(type == DIRECTORY){
+        BlockDirectory *block = readBlockDirectory(path,getInitBlock(sb,*indexBloqueActual));
+        block->b_content[indexFree].b_inodo = indexnew;
+        strcpy(block->b_content[indexFree].b_name,dirName);
+        writeBlockDirectory(block,path,getInitBlock(sb,*indexBloqueActual));
+        delete block;
+    }else if(type == POINTERS){
+        BlockPointer *block = readBlockPointer(path,getInitBlock(sb,*indexBloqueActual));
+        block->b_pointers[indexFree] = indexnew;
+        writeBlockPointer(block,path,getInitBlock(sb,*indexBloqueActual));
+        delete block;
+    }
     *indexInodoPadre = indexnew;
+
     return SUCCESS;
 }
 
-Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *indexBloqueActual,int *indexInodoActual,int *indexFree){
+Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *indexBloqueActual,int *indexInodoActual,int *indexFree,TypeBlock *type){
     Inodo *inodo = NULL;
-    inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
+    inodo = readInodo(path,getInitInode(sb,*indexInodoActual));
     if(inodo==NULL){
         return ERROR_DIR_NOT_EXIST;
     }
-
     int idPointBlock=0;
     bool isDirect = true;
     BlockDirectory *dirblock = NULL;
@@ -226,7 +228,7 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
     while(idPointBlock<16 && !found){
         if(inodo->i_block[idPointBlock]!=-1){
             if(isDirect){
-                dirblock = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*inodo->i_block[idPointBlock]));
+                dirblock = readBlockDirectory(path,getInitBlock(sb,inodo->i_block[idPointBlock]));
                 if(strcmp(dirblock->b_content[0].b_name,nameDir)==0){
                     //BLOQUE ENCONTRADO
                     *indexBloqueActual = inodo->i_block[idPointBlock];
@@ -250,8 +252,8 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                 BlockDirectory *nuevo = getNewBlockDir(dirblock->b_content[0].b_name,dirblock->b_content[0].b_inodo,
                 dirblock->b_content[1].b_name,dirblock->b_content[1].b_inodo);
                 inodo->i_block[idPointBlock] = sb->s_first_blo;
-                writeBlockDirectory(nuevo,path,sb->s_block_start+(sb->s_first_blo*sb->s_block_size));
-                writeInodo(inodo,path,sb->s_inode_start+(sb->s_inode_size*(*indexInodoActual)));
+                writeBlockDirectory(nuevo,path,getInitBlock(sb,sb->s_first_blo));
+                writeInodo(inodo,path,getInitInode(sb,*indexInodoActual));
                 //restar un bloque y un inodo del super bloque
                 *indexBloqueActual = sb->s_first_blo;
                 *indexFree = 2;
@@ -259,7 +261,12 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                 sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
                 sb->s_free_blocks_count--;
             }else{
-               // getFromBlockPointer(idPointBlock-11,indexBloqueActual,indexInodoActual,path);
+               //CREAR NUEVO BLOQUE
+                Response res = createPointersInd(idPointBlock-11,sb,path,inodo,idPointBlock,*indexInodoActual,indexBloqueActual);
+                if(res!= SUCCESS) return res;
+                *indexFree = 0;
+                *type = POINTERS;
+                found = true;
             }
 
         }
@@ -273,15 +280,16 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
     return SUCCESS;
 }
 
-Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int idPointBlock,int idInodoActual){
+Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int idPointBlock,int idInodoActual,int *idBloqueActual){
     int i;
     for(i=0;i<level;i++){
         BlockPointer *newPoints = getNewBlockPointer();
-        writeBlockPointer(newPoints,path,sb->s_block_start+(sb->s_first_blo*sb->s_block_size));
+        *idBloqueActual = sb->s_first_blo;
+        writeBlockPointer(newPoints,path,getInitBlock(sb,sb->s_first_blo));
         switch (level) {
         case 1:
             inodo->i_block[idPointBlock] = sb->s_first_blo;
-            writeInodo(inodo,path,sb->s_inode_start+(idInodoActual*sb->s_inode_size));
+            writeInodo(inodo,path,getInitInode(sb,idInodoActual));
             sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
             sb->s_free_blocks_count--;
             break;
@@ -294,6 +302,7 @@ Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int
             break;
         }
     }
+    return SUCCESS;
 }
 
 Response getFromBlockPointer(int level,int *idBloque,int *indexInodo,char path[]){
@@ -318,8 +327,8 @@ int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int 
     nuevo->i_block[0] = sb->s_first_blo;
 
 
-    writeInodo(nuevo,path,sb->s_inode_start+(indexI*sb->s_inode_size));
-    writeBlockDirectory(dir,path,sb->s_block_start+(sb->s_first_blo*sb->s_block_size));
+    writeInodo(nuevo,path,getInitInode(sb,indexI));
+    writeBlockDirectory(dir,path,getInitBlock(sb,sb->s_first_blo));
     delete nuevo;
     delete dir;
     sb->s_firts_ino = getBitmapIndex(sb->s_bm_inode_start,sb->s_inodes_count,path);
@@ -647,7 +656,8 @@ Response createFile(char newPath[], bool createPath, int size,char path[],char n
 
 Response createChildFile(int size,char *text,char path[],char dirPad[],char name[],SuperBlock *sb,int indexBloqueActual,int indexInodoPadre){
     int indexFree = -1;
-        Response res = getFreeIndexDirectory(dirPad,path,sb,&indexBloqueActual,&indexInodoPadre,&indexFree);
+    TypeBlock type = DIRECTORY;
+        Response res = getFreeIndexDirectory(dirPad,path,sb,&indexBloqueActual,&indexInodoPadre,&indexFree,&type);
         if(res!=SUCCESS){
             return res;
         }
@@ -665,7 +675,7 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
                 //apuntadores indirectos
             }
             indexofInodo++;
-            writeBlockFile(block,path,sb->s_block_start+(sb->s_first_blo*sb->s_block_size));
+            writeBlockFile(block,path,getInitBlock(sb,sb->s_first_blo));
             block = getNewBlockFile();
             sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
             sb->s_free_blocks_count--;
@@ -684,12 +694,14 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
         }
     }
 
-    writeInodo(inodo,path,sb->s_inode_start+(sb->s_firts_ino*sb->s_inode_size));
-    writeBlockFile(block,path,sb->s_block_start+(sb->s_first_blo*sb->s_block_size));
-    BlockDirectory *blockPad = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*(indexBloqueActual)));
+    writeInodo(inodo,path,getInitInode(sb,sb->s_firts_ino));
+    writeBlockFile(block,path,getInitBlock(sb,sb->s_first_blo));
+
+    BlockDirectory *blockPad = readBlockDirectory(path,getInitBlock(sb,indexBloqueActual));
     blockPad->b_content[indexFree].b_inodo = sb->s_firts_ino;
     strcpy(blockPad->b_content[indexFree].b_name,name);
-    writeBlockDirectory(blockPad,path,sb->s_block_start+(sb->s_block_size*(indexBloqueActual)));
+    writeBlockDirectory(blockPad,path,getInitBlock(sb,indexBloqueActual));
+
     sb->s_firts_ino = getBitmapIndex(sb->s_bm_inode_start,sb->s_inodes_count,path);
     sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
     sb->s_free_blocks_count--;
@@ -710,6 +722,14 @@ BlockPointer* getNewBlockPointer(){
         bl->b_pointers[j]=-1;
     }
     return bl;
+}
+
+int getInitBlock(SuperBlock* sb,int index){
+    return sb->s_block_start+(sb->s_block_size*index);
+}
+
+int getInitInode(SuperBlock *sb, int index){
+    return sb->s_inode_start+(sb->s_inode_size*index);
 }
 
 Response catFile(char filePath[], char path[], char partition[]){
@@ -741,7 +761,7 @@ Response findFile(char filePath[], char path[], char partition[],char **content,
                 cout<<"carpeta: "<<token<<endl;
                if (ss.tellg() == -1) {
                    //inodo de directorio
-                   Inodo *inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*indexInodoPadre));
+                   Inodo *inodo = readInodo(path,getInitInode(sb,indexInodoPadre));
                     if(inodo == NULL){
                         return ERROR_DIR_NOT_EXIST;
                     }
@@ -749,7 +769,7 @@ Response findFile(char filePath[], char path[], char partition[],char **content,
                         int indexBloqueInodo;
                         for(indexBloqueInodo = 0;indexBloqueInodo<12;indexBloqueInodo++){
                             if(inodo->i_block[indexBloqueInodo]!=-1){
-                                BlockDirectory *directory = readBlockDirectory(path,sb->s_block_start+(sb->s_block_size*inodo->i_block[indexBloqueInodo]));
+                                BlockDirectory *directory = readBlockDirectory(path,getInitBlock(sb,inodo->i_block[indexBloqueInodo]));
                                 if(directory == NULL){
                                     return ERROR_UNHANDLED;
                                 }
@@ -782,14 +802,14 @@ Response findFile(char filePath[], char path[], char partition[],char **content,
 }
 
 Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content){
-    Inodo *inodo = readInodo(path,sb->s_inode_start+(sb->s_inode_size*indexInodo));
+    Inodo *inodo = readInodo(path,getInitInode(sb,indexInodo));
     if(inodo->i_type == IN_FILE){
         (*content) =(char*)malloc(inodo->i_size);
         clearArray(*content,inodo->i_size);
         int indexBloque;
         for(indexBloque = 0;indexBloque<12;indexBloque++){
             if(inodo->i_block[indexBloque]!=-1){
-                BlockFile *file = readBlockFile(path,sb->s_block_start+(sb->s_block_size*inodo->i_block[indexBloque]));
+                BlockFile *file = readBlockFile(path,getInitBlock(sb,inodo->i_block[indexBloque]));
                 if(file== NULL){
                     return ERROR_UNHANDLED;
                 }

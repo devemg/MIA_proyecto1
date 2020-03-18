@@ -11,6 +11,10 @@ Response formatPart(char path[],char partition[],DeleteType tipoFormateo,FileSis
 
 Response getStartPartition(MBR*,char[],int*);
 
+int getInitBlock(SuperBlock* sb,int index);
+
+int getInitInode(SuperBlock* sb,int index);
+
 int getBitmapIndex(int startBm,int finBm,char path[]);
 
 void writeSuperBlock(SuperBlock *sb,char path[],int init);
@@ -43,15 +47,13 @@ BlockDirectory* getNewBlockDir(char name[],int indexDir,char namepad[],int index
 
 BlockFile* getNewBlockFile();
 
-Response addnewInodo(Inodo* nuevo,int indexI,TypeBlock tipoBloque,BlockDirectory *dir,BlockFile *file,char[],SuperBlock*,char[]);
-
 Response createDirectory(bool createMk,char id[],char path[]);
 
 int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad);
 
 int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init);
 
-Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,int*,int*);
+Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,int*,int*,TypeBlock *type);
 
 Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBlock *sb,int *indexInodoPadre,int *indexBloqueActual);
 
@@ -75,6 +77,6 @@ Response getFromBlockPointer(int level,int *idBloque,int *indexInodo,char path[]
 
 BlockPointer* getNewBlockPointer();
 
-Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int idPointBlock,int idInodoActual);
+Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int idPointBlock,int idInodoActua,int *idBloqueActuall);
 
 #endif // HANDLERFILESISTEM_H

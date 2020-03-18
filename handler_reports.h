@@ -28,10 +28,8 @@ void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FI
 
 void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo);
 
-void graphBlockPointer(int indexBlock,int init,FILE *myFile,char path[]);
-
 Response graphFile(char *text,char *title,char reportPath[]);
 
-void graphBlockPointer(int indexBlock,FILE *fileReport,char path[],SuperBlock *sb);
+void graphBlockPointer(int level,int indexBlock,int indexInodo,FILE *fileReport,char path[],SuperBlock *sb,TypeInode type);
 
 #endif // HANDLER_REPORTS_H
