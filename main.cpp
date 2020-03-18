@@ -8,6 +8,8 @@
 #include <parser.h>
 #include <scanner.h>
 #include <handlerfilesystem.h>
+#include<handler_reports.h>
+
 using namespace std;
 
 int main()

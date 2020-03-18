@@ -49,26 +49,6 @@ Response createDirectory(bool createMk,char id[],char path[]);
 
 int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad);
 
-void reportTree(char path_report[],char id[]);
-
-Response reportBitmap(int,char[],char[],char[]);
-
-void reportSuperBlock(char[],char[],char[]);
-
-void graphInodo(Inodo*,int,FILE*,char[],SuperBlock*);
-
-void graphBlockDirectory(BlockDirectory *block,int initBlock, FILE *myFile,int indexInodo,SuperBlock *sb,char path[]);
-
-void graphConnectionInodoBloque(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
-
-void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
-
-void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo);
-
-void graphBlockPointer(int indexBlock,int init,FILE *myFile,char path[]);
-
-Response graphFile(char *text,char *title,char reportPath[]);
-
 int getIndexBlockDir(Inodo *inodoPivote,BlockDirectory *blockDirPivote,char path[],int init);
 
 Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int*,int*,int*);
@@ -85,17 +65,11 @@ Response createFileWithText(char newPath[],bool createPath,char text[],int size,
 
 Response createChildFile(int size,char *text,char path[],char dirPad[],char name[],SuperBlock *sb,int indexBloqueActual,int indexInodoPadre);
 
-Response reportInodes(char path[], char name[], char path_report[]);
-
-Response reportBlocks(char path[], char name[], char path_report[]);
-
 Response catFile(char filePath[],char path[],char partition[]);
 
 Response findFile(char filePath[], char path[], char partition[],char **content,char **title);
 
 Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content);
-
-Response reportFile(char pathFile[],char path[],char partition[],char reportPath[]);
 
 Response getFromBlockPointer(int level,int *idBloque,int *indexInodo,char path[]);
 

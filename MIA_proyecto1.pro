@@ -12,7 +12,8 @@ SOURCES += \
     parser.cpp \
     scanner.cpp \
     vars.cpp \
-    handlerfilesystem.cpp
+    handlerfilesystem.cpp \
+    handler_reports.cpp
 
 HEADERS += \
     structures.h \
@@ -25,7 +26,8 @@ HEADERS += \
     scanner.h \
     scanner.l \
     vars.h \
-    handlerfilesystem.h
+    handlerfilesystem.h \
+    handler_reports.h
 
 DISTFILES += \
     parser.y
