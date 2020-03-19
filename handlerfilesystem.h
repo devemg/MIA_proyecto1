@@ -73,10 +73,10 @@ Response findFile(char filePath[], char path[], char partition[],char **content,
 
 Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content);
 
-Response getFreeIndexFromBlockPointer(int level,int *idBloque,int *indexInodo,char nameDir[],char path[],SuperBlock *sb,int *freeIndex);
+int getFreeIndexFromBlockPointer(int nivel,Inodo *inodo,int idBloque,char path[],SuperBlock *sb,int *freeIndex);
 
 BlockPointer* getNewBlockPointer();
 
-Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int idPointBlock,int idInodoActua,int *idBloqueActuall);
+int createPointersInd(int idPointBlock,int *idBloqueActual,SuperBlock *sb,char path[]);
 
 #endif // HANDLERFILESISTEM_H

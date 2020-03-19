@@ -26,6 +26,8 @@ void graphConnectionInodoBloque(int indexnodo,int indexBloque,int indexPuerto,FI
 
 void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile);
 
+void graphConnectionBloqueBLoque(int indexB1,int indexB2,int indexPuerto,FILE *myFile);
+
 void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo);
 
 Response graphFile(char *text,char *title,char reportPath[]);

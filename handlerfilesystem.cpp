@@ -246,8 +246,14 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                 //LEER APUNTADOR INDIRECTO
                 *type = POINTERS;
                 *indexBloqueActual = inodo->i_block[idPointBlock];
-                return getFreeIndexFromBlockPointer(idPointBlock-11,indexBloqueActual,indexInodoActual,nameDir,path,sb,indexFree);
-              }
+                int bloque = getFreeIndexFromBlockPointer(idPointBlock,inodo,*indexBloqueActual,path,sb,indexFree);
+                writeInodo(inodo,path,getInitInode(sb,*indexInodoActual));
+                if(bloque == -1){
+                    idPointBlock++;
+                    continue;
+                }
+                found = true;
+            }
         }else{
             if(isDirect){
                 //CREAR UN NUEVO BLOQUE
@@ -264,8 +270,11 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                 sb->s_free_blocks_count--;
             }else{
                //CREAR NUEVO BLOQUE
-                Response res = createPointersInd(idPointBlock-11,sb,path,inodo,idPointBlock,*indexInodoActual,indexBloqueActual);
-                if(res!= SUCCESS) return res;
+                int bloque = createPointersInd(idPointBlock,indexBloqueActual,sb,path);
+                if(bloque== -1) return ERROR_LEVEL_FULL;
+                inodo->i_block[idPointBlock] = bloque;
+                writeInodo(inodo,path,getInitInode(sb,*indexInodoActual));
+                //*indexBloqueActual = bloque;
                 *indexFree = 0;
                 *type = POINTERS;
                 found = true;
@@ -277,49 +286,63 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
             isDirect = false;
         }
     }
+
     delete inodo;
     delete dirblock;
     return SUCCESS;
 }
 
-Response createPointersInd(int level,SuperBlock *sb,char path[],Inodo *inodo,int idPointBlock,int idInodoActual,int *idBloqueActual){
-    int i;
-    for(i=0;i<level;i++){
+int createPointersInd(int idPointBlock,int *idBloqueActual,SuperBlock *sb,char path[]){
+    if(idPointBlock-11 == 1) {
         BlockPointer *newPoints = getNewBlockPointer();
-        *idBloqueActual = sb->s_first_blo;
+       int idBloque = sb->s_first_blo;
         writeBlockPointer(newPoints,path,getInitBlock(sb,sb->s_first_blo));
-        switch (level) {
-        case 1:
-            inodo->i_block[idPointBlock] = sb->s_first_blo;
-            writeInodo(inodo,path,getInitInode(sb,idInodoActual));
-            sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
-            sb->s_free_blocks_count--;
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        default:
-            return ERROR_LEVEL_FULL;
-            break;
-        }
+        sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
+        sb->s_free_blocks_count--;
+        *idBloqueActual = idBloque;
+        return idBloque;
+    }else{
+        int res = createPointersInd(idPointBlock-1,idBloqueActual,sb,path);
+        BlockPointer *pointers = getNewBlockPointer();
+        pointers->b_pointers[0] = res;
+        res = sb->s_first_blo;
+        writeBlockPointer(pointers,path,getInitBlock(sb,sb->s_first_blo));
+        sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
+        sb->s_free_blocks_count--;
+        return res;
     }
-    return SUCCESS;
+    return -1;
 }
 
-Response getFreeIndexFromBlockPointer(int level,int *idBloque,int *indexInodo,char nameDir[],char path[],SuperBlock *sb,int *freeIndex){
-    BlockPointer *pointers = readBlockPointer(path,getInitBlock(sb,*idBloque));
-    if(pointers == NULL){
-        return ERROR_DIR_NOT_EXIST;
-    }
-    int indexInBlockP;
-    for(indexInBlockP = 0;indexInBlockP<16;indexInBlockP++){
-        if(pointers->b_pointers[indexInBlockP]==-1){
-            *freeIndex = indexInBlockP;
-            break;
+int getFreeIndexFromBlockPointer(int nivel,Inodo *inodo,int indexBloqueActual,char path[],SuperBlock *sb,int *indexFree){
+        if(inodo->i_block[nivel]!=-1){
+                if(nivel == 12){
+                    BlockPointer *pointers = readBlockPointer(path,getInitBlock(sb,indexBloqueActual));
+                        if(pointers == NULL){
+                            return ERROR_DIR_NOT_EXIST;
+                        }
+                    int indexInBlockP;
+                    for(indexInBlockP = 0;indexInBlockP<16;indexInBlockP++){
+                        if(pointers->b_pointers[indexInBlockP]==-1){
+                            *indexFree = indexInBlockP;
+                            return indexBloqueActual;
+                        }
+                    }
+                }else{
+                    BlockPointer *pointers = readBlockPointer(path,getInitBlock(sb,inodo->i_block[nivel]));
+                        if(pointers == NULL){
+                            return ERROR_DIR_NOT_EXIST;
+                        }
+                    int indexInBlockP;
+                    for(indexInBlockP = 0;indexInBlockP<16;indexInBlockP++){
+                        if(pointers->b_pointers[indexInBlockP]!=-1){
+                            int r = getFreeIndexFromBlockPointer(nivel-1,inodo,pointers->b_pointers[indexInBlockP],path,sb,indexFree);
+                            if(r!=-1)return r;
+                        }
+                    }
+                }
         }
-    }
-    return SUCCESS;
+    return -1;
 }
 
 int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad){
@@ -330,8 +353,6 @@ int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int 
     BlockDirectory *dir = getNewBlockDir(nameDir,indexI,namePad,indexPad);
     //ASIGNANDO BLOQUE A CARPETA
     nuevo->i_block[0] = sb->s_first_blo;
-
-
     writeInodo(nuevo,path,getInitInode(sb,indexI));
     writeBlockDirectory(dir,path,getInitBlock(sb,sb->s_first_blo));
     delete nuevo;

@@ -298,9 +298,11 @@ void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,
     fputs("[ shape=plaintext label=< \n", fileReport);
     fputs("<table border='0' cellborder='1' cellspacing='0'>\n", fileReport);
     fputs("<tr><td ",fileReport);
+
     fputs("port=\"",fileReport);
     fputs(&to_string((indexPadre+indexBlock)*sizeof(Inodo))[0],fileReport);
     fputs("\"",fileReport);
+
     fputs(">Bloque ",fileReport);
     fputs(&to_string(indexBlock)[0],fileReport);
     fputs("</td></tr>\n", fileReport);
@@ -308,9 +310,16 @@ void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,
     for(i=0;i<16;i++){
         fputs("<tr><td bgcolor = \"#FFA07A\" ",fileReport);
         if(block->b_pointers[i]!=-1){
-            fputs("port=\"ib",fileReport);
-            fputs(&to_string(block->b_pointers[i]*sizeof(Inodo))[0],fileReport);
-            fputs("\"",fileReport);
+            if(level == 1){
+                fputs("port=\"ib",fileReport);
+                fputs(&to_string(block->b_pointers[i]*sizeof(Inodo))[0],fileReport);
+                fputs("\"",fileReport);
+            }else{
+                fputs("port=\"",fileReport);
+                int port = (indexBlock+block->b_pointers[i])*sizeof(Inodo);
+                fputs(&to_string(port)[0],fileReport);
+                fputs("\"",fileReport);
+            }
         }
         fputs(">",fileReport);
         fputs(&to_string(block->b_pointers[i])[0],fileReport);
@@ -318,17 +327,19 @@ void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,
     }
     fputs("</table>\n",fileReport);
     fputs(">];\n",fileReport);
-    if(level==1){
         for(i=0;i<16;i++){
             if(block->b_pointers[i]!=-1){
-                Inodo *ind = readInodo(path,getInitInode(sb,block->b_pointers[i]));
-                if(ind!=NULL){
-                    graphInodo(ind,block->b_pointers[i],fileReport,path,sb);
-                    graphConnectionBloqueInodo(block->b_pointers[i],indexBlock,block->b_pointers[i]*sizeof(Inodo),fileReport);
+                if(level==1){
+                    Inodo *ind = readInodo(path,getInitInode(sb,block->b_pointers[i]));
+                        //graphInodo(ind,block->b_pointers[i],fileReport,path,sb);
+                        //graphConnectionBloqueInodo(block->b_pointers[i],indexBlock,block->b_pointers[i]*sizeof(Inodo),fileReport);
+                    }else{
+                       graphBlockPointer(level-1,indexBlock,block->b_pointers[i],fileReport,path,sb);
+                       int port = (indexBlock+block->b_pointers[i])*sizeof(Inodo);
+                       graphConnectionBloqueBLoque(indexBlock,block->b_pointers[i],port,fileReport);
+                    }
                 }
             }
-        }
-    }
 }
 
 void graphConnectionInodoBloque(int indexnodo,int indexBloque,int indexPuerto,FILE *myFile){
@@ -356,6 +367,19 @@ void graphConnectionBloqueInodo(int indexnodo,int indexBloque,int indexPuerto,FI
     fputs(&to_string(indexnodo)[0],myFile);
     fputs(":",myFile);
     fputs("ib",myFile);
+    fputs(&to_string(indexPuerto)[0],myFile);
+    fputs(";\n",myFile);
+}
+
+void graphConnectionBloqueBLoque(int indexB1,int indexB2,int indexPuerto,FILE *myFile){
+    fputs("b_",myFile);
+    fputs(&to_string(indexB1)[0],myFile);
+    fputs(":",myFile);
+    fputs(&to_string(indexPuerto)[0],myFile);
+    fputs("->",myFile);
+    fputs("b_",myFile);
+    fputs(&to_string(indexB2)[0],myFile);
+    fputs(":",myFile);
     fputs(&to_string(indexPuerto)[0],myFile);
     fputs(";\n",myFile);
 }
