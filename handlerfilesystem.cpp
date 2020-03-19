@@ -197,6 +197,9 @@ Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBloc
     if(res!=SUCCESS){
         return res;
     }
+    if(indexFree == -1){
+        return ERROR_LEVEL_FULL;
+    }
     int indexnew = writeDirectory(sb,path,dirName,dirPad,*indexInodoPadre);
     if(type == DIRECTORY){
         BlockDirectory *block = readBlockDirectory(path,getInitBlock(sb,*indexBloqueActual));
@@ -339,6 +342,15 @@ int getFreeIndexFromBlockPointer(int nivel,Inodo *inodo,int indexBloqueActual,ch
                         if(pointers->b_pointers[indexInBlockP]!=-1){
                             int r = getFreeIndexFromBlockPointer(nivel-1,inodo,pointers->b_pointers[indexInBlockP],path,sb,indexFree);
                             if(r!=-1)return r;
+                        }else{
+                            int bloquePadre = indexBloqueActual;
+                            int bloque = createPointersInd(nivel-1,&indexBloqueActual,sb,path);
+                            if(bloque== -1) return ERROR_LEVEL_FULL;
+                            pointers->b_pointers[indexInBlockP] = bloque;
+                            writeBlockPointer(pointers,path,getInitBlock(sb,bloquePadre));
+                            //*indexBloqueActual = bloque;
+                            *indexFree = 0;
+                            return bloque;
                         }
                     }
                 }
