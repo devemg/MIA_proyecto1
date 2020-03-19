@@ -333,7 +333,7 @@ int getFreeIndexFromBlockPointer(int nivel,Inodo *inodo,int indexBloqueActual,ch
                         }
                     }
                 }else{
-                    BlockPointer *pointers = readBlockPointer(path,getInitBlock(sb,inodo->i_block[nivel]));
+                    BlockPointer *pointers = readBlockPointer(path,getInitBlock(sb,indexBloqueActual));
                         if(pointers == NULL){
                             return ERROR_DIR_NOT_EXIST;
                         }

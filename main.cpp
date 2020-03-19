@@ -34,93 +34,28 @@ int main()
   createPartition(30,MB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion_1");
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
-  createDirectory(true,"vda0","/home");
-  createDirectory(true,"vda0","/usr");
-  createDirectory(true,"vda0","/a");
-  createDirectory(true,"vda0","/b");
-  createDirectory(true,"vda0","/c");
-  createDirectory(true,"vda0","/d");
-  createDirectory(true,"vda0","/e");
-
-  createDirectory(true,"vda0","/f");
-  createDirectory(true,"vda0","/g");
-  createDirectory(true,"vda0","/h");
-  createDirectory(true,"vda0","/i");
-  createDirectory(true,"vda0","/j");
-
-  createDirectory(true,"vda0","/k");
-  createDirectory(true,"vda0","/l");
-  createDirectory(true,"vda0","/m");
-  createDirectory(true,"vda0","/n");
-  createDirectory(true,"vda0","/o");
-
-  createDirectory(true,"vda0","/p");
-  createDirectory(true,"vda0","/q");
-  createDirectory(true,"vda0","/r");
-  createDirectory(true,"vda0","/s");
-  createDirectory(true,"vda0","/t");
-  createDirectory(true,"vda0","/u");
-
-  createDirectory(true,"vda0","/v");
-
-  createDirectory(true,"vda0","/w");
-
-  createDirectory(true,"vda0","/w1");
-  createDirectory(true,"vda0","/w2");
-  createDirectory(true,"vda0","/w3");
-  createDirectory(true,"vda0","/w4");
-  createDirectory(true,"vda0","/w5");
-  createDirectory(true,"vda0","/w6");
-  createDirectory(true,"vda0","/w7");
-  createDirectory(true,"vda0","/w8");
-  createDirectory(true,"vda0","/w9");
-  createDirectory(true,"vda0","/w10");
-  createDirectory(true,"vda0","/w11");
-  createDirectory(true,"vda0","/w12");
-  createDirectory(true,"vda0","/w13");
-  createDirectory(true,"vda0","/w14");
-  createDirectory(true,"vda0","/w15");
-
-  createDirectory(true,"vda0","/w16");
-
-  createDirectory(true,"vda0","/w17");
-  createDirectory(true,"vda0","/w18");
-  createDirectory(true,"vda0","/w19");
-  createDirectory(true,"vda0","/w20");
-  createDirectory(true,"vda0","/w21");
-  createDirectory(true,"vda0","/w22");
-  createDirectory(true,"vda0","/w23");
-  createDirectory(true,"vda0","/w24");
-  createDirectory(true,"vda0","/w25");
-  createDirectory(true,"vda0","/w26");
-  createDirectory(true,"vda0","/w27");
-  createDirectory(true,"vda0","/w28");
-
-  createDirectory(true,"vda0","/w29");
-  createDirectory(true,"vda0","/w30");
-  createDirectory(true,"vda0","/w31");
-  createDirectory(true,"vda0","/w32");
-  createDirectory(true,"vda0","/w33");
-  createDirectory(true,"vda0","/w34");
-  createDirectory(true,"vda0","/w35");
-  createDirectory(true,"vda0","/w36");
-  createDirectory(true,"vda0","/w37");
-  createDirectory(true,"vda0","/w38");
-  createDirectory(true,"vda0","/w39");
-  createDirectory(true,"vda0","/w40");
-  createDirectory(true,"vda0","/w41");
-  createDirectory(true,"vda0","/w42");
-  createDirectory(true,"vda0","/w43");
 
 
-  createDirectory(true,"vda0","/w50");
+  int i;
+  //llenando apuntadores directos
+  for(i = 0;i<23;i++){
+      createDirectory(true,"vda0","/a");
+  }
+  //llenando indirecto apuntador simple
+  for(i = 0;i<15;i++){
+      createDirectory(true,"vda0","/a");
+  }
+  //llenando indirecto apuntador doble
+  for(i = 0;i<225;i++){
+      createDirectory(true,"vda0","/a");
+  }
 
-  //createDirectory(true,"vda0","/w30");
-
-  //createDirectory(true,"vda0","/w31");
-
-  //createDirectory(true,"vda0","/w32");
-
+  //llenando indirecto apuntador triple
+  /*
+    for(i = 0;i<55;i++){
+      createDirectory(true,"vda0","/a");
+  }
+  */
   //createDirectory(true,"vda0","/home/emely");
   //createDirectory(true,"vda0","/home/emely/fotos");
   //createDirectory(true,"vda0","/home/flaca/fotos");
