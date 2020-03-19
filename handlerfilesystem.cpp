@@ -253,6 +253,7 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
                     continue;
                 }
                 found = true;
+                *indexBloqueActual = bloque;
             }
         }else{
             if(isDirect){

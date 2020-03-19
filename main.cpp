@@ -81,7 +81,24 @@ int main()
   createDirectory(true,"vda0","/w14");
   createDirectory(true,"vda0","/w15");
 
-  //createDirectory(true,"vda0","/w16");
+  createDirectory(true,"vda0","/w16");
+
+  createDirectory(true,"vda0","/w17");
+  createDirectory(true,"vda0","/w18");
+  createDirectory(true,"vda0","/w19");
+  createDirectory(true,"vda0","/w20");
+  createDirectory(true,"vda0","/w21");
+  createDirectory(true,"vda0","/w22");
+  createDirectory(true,"vda0","/w23");
+  createDirectory(true,"vda0","/w24");
+  createDirectory(true,"vda0","/w25");
+  createDirectory(true,"vda0","/w26");
+  createDirectory(true,"vda0","/w27");
+  createDirectory(true,"vda0","/w28");
+  createDirectory(true,"vda0","/w29");
+  createDirectory(true,"vda0","/w30");
+
+  createDirectory(true,"vda0","/w31");
 
   //createDirectory(true,"vda0","/home/emely");
   //createDirectory(true,"vda0","/home/emely/fotos");
