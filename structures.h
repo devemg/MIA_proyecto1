@@ -139,7 +139,7 @@ struct Inodo{
 };
 
 struct Content{
-    char b_name[14];
+    char b_name[12];
     int b_inodo;
 };
 

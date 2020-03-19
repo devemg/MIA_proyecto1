@@ -96,7 +96,7 @@ Response formatPart(char path[], char partition[], DeleteType tipoFormateo, File
     writeSuperBlock(sb,path,initPart);
     //CREAR ARCHIVO DE USERS
     char *users = "1,G,root,\n1,U,root,root,123\n";
-    //createFileWithText("/users.txt",true,users,28,path,partition);
+    createFileWithText("/users.txt",true,users,28,path,partition);
     delete disco;
     delete sb;
     return SUCCESS;
@@ -401,7 +401,6 @@ void writeSuperBlock(SuperBlock *sb,char path[],int init){
          cout<<"Error al abrir el disco\n";
          return;
      }
-     //escribir MBR en disco
      fseek(myFile, init, SEEK_SET);
      fwrite(sb, sizeof(SuperBlock), 1, myFile);
      //cerrando stream
@@ -416,7 +415,6 @@ void writeBlockDirectory(BlockDirectory *sb,char path[],int init){
          cout<<"Error al abrir el disco\n";
          return;
      }
-     //escribir MBR en disco
      fseek(myFile, init, SEEK_SET);
      fwrite(sb, sizeof(BlockDirectory), 1, myFile);
      //cerrando stream
@@ -431,7 +429,6 @@ void writeBlockFile(BlockFile *sb,char path[],int init){
          cout<<"Error al abrir el disco\n";
          return;
      }
-     //escribir MBR en disco
      fseek(myFile, init, SEEK_SET);
      fwrite(sb, sizeof(BlockFile), 1, myFile);
      //cerrando stream
@@ -510,7 +507,6 @@ void writeBitmap(int cantInodos,int init,char path[]){
          cout<<"Error al abrir el disco\n";
          return;
      }
-     //escribir MBR en disco
      fseek(myFile, init, SEEK_SET);
    while(contador<cantInodos){
         fwrite("0", sizeof(char), 1, myFile);
@@ -733,8 +729,10 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
         }
     }
 
+    int dirBlockFile = getInitBlock(sb,sb->s_first_blo);
+
     writeInodo(inodo,path,getInitInode(sb,sb->s_firts_ino));
-    writeBlockFile(block,path,getInitBlock(sb,sb->s_first_blo));
+    writeBlockFile(block,path,dirBlockFile);
 
     BlockDirectory *blockPad = readBlockDirectory(path,getInitBlock(sb,indexBloqueActual));
     blockPad->b_content[indexFree].b_inodo = sb->s_firts_ino;

@@ -35,27 +35,25 @@ int main()
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
-  createDirectory(true,"vda0","/a");
+  //createFile("/home/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
+  //createFile("/home/fil2.txt",true,100,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+
+  //catFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  /*
   int i;
   //llenando apuntadores directos
   for(i = 0;i<23;i++){
       createDirectory(true,"vda0","/a");
   }
-
-
   //llenando indirecto apuntador simple
   for(i = 0;i<15;i++){
       createDirectory(true,"vda0","/a");
   }
-/*
   //llenando indirecto apuntador doble 225
   for(i = 0;i<50;i++){
       createDirectory(true,"vda0","/a");
   }
-*/
-
-  /*
   //llenando indirecto apuntador triple
     for(i = 0;i<55;i++){
       createDirectory(true,"vda0","/a");
@@ -93,7 +91,7 @@ int main()
   //showMounts();
   //reportBlocks("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/blocks.png");
   //reportInodes("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/inodos.png");
-  reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
+  //reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
   //cout<<"reporte generado\n";
   //myPause();
   //reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");
