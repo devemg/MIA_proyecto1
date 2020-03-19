@@ -208,7 +208,7 @@ Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBloc
         BlockPointer *block = readBlockPointer(path,getInitBlock(sb,*indexBloqueActual));
         block->b_pointers[indexFree] = indexnew;
         writeBlockPointer(block,path,getInitBlock(sb,*indexBloqueActual));
-        delete block;
+       // delete block;
     }
     *indexInodoPadre = indexnew;
 
@@ -225,7 +225,7 @@ Response getFreeIndexDirectory(char nameDir[],char path[],SuperBlock *sb,int *in
     bool isDirect = true;
     BlockDirectory *dirblock = NULL;
     bool found = false;
-    while(idPointBlock<16 && !found){
+    while(idPointBlock<SIZE_BLOCKS_INODE && !found){
         if(inodo->i_block[idPointBlock]!=-1){
             if(isDirect){
                 dirblock = readBlockDirectory(path,getInitBlock(sb,inodo->i_block[idPointBlock]));
@@ -323,7 +323,7 @@ int getFreeIndexFromBlockPointer(int nivel,Inodo *inodo,int indexBloqueActual,ch
                             return ERROR_DIR_NOT_EXIST;
                         }
                     int indexInBlockP;
-                    for(indexInBlockP = 0;indexInBlockP<16;indexInBlockP++){
+                    for(indexInBlockP = 0;indexInBlockP<SIZE_BLOCKS_INODE;indexInBlockP++){
                         if(pointers->b_pointers[indexInBlockP]==-1){
                             *indexFree = indexInBlockP;
                             return indexBloqueActual;
@@ -335,7 +335,7 @@ int getFreeIndexFromBlockPointer(int nivel,Inodo *inodo,int indexBloqueActual,ch
                             return ERROR_DIR_NOT_EXIST;
                         }
                     int indexInBlockP;
-                    for(indexInBlockP = 0;indexInBlockP<16;indexInBlockP++){
+                    for(indexInBlockP = 0;indexInBlockP<SIZE_BLOCKS_INODE;indexInBlockP++){
                         if(pointers->b_pointers[indexInBlockP]!=-1){
                             int r = getFreeIndexFromBlockPointer(nivel-1,inodo,pointers->b_pointers[indexInBlockP],path,sb,indexFree);
                             if(r!=-1)return r;
@@ -517,7 +517,7 @@ getCurrentDate(nuevo->i_atime);
 getCurrentDate(nuevo->i_ctime);
 getCurrentDate(nuevo->i_mtime);
 int i;
-for(i=0;i<16;i++){
+for(i=0;i<SIZE_BLOCKS_INODE;i++){
     nuevo->i_block[i]=-1;
 }
     nuevo->i_type = type;

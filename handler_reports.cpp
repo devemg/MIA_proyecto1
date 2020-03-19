@@ -241,7 +241,7 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
         i++;
     }
 
-    while (i<16) {
+    while (i<SIZE_BLOCKS_INODE) {
       fputs("<tr><td bgcolor=\"#a8ffdf\">AI", myFile);
       fputs(&to_string(i-11)[0],myFile);
       fputs("</td><td ",myFile);
@@ -307,7 +307,7 @@ void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,
     fputs(&to_string(indexBlock)[0],fileReport);
     fputs("</td></tr>\n", fileReport);
     int i;
-    for(i=0;i<16;i++){
+    for(i=0;i<SIZE_BLOCKS_INODE;i++){
         fputs("<tr><td bgcolor = \"#FFA07A\" ",fileReport);
         if(block->b_pointers[i]!=-1){
             if(level == 1){
@@ -327,7 +327,7 @@ void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,
     }
     fputs("</table>\n",fileReport);
     fputs(">];\n",fileReport);
-        for(i=0;i<16;i++){
+        for(i=0;i<SIZE_BLOCKS_INODE;i++){
             if(block->b_pointers[i]!=-1){
                 if(level==1){
                     Inodo *ind = readInodo(path,getInitInode(sb,block->b_pointers[i]));
@@ -541,7 +541,7 @@ Response reportInodes(char path[], char name[], char path_report[]){
                         i++;
                     }
 
-                    while (i<16) {
+                    while (i<SIZE_BLOCKS_INODE) {
                       fputs("<tr><td bgcolor=\"#FF5733\">AI", fileReport);
                       fputs(&to_string(i-11)[0],fileReport);
                       fputs("</td><td bgcolor=\"#FF5733\">",fileReport);
