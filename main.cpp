@@ -35,27 +35,33 @@ int main()
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
+  createDirectory(true,"vda0","/a");
 
   int i;
   //llenando apuntadores directos
   for(i = 0;i<23;i++){
       createDirectory(true,"vda0","/a");
   }
+
+
   //llenando indirecto apuntador simple
   for(i = 0;i<15;i++){
       createDirectory(true,"vda0","/a");
   }
-  //llenando indirecto apuntador doble
-  for(i = 0;i<225;i++){
+/*
+  //llenando indirecto apuntador doble 225
+  for(i = 0;i<50;i++){
       createDirectory(true,"vda0","/a");
   }
+*/
 
-  //llenando indirecto apuntador triple
   /*
+  //llenando indirecto apuntador triple
     for(i = 0;i<55;i++){
       createDirectory(true,"vda0","/a");
   }
   */
+
   //createDirectory(true,"vda0","/home/emely");
   //createDirectory(true,"vda0","/home/emely/fotos");
   //createDirectory(true,"vda0","/home/flaca/fotos");
@@ -90,7 +96,7 @@ int main()
   reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
   //cout<<"reporte generado\n";
   //myPause();
-  reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");
+  //reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");
   //reportBitmap(0,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmap_inodos.txt");
   //reportBitmap(1,"/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/bitmap_bloques.txt");
 

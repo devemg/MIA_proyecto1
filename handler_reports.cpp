@@ -189,6 +189,7 @@ void reportTree(char path_report[], char id[]){
 }
 
 void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock *sb){
+    if(inodo==NULL) return;
     fputs("i_",myFile);
     fputs(&to_string(indexInodo)[0],myFile);
     fputs("[ shape=plaintext label=< \n", myFile);
@@ -261,7 +262,6 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
 
     //GRAFICAR BLOQUES
     i=0;
-    /*
     while(i<12){
         if(inodo->i_block[i]!=-1){
             int pos = getInitBlock(sb,inodo->i_block[i]);
@@ -279,9 +279,8 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
              graphConnectionInodoBloque(indexInodo,inodo->i_block[i],(indexInodo+inodo->i_block[i])*sizeof(Inodo),myFile);
         }
        i++;
-    }*/
-    i = 12;
-    while(i<15){
+    }
+    while(i<SIZE_BLOCKS_INODE){
         if(inodo->i_block[i]!=-1){
             graphBlockPointer(i-11,indexInodo,inodo->i_block[i],myFile,path,sb);
             graphConnectionInodoBloque(indexInodo,inodo->i_block[i],(indexInodo+inodo->i_block[i])*sizeof(Inodo),myFile);
@@ -331,8 +330,8 @@ void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,
             if(block->b_pointers[i]!=-1){
                 if(level==1){
                     Inodo *ind = readInodo(path,getInitInode(sb,block->b_pointers[i]));
-                        //graphInodo(ind,block->b_pointers[i],fileReport,path,sb);
-                        //graphConnectionBloqueInodo(block->b_pointers[i],indexBlock,block->b_pointers[i]*sizeof(Inodo),fileReport);
+                        graphInodo(ind,block->b_pointers[i],fileReport,path,sb);
+                        graphConnectionBloqueInodo(block->b_pointers[i],indexBlock,block->b_pointers[i]*sizeof(Inodo),fileReport);
                     }else{
                        graphBlockPointer(level-1,indexBlock,block->b_pointers[i],fileReport,path,sb);
                        int port = (indexBlock+block->b_pointers[i])*sizeof(Inodo);
@@ -435,7 +434,7 @@ void graphBlockDirectory(BlockDirectory *block,int initBlock, FILE *myFile,int i
     fputs(">];\n",myFile);
     for(i=2;i<4;i++){
         if(block->b_content[i].b_inodo!=-1){
-            Inodo *inodo = readInodo(path,sb->s_inode_start+getInitInode(sb,block->b_content[i].b_inodo));
+            Inodo *inodo = readInodo(path,getInitInode(sb,block->b_content[i].b_inodo));
             graphInodo(inodo,block->b_content[i].b_inodo,myFile,path,sb);
             graphConnectionBloqueInodo(block->b_content[i].b_inodo,initBlock,block->b_content[i].b_inodo*sizeof(Inodo),myFile);
 
