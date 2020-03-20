@@ -328,27 +328,29 @@ void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,
     }
     fputs("</table>\n",fileReport);
     fputs(">];\n",fileReport);
-    if(graphConnection){
+
         for(i=0;i<SIZE_BLOCKS_INODE;i++){
             if(block->b_pointers[i]!=-1){
                 if(level==1){
                     if(type==IN_DIRECTORY){
                         Inodo *ind = readInodo(path,getInitInode(sb,block->b_pointers[i]));
                             graphInodo(ind,block->b_pointers[i],fileReport,path,sb);
+                            if(graphConnection)
                             graphConnectionBloqueInodo(block->b_pointers[i],indexBlock,block->b_pointers[i]*sizeof(Inodo),fileReport);
                     }else{
                         BlockFile *file = readBlockFile(path,getInitBlock(sb,block->b_pointers[i]));
                         graphBlockFile(file,block->b_pointers[i],fileReport,indexBlock);
                         int port = (indexBlock+block->b_pointers[i])*sizeof(Inodo);
+                        if(graphConnection)
                         graphConnectionBloqueBLoque(indexBlock,block->b_pointers[i],port,fileReport);
                     }
                 }else{
                        graphBlockPointer(level-1,indexBlock,block->b_pointers[i],fileReport,path,sb,graphConnection,type);
                        int port = (indexBlock+block->b_pointers[i])*sizeof(Inodo);
+                       if(graphConnection)
                        graphConnectionBloqueBLoque(indexBlock,block->b_pointers[i],port,fileReport);
                     }
                 }
-            }
     }
 }
 
@@ -633,7 +635,7 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                     //apuntadores indirectos
                     for(i=12;i<15;i++){
                         if(inodo->i_block[i]!=-1){
-                            graphBlockPointer(i,contador,inodo->i_block[i],fileReport,path,sb,false,IN_DIRECTORY);
+                            graphBlockPointer(i-11,contador,inodo->i_block[i],fileReport,path,sb,false,inodo->i_type);
                         }
                     }
                 }

@@ -37,6 +37,10 @@ int main()
 
   //createFile("/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
+
+  //2751
+  //16151
+
   createFile("/fil2.txt",true,2751,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
   //catFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
@@ -89,7 +93,7 @@ int main()
   */
 
   //showMounts();
-  //reportBlocks("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/blocks.png");
+  reportBlocks("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/blocks.png");
   //reportInodes("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/inodos.png");
   reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
   //cout<<"reporte generado\n";
