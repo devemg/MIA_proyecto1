@@ -456,7 +456,15 @@ void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo)
     fputs(&to_string(initBlock)[0],myFile);
     fputs("</td></tr>\n", myFile);
     fputs("<tr><td>",myFile);
-    fputs("CONTENIDO",myFile);
+    int i;
+    for(i=0;i<64;i++){
+        if(block->b_content[i]!='\0'){
+           fprintf(myFile,"%c", block->b_content[i]);
+           if(i%10 == 0 && i!=0){
+               fputs("<br/>",myFile);
+           }
+        }
+    }
     fputs("</td></tr>\n",myFile);
     fputs("</table>\n",myFile);
     fputs(">];\n",myFile);
@@ -578,7 +586,7 @@ Response reportBlocks(char path[], char name[], char path_report[]){
      }
 
      FILE * fileReport;
-      fileReport = fopen ("report_blocks.dot","w+");
+      fileReport = fopen ("report_blocks.dot","w");
       if (fileReport==NULL)
       {
           cout<<"Error al crear archivo de reporte\n";
@@ -630,13 +638,7 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                                     fputs(colors[i],fileReport);
                                     fputs("\">b_name</td><td bgcolor=\"",fileReport);
                                     fputs(colors[i],fileReport);
-                                    fputs("\" ",fileReport);
-                                    if(block->b_content[i].b_inodo!=-1 && block->b_content[i].b_inodo!=contador){
-                                        fputs("port=\"ib",fileReport);
-                                        fputs(&to_string(block->b_content[i].b_inodo*sizeof(Inodo))[0],fileReport);
-                                        fputs("\"",fileReport);
-                                    }
-                                    fputs(">",fileReport);
+                                    fputs("\" >",fileReport);
                                     fputs(block->b_content[i].b_name,fileReport);
                                     fputs("</td></tr>\n",fileReport);
                                     fputs("<tr><td bgcolor=\"",fileReport);
@@ -657,15 +659,24 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                                 fputs(&to_string(inodo->i_block[i])[0],fileReport);
                                 fputs("[ shape=plaintext label=< \n", fileReport);
                                 fputs("<table border='0' cellborder='1' cellspacing='0'>\n", fileReport);
-                                fputs("<tr><td ",fileReport);
-                                fputs(" colspan=\"3\">Bloque ",fileReport);
+                                fputs("<tr><td >Bloque ",fileReport);
                                 fputs(&to_string(contador)[0],fileReport);
                                 fputs("</td></tr>\n", fileReport);
                                 fputs("<tr><td bgcolor = \"#FFA07A\">",fileReport);
-                                fputs("CONTENIDO",fileReport);
+                                int i;
+                                for(i=0;i<64;i++){
+                                    if(block->b_content[i]!='\0'){
+                                       fprintf(fileReport,"%c", block->b_content[i]);
+                                       if(i%10 == 0 && i!=0){
+                                           fputs("<br/>",fileReport);
+                                       }
+                                    }
+                                }
+                                //fprintf(myFile,"%c",block->b_content);
                                 fputs("</td></tr>\n",fileReport);
                                 fputs("</table>\n",fileReport);
                                 fputs(">];\n",fileReport);
+
                             }
                         }
                     }

@@ -581,7 +581,6 @@ BlockFile* readBlockFile(char path[], int init){
         return NULL;
     }
     BlockFile *bd = (BlockFile*)malloc(sizeof(BlockFile));
-
     fseek(myFile, init, SEEK_SET);
     fread(bd, sizeof(BlockFile), 1, myFile);
     fclose(myFile);
@@ -702,6 +701,7 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
     int indexofInodo = 0;
     int contadorCaracteres = 0;
     int indexCaracteres = 0;
+    int contadorBloques = 0;
     while(indexCaracteres<size){
         if(contadorCaracteres>=64){
             if(indexofInodo<12){
@@ -715,8 +715,8 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
             sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
             sb->s_free_blocks_count--;
             contadorCaracteres = 0;
+            contadorBloques++;
         }
-
         block->b_content[contadorCaracteres] = text[indexCaracteres];
         contadorCaracteres++;
         indexCaracteres++;
@@ -728,11 +728,12 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
             //apuntadores indirectos
         }
     }
-
-    int dirBlockFile = getInitBlock(sb,sb->s_first_blo);
-
+    contadorBloques++;
     writeInodo(inodo,path,getInitInode(sb,sb->s_firts_ino));
-    writeBlockFile(block,path,dirBlockFile);
+    writeBlockFile(block,path,getInitBlock(sb,sb->s_first_blo));
+
+    //BlockFile *myfile = readBlockFile(path,getInitBlock(sb,sb->s_first_blo));
+    //cout<<myfile->b_content;
 
     BlockDirectory *blockPad = readBlockDirectory(path,getInitBlock(sb,indexBloqueActual));
     blockPad->b_content[indexFree].b_inodo = sb->s_firts_ino;
@@ -774,7 +775,7 @@ Response catFile(char filePath[], char path[], char partition[]){
      char *title;
     Response res = findFile(filePath,path,partition,&content,&title);
     if(res!=SUCCESS)return res;
-    cout<<"--->"<<title<<"<---\n";
+    //cout<<"--->"<<title<<"<---\n";
     cout<<content<<endl;
     return SUCCESS;
 }
@@ -853,6 +854,8 @@ Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **conten
                 strcat((*content),file->b_content);
             }
         }
+        //APUNTADORES INDIRECTOS
+
     }
     return SUCCESS;
 }
