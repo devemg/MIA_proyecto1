@@ -83,4 +83,6 @@ void saveBlockFile(BlockFile *block,SuperBlock *sb,char path[]);
 
 Response addFileBlockPointers(Inodo *inodo,int *indexofInodo,BlockFile *block,SuperBlock *sb,char path[]);
 
+int findDirectoryInPointers(int level,int indexBlock,int *indexInodoActual,char namedir[],SuperBlock *sb,char path[]);
+
 #endif // HANDLERFILESISTEM_H

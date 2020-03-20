@@ -184,9 +184,57 @@ int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *s
             }
         }
     }
-    //buscar en simble
-    //buscar en doble
-    //buscar en triple
+    for(indexBlock = 12;indexBlock<14;indexBlock++){
+        int index = findDirectoryInPointers(indexBlock-11,inodo->i_block[indexBlock],indexInodoActual,namedir,sb,path);
+        if(index!=-1)return index;
+    }
+    return -1;
+}
+
+int findDirectoryInPointers(int level,int indexBlock,int *indexInodoActual,char namedir[],SuperBlock *sb,char path[]){
+
+    if(level == 1){
+        BlockPointer *pointers = readBlockPointer(path,getInitBlock(sb,indexBlock));
+        int indexofPointer;
+        for(indexofPointer = 0;indexofPointer<14;indexofPointer++){
+            if(pointers->b_pointers[indexofPointer]!=-1){
+               //BUSCANDO EN INODO
+                Inodo *inodo = readInodo(path,getInitInode(sb,pointers->b_pointers[indexofPointer]));
+                if(inodo==NULL)return -1;
+                int indexBlock;
+                BlockDirectory *block;
+                for(indexBlock = 0;indexBlock<12;indexBlock++){
+                    if(inodo->i_block[indexBlock]!=-1){
+                        if(inodo->i_type == IN_DIRECTORY){
+                            block = readBlockDirectory(path,getInitBlock(sb,inodo->i_block[indexBlock]));
+                            if(block == NULL)return -1;
+                            int i=0;
+                                if(block->b_content[i].b_inodo!=-1){
+                                    if(strcmp(block->b_content[i].b_name,namedir)==0){
+                                        *indexInodoActual = block->b_content[0].b_inodo;
+                                        return inodo->i_block[indexBlock];
+                                    }
+                                }
+                        }
+                    }
+                }
+            }
+        }
+
+    }else{
+        BlockPointer *pointers = readBlockPointer(path,getInitBlock(sb,indexBlock));
+        int indexofPointer;
+        for(indexofPointer = 0;indexofPointer<14;indexofPointer++){
+            if(pointers->b_pointers[indexofPointer]!=-1){
+                int i = findDirectoryInPointers(level-1,pointers->b_pointers[indexofPointer],indexInodoActual,namedir,sb,path);
+                if(i!=-1){
+                    return i;
+                }
+            }
+        }
+
+    }
+
     return -1;
 }
 

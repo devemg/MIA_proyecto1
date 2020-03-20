@@ -36,14 +36,44 @@ int main()
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
   //createFile("/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  createDirectory(true,"vda0","/a");
+  createDirectory(true,"vda0","/b");
+  createDirectory(true,"vda0","/c");
+  createDirectory(true,"vda0","/d");
+  createDirectory(true,"vda0","/e");
+  createDirectory(true,"vda0","/f");
+  createDirectory(true,"vda0","/g");
+  createDirectory(true,"vda0","/h");
+  createDirectory(true,"vda0","/i");
+  createDirectory(true,"vda0","/j");
+  createDirectory(true,"vda0","/k");
+  createDirectory(true,"vda0","/l");
+  createDirectory(true,"vda0","/m");
+  createDirectory(true,"vda0","/n");
+  createDirectory(true,"vda0","/o");
+  createDirectory(true,"vda0","/p");
+  createDirectory(true,"vda0","/q");
+  createDirectory(true,"vda0","/r");
+  createDirectory(true,"vda0","/s");
+  createDirectory(true,"vda0","/t");
+  createDirectory(true,"vda0","/u");
+  createDirectory(true,"vda0","/v");
+  createDirectory(true,"vda0","/w");
+  createDirectory(true,"vda0","/x");
+  createDirectory(true,"vda0","/y");
+  createDirectory(true,"vda0","/z");
 
 
+  for(int i;i<12;i++){
+      createDirectory(true,"vda0","/zn");
+  }
+  createDirectory(true,"vda0","/coke");
   //2751
   //16151
 
-  createFile("/fil2.txt",true,2751,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  createFile("/coke/file.txt",true,15,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
-  //catFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  catFile("/coke/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
   /*
   int i;
   //llenando apuntadores directos
@@ -93,7 +123,7 @@ int main()
   */
 
   //showMounts();
-  reportBlocks("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/blocks.png");
+  //reportBlocks("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/blocks.png");
   //reportInodes("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/inodos.png");
   reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
   //cout<<"reporte generado\n";
