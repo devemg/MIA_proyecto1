@@ -37,7 +37,7 @@ int main()
 
   //createFile("/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
-  createFile("/fil2.txt",true,1727,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  createFile("/fil2.txt",true,2751,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
   //catFile("/home/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
   /*

@@ -701,31 +701,33 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
     int indexofInodo = 0;
     int contadorCaracteres = 0;
     int indexCaracteres = 0;
-    while(indexCaracteres<size){
-        if(contadorCaracteres>=64){
+    bool keepSaving = true;
+    while(keepSaving){
+        if(contadorCaracteres>=64 || indexCaracteres>=size){
             if(indexofInodo<12){
                 inodo->i_block[indexofInodo] = sb->s_first_blo;
                 saveBlockFile(block,sb,path);
                 indexofInodo++;
             }else{
                Response r = addFileBlockPointers(inodo,&indexofInodo,block,sb,path);
-               if(r!=SUCCESS) return r;
+               if(r==ERROR_LEVEL_FULL){
+                   if(indexofInodo<14){
+                        indexofInodo++;
+                        continue;
+                   }
+               }else if(r!=SUCCESS){
+                   return r;
+               }
             }
             block = getNewBlockFile();
             contadorCaracteres = 0;
         }
         block->b_content[contadorCaracteres] = text[indexCaracteres];
+        if(indexCaracteres>=size){
+            break;
+        }
         contadorCaracteres++;
         indexCaracteres++;
-    }
-    if(contadorCaracteres>0){
-        if(indexofInodo<12){
-            inodo->i_block[indexofInodo] = sb->s_first_blo;
-            saveBlockFile(block,sb,path);
-        }else{
-          Response r = addFileBlockPointers(inodo,&indexofInodo,block,sb,path);
-          if(r!=SUCCESS) return r;
-        }
     }
     writeInodo(inodo,path,getInitInode(sb,sb->s_firts_ino));
 
@@ -744,10 +746,6 @@ Response addFileBlockPointers(Inodo *inodo,int *indexofInodo,BlockFile *block,Su
         int free= 0;
         int res =getFreeIndexFromBlockPointer(*indexofInodo,inodo,inodo->i_block[*indexofInodo],path,sb,&free);
         if(res==-1){
-            if((*indexofInodo-11)<14){
-                *indexofInodo++;
-                return SUCCESS;
-            }
             return ERROR_LEVEL_FULL;
         }
         BlockPointer *point = readBlockPointer(path,getInitBlock(sb,res));
@@ -760,9 +758,9 @@ Response addFileBlockPointers(Inodo *inodo,int *indexofInodo,BlockFile *block,Su
         int bloque = createPointersInd(*indexofInodo,&nuevoIndex,sb,path);
          if(bloque== -1) return ERROR_LEVEL_FULL;
          inodo->i_block[*indexofInodo] = bloque;
-         BlockPointer *point = readBlockPointer(path,getInitBlock(sb,bloque));
+         BlockPointer *point = readBlockPointer(path,getInitBlock(sb,nuevoIndex));
          point->b_pointers[0] = sb->s_first_blo;
-         writeBlockPointer(point,path,getInitBlock(sb,bloque));
+         writeBlockPointer(point,path,getInitBlock(sb,nuevoIndex));
          //CREAR BLOQUE CON CONTENIDO
          saveBlockFile(block,sb,path);
     }
