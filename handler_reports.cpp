@@ -282,14 +282,15 @@ void graphInodo(Inodo* inodo,int indexInodo,FILE *myFile,char path[],SuperBlock 
     }
     while(i<SIZE_BLOCKS_INODE){
         if(inodo->i_block[i]!=-1){
-            graphBlockPointer(i-11,indexInodo,inodo->i_block[i],myFile,path,sb,true);
+            graphBlockPointer(i-11,indexInodo,inodo->i_block[i],myFile,path,sb,true,inodo->i_type);
             graphConnectionInodoBloque(indexInodo,inodo->i_block[i],(indexInodo+inodo->i_block[i])*sizeof(Inodo),myFile);
         }
         i++;
     }
 }
 
-void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,char path[],SuperBlock *sb,bool graphConnection){
+void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,char path[],SuperBlock *sb,
+                       bool graphConnection,TypeInode type){
     BlockPointer *block = readBlockPointer(path,getInitBlock(sb,indexBlock));
     if(block==NULL) return;
     fputs("b_",fileReport);
@@ -309,10 +310,11 @@ void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,
     for(i=0;i<SIZE_BLOCKS_INODE;i++){
         fputs("<tr><td bgcolor = \"#FFA07A\" ",fileReport);
         if(block->b_pointers[i]!=-1){
-            if(level == 1){
+            if(level == 1 && type == IN_DIRECTORY){
                 fputs("port=\"ib",fileReport);
                 fputs(&to_string(block->b_pointers[i]*sizeof(Inodo))[0],fileReport);
                 fputs("\"",fileReport);
+
             }else{
                 fputs("port=\"",fileReport);
                 int port = (indexBlock+block->b_pointers[i])*sizeof(Inodo);
@@ -330,11 +332,18 @@ void graphBlockPointer(int level,int indexPadre,int indexBlock,FILE *fileReport,
         for(i=0;i<SIZE_BLOCKS_INODE;i++){
             if(block->b_pointers[i]!=-1){
                 if(level==1){
-                    Inodo *ind = readInodo(path,getInitInode(sb,block->b_pointers[i]));
-                        graphInodo(ind,block->b_pointers[i],fileReport,path,sb);
-                        graphConnectionBloqueInodo(block->b_pointers[i],indexBlock,block->b_pointers[i]*sizeof(Inodo),fileReport);
+                    if(type==IN_DIRECTORY){
+                        Inodo *ind = readInodo(path,getInitInode(sb,block->b_pointers[i]));
+                            graphInodo(ind,block->b_pointers[i],fileReport,path,sb);
+                            graphConnectionBloqueInodo(block->b_pointers[i],indexBlock,block->b_pointers[i]*sizeof(Inodo),fileReport);
                     }else{
-                       graphBlockPointer(level-1,indexBlock,block->b_pointers[i],fileReport,path,sb,graphConnection);
+                        BlockFile *file = readBlockFile(path,getInitBlock(sb,block->b_pointers[i]));
+                        graphBlockFile(file,block->b_pointers[i],fileReport,indexBlock);
+                        int port = (indexBlock+block->b_pointers[i])*sizeof(Inodo);
+                        graphConnectionBloqueBLoque(indexBlock,block->b_pointers[i],port,fileReport);
+                    }
+                }else{
+                       graphBlockPointer(level-1,indexBlock,block->b_pointers[i],fileReport,path,sb,graphConnection,type);
                        int port = (indexBlock+block->b_pointers[i])*sizeof(Inodo);
                        graphConnectionBloqueBLoque(indexBlock,block->b_pointers[i],port,fileReport);
                     }
@@ -453,8 +462,7 @@ void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo)
     fputs("<tr><td ",myFile);
         fputs("port=\"",myFile);
         fputs(&to_string((indexInodo+initBlock)*sizeof(Inodo))[0],myFile);
-        fputs("\"",myFile);
-    fputs(" colspan=\"3\">Bloque ",myFile);
+        fputs("\">Bloque ",myFile);
     fputs(&to_string(initBlock)[0],myFile);
     fputs("</td></tr>\n", myFile);
     fputs("<tr><td>",myFile);
@@ -625,7 +633,7 @@ Response reportBlocks(char path[], char name[], char path_report[]){
                     //apuntadores indirectos
                     for(i=12;i<15;i++){
                         if(inodo->i_block[i]!=-1){
-                            graphBlockPointer(inodo->i_block[i]-11,inodo->i_block[i],contador,fileReport,path,sb,false);
+                            graphBlockPointer(i,contador,inodo->i_block[i],fileReport,path,sb,false,IN_DIRECTORY);
                         }
                     }
                 }

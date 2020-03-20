@@ -79,4 +79,8 @@ BlockPointer* getNewBlockPointer();
 
 int createPointersInd(int idPointBlock,int *idBloqueActual,SuperBlock *sb,char path[]);
 
+void saveBlockFile(BlockFile *block,SuperBlock *sb,char path[]);
+
+Response addFileBlockPointers(Inodo *inodo,int *indexofInodo,BlockFile *block,SuperBlock *sb,char path[]);
+
 #endif // HANDLERFILESISTEM_H

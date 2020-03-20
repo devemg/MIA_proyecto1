@@ -32,6 +32,6 @@ void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo)
 
 Response graphFile(char *text,char *title,char reportPath[]);
 
-void graphBlockPointer(int level,int indexBlock,int indexInodo,FILE *fileReport,char path[],SuperBlock *sb,bool graphConnection);
+void graphBlockPointer(int level,int indexBlock,int indexInodo,FILE *fileReport,char path[],SuperBlock *sb,bool graphConnection,TypeInode type);
 
 #endif // HANDLER_REPORTS_H

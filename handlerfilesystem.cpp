@@ -668,7 +668,7 @@ Response createFileWithText(char newPath[], bool createPath, char text[],int siz
                 dirPad = token;
             }
         }
-    writeSuperBlock(sb,path,startSb);
+     writeSuperBlock(sb,path,startSb);
     delete sb;
     return SUCCESS;
 }
@@ -701,21 +701,18 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
     int indexofInodo = 0;
     int contadorCaracteres = 0;
     int indexCaracteres = 0;
-    int contadorBloques = 0;
     while(indexCaracteres<size){
         if(contadorCaracteres>=64){
             if(indexofInodo<12){
                 inodo->i_block[indexofInodo] = sb->s_first_blo;
+                saveBlockFile(block,sb,path);
+                indexofInodo++;
             }else{
-                //apuntadores indirectos
+               Response r = addFileBlockPointers(inodo,&indexofInodo,block,sb,path);
+               if(r!=SUCCESS) return r;
             }
-            indexofInodo++;
-            writeBlockFile(block,path,getInitBlock(sb,sb->s_first_blo));
             block = getNewBlockFile();
-            sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
-            sb->s_free_blocks_count--;
             contadorCaracteres = 0;
-            contadorBloques++;
         }
         block->b_content[contadorCaracteres] = text[indexCaracteres];
         contadorCaracteres++;
@@ -724,16 +721,13 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
     if(contadorCaracteres>0){
         if(indexofInodo<12){
             inodo->i_block[indexofInodo] = sb->s_first_blo;
+            saveBlockFile(block,sb,path);
         }else{
-            //apuntadores indirectos
+          Response r = addFileBlockPointers(inodo,&indexofInodo,block,sb,path);
+          if(r!=SUCCESS) return r;
         }
     }
-    contadorBloques++;
     writeInodo(inodo,path,getInitInode(sb,sb->s_firts_ino));
-    writeBlockFile(block,path,getInitBlock(sb,sb->s_first_blo));
-
-    //BlockFile *myfile = readBlockFile(path,getInitBlock(sb,sb->s_first_blo));
-    //cout<<myfile->b_content;
 
     BlockDirectory *blockPad = readBlockDirectory(path,getInitBlock(sb,indexBloqueActual));
     blockPad->b_content[indexFree].b_inodo = sb->s_firts_ino;
@@ -741,10 +735,44 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
     writeBlockDirectory(blockPad,path,getInitBlock(sb,indexBloqueActual));
 
     sb->s_firts_ino = getBitmapIndex(sb->s_bm_inode_start,sb->s_inodes_count,path);
-    sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
-    sb->s_free_blocks_count--;
     sb->s_free_inodes_count--;
     return SUCCESS;
+}
+
+Response addFileBlockPointers(Inodo *inodo,int *indexofInodo,BlockFile *block,SuperBlock *sb,char path[]){
+    if(inodo->i_block[*indexofInodo]!=-1){
+        int free= 0;
+        int res =getFreeIndexFromBlockPointer(*indexofInodo,inodo,inodo->i_block[*indexofInodo],path,sb,&free);
+        if(res==-1){
+            if((*indexofInodo-11)<14){
+                *indexofInodo++;
+                return SUCCESS;
+            }
+            return ERROR_LEVEL_FULL;
+        }
+        BlockPointer *point = readBlockPointer(path,getInitBlock(sb,res));
+        point->b_pointers[free] = sb->s_first_blo;
+        writeBlockPointer(point,path,getInitBlock(sb,res));
+        saveBlockFile(block,sb,path);
+    }else{
+        //CREAR NUEVO BLOQUE
+        int nuevoIndex;
+        int bloque = createPointersInd(*indexofInodo,&nuevoIndex,sb,path);
+         if(bloque== -1) return ERROR_LEVEL_FULL;
+         inodo->i_block[*indexofInodo] = bloque;
+         BlockPointer *point = readBlockPointer(path,getInitBlock(sb,bloque));
+         point->b_pointers[0] = sb->s_first_blo;
+         writeBlockPointer(point,path,getInitBlock(sb,bloque));
+         //CREAR BLOQUE CON CONTENIDO
+         saveBlockFile(block,sb,path);
+    }
+    return SUCCESS;
+}
+
+void saveBlockFile(BlockFile *block,SuperBlock *sb,char path[]){
+    writeBlockFile(block,path,getInitBlock(sb,sb->s_first_blo));
+    sb->s_first_blo = getBitmapIndex(sb->s_bm_block_start,sb->s_blocks_count,path);
+    sb->s_free_blocks_count--;
 }
 
 BlockFile* getNewBlockFile(){
