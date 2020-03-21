@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
-#include <handlerdisk.h>
+#include <handler_disk.h>
 #include <enums.h>
 #include <iostream>
-#include <handlerpartitions.h>
+#include <handler_partitions.h>
 #include <parser.h>
 #include <scanner.h>
-#include <handlerfilesystem.h>
+#include <handler_fs.h>
 #include<handler_reports.h>
 
 using namespace std;
@@ -36,6 +36,7 @@ int main()
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
   //createFile("/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  /*
   createDirectory(true,"vda0","/a");
   createDirectory(true,"vda0","/b");
   createDirectory(true,"vda0","/c");
@@ -68,12 +69,13 @@ int main()
       createDirectory(true,"vda0","/zn");
   }
   createDirectory(true,"vda0","/coke");
+  */
   //2751
   //16151
 
-  createFile("/coke/file.txt",true,15,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //createFile("/coke/file.txt",true,15,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
-  catFile("/coke/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //catFile("/coke/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
   /*
   int i;
   //llenando apuntadores directos

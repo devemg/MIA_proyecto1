@@ -2,10 +2,10 @@
 #define HANDLERPARTITIONS_H
 #include <enums.h>
 #include <utils.h>
-#include <handlerdisk.h>
+#include <handler_disk.h>
 #include <virtual_blocks.h>
 #include <vars.h>
-#include <handlerfilesystem.h>
+#include <handler_fs.h>
 
 Response updatepartition(char path[],char nameDisk[],char namePart[],int sizeToMod,Unit unit);
 

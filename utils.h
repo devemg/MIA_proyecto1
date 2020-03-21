@@ -5,8 +5,8 @@
 #include <iostream>
 #include <structures.h>
 #include <math.h>
-#include <handlerdisk.h>
-#include <handlerpartitions.h>
+#include <handler_disk.h>
+#include <handler_partitions.h>
 #include <scanner.h>
 #include <parser.h>
 
