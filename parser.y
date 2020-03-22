@@ -5,6 +5,7 @@
 #include <enums.h>
 #include <utils.h>
 #include <structures.h>
+#include <handler_commands.h>
 
 extern int yylineno; //linea actual
 extern int columna; //columna actual
@@ -29,6 +30,7 @@ return 0;
 
 //se especifican los tipo de valores para los no terminales y lo terminales
 char TEXT [256];
+int INT;
 Fit FIT;
 TypePartition TYPEPARTITION;
 TypeFormat FORMATTYPE;
@@ -36,12 +38,12 @@ Unit UNIT;
 CommandEnum COMMAND_ENUM;
 struct Option * OPTION;
 class Command *COMMAND;
-
+FileSistem FILESYSTEM;
 }
 
 //TERMINALES DE TIPO TEXT, SON STRINGS
 %token<TEXT> WORD
-%token<TEXT> NUMERO
+%token<INT> NUMERO
 %token<TEXT> SIZE
 %token<TEXT> FIT
 %token<TEXT> UNIT
@@ -71,9 +73,44 @@ class Command *COMMAND;
 %token<TEXT>  FAST
 %token<TEXT>  FULL
 %token<TEXT>  PATH_
+
+%token<TEXT>  FS
+%token<TEXT>  EXT2
+%token<TEXT>  EXT3
+
+%token<TEXT>  USR
+%token<TEXT>  PWD
+%token<TEXT>  GRP
+%token<TEXT>  UGO
+%token<TEXT>  RECURSIVE
+%token<TEXT>  CONTENT
+%token<TEXT>  _FILE
+%token<TEXT>  DESTINY
+%token<TEXT>  RUTA
+
+%token<TEXT>  LOSS
+%token<TEXT>  CHGRP
+%token<TEXT>  CHOWN
+%token<TEXT>  FIND
+%token<TEXT>  MV
+%token<TEXT>  CP
+%token<TEXT>  MKDIR
+%token<TEXT>  REN
+%token<TEXT>  EDIT
+%token<TEXT>  REM
+%token<TEXT>  CAT
+%token<TEXT>  MKFILE
+%token<TEXT>  CHMOD
+%token<TEXT>  RMUSR
+%token<TEXT>  MKUSR
+%token<TEXT>  RMGRP
+%token<TEXT>  LOGIN
+%token<TEXT>  MKFS
+
 //NO TERMINALES DE TIPO VAL, POSEEN ATRIBUTOS INT VALOR, Y QSTRING TEXTO
 %type<TEXT>  INICIO
 %type<FIT>  FIT_OPTIONS
+%type<TEXT>  STRING
 %type<TYPEPARTITION>  TYPE_OPTIONS
 %type<FORMATTYPE>  DELETE_OPTIONS
 %type<UNIT>  UNIT_OPTIONS
@@ -84,7 +121,7 @@ class Command *COMMAND;
 %type<COMMAND_ENUM>  STATE_COMMANDS
 %type<COMMAND>  COMMANDS_LIST
 %type<COMMAND>  COMMAND
-
+%type<FILESYSTEM> FS_OPTIONS
 
 %start INICIO
 
@@ -128,7 +165,25 @@ COMMAND: STATE_COMMANDS OPTIONS_LIST{
 };
 
 STATE_COMMANDS: MKDISK{$$=mkdisk;}|RMDISK{$$=rmdisk;}|FDISK{$$=fdisk;}|MOUNT{$$=mount;}|UNMOUNT{$$=unmount;}|REP{$$=rep;}
-|EXEC{$$=exec;};
+|EXEC{$$=exec;}
+|LOSS{$$=loss;}
+|CHGRP{$$=chgrp;}
+|CHOWN{$$=ch_own;}
+|FIND{$$=find_;}
+|MV{$$=mv;}
+|CP{$$=cp;}
+|MKDIR{$$=mk_dir;}
+|REN{$$=ren;}
+|EDIT{$$=edit;}
+|REM{$$=rem;}
+|CAT{$$=cat;}
+|MKFILE{$$=mkfile;}
+|CHMOD{$$=ch_mod;}
+|RMUSR{$$=rmusr;}
+|MKUSR{$$=mkusr;}
+|LOGIN{$$=login;}
+|MKFS{$$=mkfs;}
+;
 
 
 OPTIONS_LIST:OPTIONS_LIST STATE_OPTION{
@@ -142,50 +197,96 @@ $$ = $1;
 */
 }
 |STATE_OPTION{
-$$ = $1;
+    $$ = $1;
 };
 
 
 STATE_OPTION:NAME IGUAL WORD{
-//$$ = new Option(Name);
-//strcpy($$->text, $3);
+    $$ = new Option(Name);
+    strcpy($$->text, $3);
 }
 |SIZE IGUAL NUMERO{
-//$$ = new Option(Size);
-//$$->num = getInt($3);
+    $$ = new Option(Size);
+    $$->num = $3;
 }
 |FIT IGUAL FIT_OPTIONS{
-//$$ = new Option(Fitt);
-//$$->fit = $3;
+    $$ = new Option(Fitt);
+    $$->fit = $3;
 }
 |UNIT IGUAL UNIT_OPTIONS{
-//$$ = new Option(Unitt);
-//$$->unit = $3;
+    $$ = new Option(Unitt);
+    $$->unit = $3;
 }
-|PATH IGUAL PATH_{
-// = new Option(Path);
-//strcpy($$->text, $3);
-}
-|PATH IGUAL WORD{
-//$$ = new Option(Path);
-//strcpy($$->text, $3);
+|PATH IGUAL STRING{
+    $$ = new Option(Path);
+    strcpy($$->text, $3);
 }
 |TYPE IGUAL TYPE_OPTIONS{
-//$$ = new Option(Type);
-//$$->type = $3;
+    $$ = new Option(Type);
+    $$->type = $3;
 }
 |DELETE  IGUAL DELETE_OPTIONS{
-//$$ = new Option(Delete);
-//$$->delType = $3;
+    $$ = new Option(Delete);
+    $$->delType = $3;
 }
 |ADD IGUAL NUMERO{
-//$$ = new Option(Add);
-//$$->num = getInt($3);
+    $$ = new Option(Add);
+    $$->num = $3;
 }
 |ID IGUAL WORD{
- //$$ = new Option(Id);
-// strcpy($$->text, $3);
-};
+     $$ = new Option(Id);
+     strcpy($$->text, $3);
+}
+|TYPE IGUAL DELETE_OPTIONS{
+    $$ = new Option(Format);
+    $$->delType = $3;
+}
+|FS IGUAL FS_OPTIONS{
+    $$ = new Option(FileSys);
+    $$->fs = $3;
+}
+|USR IGUAL STRING{
+    $$ = new Option(Usr);
+    strcpy($$->text, $3);
+}
+|PWD IGUAL STRING{
+    $$ = new Option(Pwd);
+    strcpy($$->text, $3);
+}
+|GRP IGUAL STRING{
+    $$ = new Option(Grp);
+    strcpy($$->text, $3);
+}
+|UGO IGUAL NUMERO{
+    $$ = new Option(Ugo);
+    $$->num = $3;
+}
+|RECURSIVE{
+    $$ = new Option(Recursive);
+    $$->flag = true;
+}
+|CONTENT IGUAL STRING{
+    $$ = new Option(Cont);
+    strcpy($$->text, $3);
+}
+|_FILE IGUAL STRING{
+    $$ = new Option(Fil_e);
+    strcpy($$->text, $3);
+}
+|DESTINY IGUAL STRING{
+    $$ = new Option(Dest);
+    strcpy($$->text, $3);
+}
+|RUTA IGUAL STRING{
+    $$ = new Option(Ruta);
+    strcpy($$->text, $3);
+}
+
+;
+
+STRING:PATH_{strcpy($$,$1);}|WORD{strcpy($$,$1);};
+
+FS_OPTIONS:EXT2{$$=ext2;}|EXT3{$$=ext3;};
 
 DELETE_OPTIONS:FAST{$$=Fast;}|FULL{$$=Full;};
 

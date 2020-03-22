@@ -68,9 +68,6 @@ public:
     cmd_login(char usr[],char pwd[],char id[]);
 };
 
-class cmd_logout{
-};
-
 class cmd_grp{
 public:
     char *name;
@@ -191,7 +188,7 @@ public:
     virtual void Exec() = 0;
 };
 
-
+*/
 class Option
 {
 public:
@@ -206,11 +203,12 @@ public:
     Fit fit;
     Unit unit;
     TypePartition type;
-    FormatType delType;
-
+    TypeFormat delType;
+    FileSistem fs;
     Option *next;
+    bool flag;
 };
-
+/*
 class Command:public Node {
 public:
     CommandEnum cmd;

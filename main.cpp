@@ -27,6 +27,9 @@ int main()
         }else if(strcmp(command.c_str(),"pause")==0){
             system("read -r -p \"Presiona cualquier tecla para continuar...\" key");
             continue;
+        }else if(strcmp(command.c_str(),"logout")==0){
+            //***********
+            continue;
         }
         //writeCommand(command,false);
         //readExecCommand(false);

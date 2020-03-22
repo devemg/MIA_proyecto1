@@ -27,8 +27,12 @@ enum Response {SUCCESS,
               ERROR_LEVEL_FULL};
 enum TypeFormat {Fast,Full};
 enum statusBlock {OCUPADO,LIBRE};
-enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec};
-enum Options {Id,Add,Delete,Type,Path,Unitt,Fitt,Size,Name};
+enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec,
+                 loss,chgrp,ch_own,find_,mv,cp,mk_dir,ren,
+                 edit,rem,cat,mkfile,ch_mod,rmusr,mkusr,
+                 login,mkfs};
+enum Options {Id,Add,Delete,Type,Path,Unitt,Fitt,Size,Name,Format,FileSys,
+             Ruta,Dest,Fil_e,Cont,Recursive,Ugo,Grp,Pwd,Usr};
 enum FileSistem {ext2 = 2,ext3 = 3};
 enum TypeInode{IN_FILE = 0,IN_DIRECTORY=1};
 enum TypeBlock{FILE_,DIRECTORY,POINTERS};

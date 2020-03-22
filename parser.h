@@ -75,7 +75,37 @@ extern int yydebug;
     L_ = 285,
     FAST = 286,
     FULL = 287,
-    PATH_ = 288
+    PATH_ = 288,
+    FS = 289,
+    EXT2 = 290,
+    EXT3 = 291,
+    USR = 292,
+    PWD = 293,
+    GRP = 294,
+    UGO = 295,
+    RECURSIVE = 296,
+    CONTENT = 297,
+    _FILE = 298,
+    DESTINY = 299,
+    RUTA = 300,
+    LOSS = 301,
+    CHGRP = 302,
+    CHOWN = 303,
+    FIND = 304,
+    MV = 305,
+    CP = 306,
+    MKDIR = 307,
+    REN = 308,
+    EDIT = 309,
+    REM = 310,
+    CAT = 311,
+    MKFILE = 312,
+    CHMOD = 313,
+    RMUSR = 314,
+    MKUSR = 315,
+    RMGRP = 316,
+    LOGIN = 317,
+    MKFS = 318
   };
 #endif
 
@@ -84,12 +114,13 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 27 "parser.y" /* yacc.c:1909  */
+#line 28 "parser.y" /* yacc.c:1909  */
 
 #include <enums.h>
 
 //se especifican los tipo de valores para los no terminales y lo terminales
 char TEXT [256];
+int INT;
 Fit FIT;
 TypePartition TYPEPARTITION;
 TypeFormat FORMATTYPE;
@@ -97,9 +128,9 @@ Unit UNIT;
 CommandEnum COMMAND_ENUM;
 struct Option * OPTION;
 class Command *COMMAND;
+FileSistem FILESYSTEM;
 
-
-#line 103 "parser.h" /* yacc.c:1909  */
+#line 134 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
