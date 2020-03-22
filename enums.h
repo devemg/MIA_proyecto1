@@ -4,7 +4,7 @@
 enum Fit {BestFit='b',FirstFit='f',WorstFit='w'};
 enum Unit {KB='k',MB='m',Byte='b'};
 enum Status {Activo=1,Inactivo=0};
-enum TipoParticion {Primaria='p',Extendida='e',Logica='l'};
+enum TypePartition {Primaria='p',Extendida='e',Logica='l'};
 enum Response {SUCCESS,
                ERROR_INSUFICIENT_SPACE,
                ERROR_FULL_PARTITION_PRIMARY,
@@ -25,11 +25,12 @@ enum Response {SUCCESS,
               ERROR_DIR_NOT_EXIST,
               ERROR_INODO_NOT_DIR,
               ERROR_LEVEL_FULL};
-enum DeleteType {Fast,Full};
+enum TypeFormat {Fast,Full};
 enum statusBlock {OCUPADO,LIBRE};
 enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec};
 enum Options {Id,Add,Delete,Type,Path,Unitt,Fitt,Size,Name};
 enum FileSistem {ext2 = 2,ext3 = 3};
 enum TypeInode{IN_FILE = 0,IN_DIRECTORY=1};
 enum TypeBlock{FILE_,DIRECTORY,POINTERS};
+enum TypeReport{Inode,Journaling,Block,BM_inode,BM_block,Tree,Sb,File,Ls,Mbr,Disk};
 #endif // ENUMS_H

@@ -91,8 +91,8 @@ union YYSTYPE
 //se especifican los tipo de valores para los no terminales y lo terminales
 char TEXT [256];
 Fit FIT;
-TipoParticion TIPOPARTICION;
-DeleteType DELETETYPE;
+TypePartition TYPEPARTITION;
+TypeFormat FORMATTYPE;
 Unit UNIT;
 CommandEnum COMMAND_ENUM;
 struct Option * OPTION;

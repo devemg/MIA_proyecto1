@@ -1,12 +1,12 @@
 #include "handler_partitions.h"
 #include <vars.h>
 
-Response createPartition(int size, Unit unit, char path[],char nameDisk[],TipoParticion tipoParticion, Fit fit, char name[]){
+Response createPartition(int size, Unit unit, char path[],char nameDisk[],TypePartition TypePartition, Fit fit, char name[]){
     char full_path[200];
     clearArray(full_path,sizeof(full_path));
     getFullPathDisk(path,nameDisk,full_path);
     //ESCRIBIR ARCHIVO
-    Response response = newPartition(size,unit,full_path,tipoParticion,fit,name);
+    Response response = newPartition(size,unit,full_path,TypePartition,fit,name);
     if(response == SUCCESS){
         char nameMirror[50];
         clearArray(nameMirror,50);
@@ -16,7 +16,7 @@ Response createPartition(int size, Unit unit, char path[],char nameDisk[],TipoPa
         getFullPathDisk(path,nameMirror,full_path);
         //ESCRIBIR RAID
         //Response response1 =
-        newPartition(size,unit,full_path,tipoParticion,fit,name);
+        newPartition(size,unit,full_path,TypePartition,fit,name);
         //if(response1 != SUCCESS)cout<<"Error al hacer cambio en el raid\n";
     }
     return response;
@@ -44,7 +44,7 @@ Response updatepartition(char path[],char nameDisk[],char namePart[],int sizeToM
 
 }
 
-Response newPartition(int size, Unit unit, char path[], TipoParticion tipoParticion, Fit fit, char name[]){
+Response newPartition(int size, Unit unit, char path[], TypePartition TypePartition, Fit fit, char name[]){
     MBR *disco = openMBR(path);
     if(disco==NULL){
         return ERROR_UNHANDLED;
@@ -53,7 +53,7 @@ Response newPartition(int size, Unit unit, char path[], TipoParticion tipoPartic
     if(final_size<=0){
         return ERROR_SIZE_MIN;
     }
-    switch (tipoParticion) {
+    switch (TypePartition) {
     case Primaria:
         return newPrimaryPart(final_size,fit,name,disco,path);
    case Extendida:
@@ -391,12 +391,12 @@ Response newLogicPart(long size, Fit fit, char name[], MBR *disco, char path[]){
 return SUCCESS;
 }
 
-Response deletePartition(char path[],char nameDisk[], char name[],TipoParticion tipoParticion,DeleteType dtype){
+Response deletePartition(char path[],char nameDisk[], char name[],TypePartition typePartition,TypeFormat dtype){
     char full_path[200];
     clearArray(full_path,sizeof(full_path));
     getFullPathDisk(path,nameDisk,full_path);
     //ESCRIBIR ARCHIVO
-    Response response = rmPartition(full_path,name,tipoParticion,dtype);
+    Response response = rmPartition(full_path,name,typePartition,dtype);
     if(response == SUCCESS){
         char nameMirror[50];
         clearArray(nameMirror,50);
@@ -406,13 +406,13 @@ Response deletePartition(char path[],char nameDisk[], char name[],TipoParticion 
         getFullPathDisk(path,nameMirror,full_path);
         //ESCRIBIR RAID
         //Response response1 =
-        rmPartition(full_path,name,tipoParticion,dtype);
+        rmPartition(full_path,name,typePartition,dtype);
         //if(response1 != SUCCESS)cout<<"Error al hacer cambio en el raid\n";
     }
     return response;
 }
 
-Response rmPartition(char path[], char name[], TipoParticion tipoParticion,DeleteType dtype){
+Response rmPartition(char path[], char name[], TypePartition typePartition,TypeFormat dtype){
     MBR *disco = openMBR(path);
     if(disco==NULL){
         return ERROR_UNHANDLED;
@@ -420,7 +420,7 @@ Response rmPartition(char path[], char name[], TipoParticion tipoParticion,Delet
     /*if(!canDeletePart(path,name)){
         return ERROR_PARTITION_MOUNTED_DEL;
     }*/
-    switch (tipoParticion) {
+    switch (typePartition) {
     case Primaria:
     case Extendida:
         return deletePrimaryPart(disco,name,dtype,path);
@@ -431,7 +431,7 @@ Response rmPartition(char path[], char name[], TipoParticion tipoParticion,Delet
     return SUCCESS;
 }
 
-Response deletePrimaryPart(MBR *disco,char name[],DeleteType dtype,char path[]){
+Response deletePrimaryPart(MBR *disco,char name[],TypeFormat dtype,char path[]){
     int i;
     for(i=0;i<4;i++){
         if(disco->particiones[i].part_status == Activo){

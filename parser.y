@@ -30,8 +30,8 @@ return 0;
 //se especifican los tipo de valores para los no terminales y lo terminales
 char TEXT [256];
 Fit FIT;
-TipoParticion TIPOPARTICION;
-DeleteType DELETETYPE;
+TypePartition TYPEPARTITION;
+TypeFormat FORMATTYPE;
 Unit UNIT;
 CommandEnum COMMAND_ENUM;
 struct Option * OPTION;
@@ -74,8 +74,8 @@ class Command *COMMAND;
 //NO TERMINALES DE TIPO VAL, POSEEN ATRIBUTOS INT VALOR, Y QSTRING TEXTO
 %type<TEXT>  INICIO
 %type<FIT>  FIT_OPTIONS
-%type<TIPOPARTICION>  TYPE_OPTIONS
-%type<DELETETYPE>  DELETE_OPTIONS
+%type<TYPEPARTITION>  TYPE_OPTIONS
+%type<FORMATTYPE>  DELETE_OPTIONS
 %type<UNIT>  UNIT_OPTIONS
 
 %type<OPTION>  OPTIONS_LIST
@@ -91,11 +91,11 @@ class Command *COMMAND;
 %%
 
 INICIO :COMMANDS_LIST{
-ListCommand($1,true);
+//ListCommand($1,true);
 };
 
 COMMANDS_LIST: COMMANDS_LIST COMMAND{
-    if($1!=NULL){
+ /*   if($1!=NULL){
         if($2!=NULL){
             Command *first = $1;
             while(first->next!=NULL){
@@ -110,18 +110,20 @@ COMMANDS_LIST: COMMANDS_LIST COMMAND{
         }else{
             $$=NULL;
         }
-    }
+    }*/
 }
 |COMMAND{
    $$ = $1;
 };
 
 COMMAND: STATE_COMMANDS OPTIONS_LIST{
-   if(validateOptionCommand($1,$2)){
+
+    /*  if(validateOptionCommand($1,$2)){
         $$ = new Command($1,$2);
    }else{
        $$=NULL;
    }
+*/
 
 };
 
@@ -130,12 +132,14 @@ STATE_COMMANDS: MKDISK{$$=mkdisk;}|RMDISK{$$=rmdisk;}|FDISK{$$=fdisk;}|MOUNT{$$=
 
 
 OPTIONS_LIST:OPTIONS_LIST STATE_OPTION{
+/*
 Option *op = $1;
 while(op->next!=NULL){
     op = op->next;
 }
 op->next = $2;
 $$ = $1;
+*/
 }
 |STATE_OPTION{
 $$ = $1;
@@ -143,44 +147,44 @@ $$ = $1;
 
 
 STATE_OPTION:NAME IGUAL WORD{
-$$ = new Option(Name);
-strcpy($$->text, $3);
+//$$ = new Option(Name);
+//strcpy($$->text, $3);
 }
 |SIZE IGUAL NUMERO{
-$$ = new Option(Size);
-$$->num = getInt($3);
+//$$ = new Option(Size);
+//$$->num = getInt($3);
 }
 |FIT IGUAL FIT_OPTIONS{
-$$ = new Option(Fitt);
-$$->fit = $3;
+//$$ = new Option(Fitt);
+//$$->fit = $3;
 }
 |UNIT IGUAL UNIT_OPTIONS{
-$$ = new Option(Unitt);
-$$->unit = $3;
+//$$ = new Option(Unitt);
+//$$->unit = $3;
 }
 |PATH IGUAL PATH_{
-$$ = new Option(Path);
-strcpy($$->text, $3);
+// = new Option(Path);
+//strcpy($$->text, $3);
 }
 |PATH IGUAL WORD{
-$$ = new Option(Path);
-strcpy($$->text, $3);
+//$$ = new Option(Path);
+//strcpy($$->text, $3);
 }
 |TYPE IGUAL TYPE_OPTIONS{
-$$ = new Option(Type);
-$$->type = $3;
+//$$ = new Option(Type);
+//$$->type = $3;
 }
 |DELETE  IGUAL DELETE_OPTIONS{
-$$ = new Option(Delete);
-$$->delType = $3;
+//$$ = new Option(Delete);
+//$$->delType = $3;
 }
 |ADD IGUAL NUMERO{
-$$ = new Option(Add);
-$$->num = getInt($3);
+//$$ = new Option(Add);
+//$$->num = getInt($3);
 }
 |ID IGUAL WORD{
- $$ = new Option(Id);
- strcpy($$->text, $3);
+ //$$ = new Option(Id);
+// strcpy($$->text, $3);
 };
 
 DELETE_OPTIONS:FAST{$$=Fast;}|FULL{$$=Full;};

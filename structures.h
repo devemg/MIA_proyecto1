@@ -50,37 +50,6 @@ public:
     virtualBlock(int,int, statusBlock);
 };
 
-class Option
-{
-public:
-    Option(Options op){
-        option = op;
-        next = NULL;
-    }
-
-    Options option;
-    char text[200];
-    int num;
-    Fit fit;
-    Unit unit;
-    TipoParticion type;
-    DeleteType delType;
-
-    Option *next;
-};
-
-class Command {
-public:
-    CommandEnum cmd;
-    Option *opts;
-    Command *next;
-    Command(CommandEnum c,Option *o){
-        cmd = c;
-        opts = o;
-        next = NULL;
-    }
-};
-
 
 class MountedPart{
 public:

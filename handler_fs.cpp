@@ -40,7 +40,7 @@ int getBitmapIndex(int startBm,int finBm,char path[]){
     return contador;
 }
 
-Response formatPart(char path[], char partition[], DeleteType tipoFormateo, FileSistem sistem){
+Response formatPart(char path[], char partition[], TypeFormat tipoFormateo, FileSistem sistem){
     MBR *disco = openMBR(path);
     if(disco==NULL){
         return ERROR_DISK_NOT_EXIST;

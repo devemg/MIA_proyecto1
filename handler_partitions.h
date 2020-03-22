@@ -11,9 +11,9 @@ Response updatepartition(char path[],char nameDisk[],char namePart[],int sizeToM
 
 Response modPartition(int size, Unit unit, char path[], char name[]);
 
-Response createPartition(int,Unit,char[],char[],TipoParticion,Fit,char[]);
+Response createPartition(int,Unit,char[],char[],TypePartition,Fit,char[]);
 
-Response newPartition(int,Unit,char[],TipoParticion,Fit,char[]);
+Response newPartition(int,Unit,char[],TypePartition,Fit,char[]);
 
 Response newPrimaryPart(long,Fit,char[],MBR*,char[]);
 
@@ -25,11 +25,11 @@ void newEBR(Partition *, char[]);
 
 void writeEBR(EBR *, char[],int);
 
-Response deletePartition(char[], char[],char[],TipoParticion,DeleteType);
+Response deletePartition(char[], char[],char[],TypePartition,TypeFormat);
 
-Response rmPartition(char[],char[],TipoParticion,DeleteType);
+Response rmPartition(char[],char[],TypePartition,TypeFormat);
 
-Response deletePrimaryPart(MBR*,char[],DeleteType,char[]);
+Response deletePrimaryPart(MBR*,char[],TypeFormat,char[]);
 
 Response deleteLogicPart(char[], MBR*, char[]);
 

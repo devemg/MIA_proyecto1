@@ -11,10 +11,10 @@ SOURCES += \
     scanner.cpp \
     vars.cpp \
     handler_reports.cpp \
-    handler_commands.cpp \
     handler_disk.cpp \
     handler_fs.cpp \
-    handler_partitions.cpp
+    handler_partitions.cpp \
+    handler_commands.cpp
 
 HEADERS += \
     structures.h \
@@ -26,10 +26,10 @@ HEADERS += \
     scanner.l \
     vars.h \
     handler_reports.h \
-    handler_commands.h \
     handler_disk.h \
     handler_fs.h \
-    handler_partitions.h
+    handler_partitions.h \
+    handler_commands.h
 
 DISTFILES += \
     parser.y

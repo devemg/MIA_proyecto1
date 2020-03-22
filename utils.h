@@ -11,11 +11,6 @@
 #include <parser.h>
 
 using namespace std;
-Command* ListCommand(Command *cmd,bool flag);
-
-void writeCommand(string command,bool);
-
-void readExecCommand(bool);
 
 void clearArray(char [],int);
 
@@ -33,14 +28,7 @@ float getDecimal(float);
 
 const char* showOption(Options);
 
-bool validateOptionCommand(CommandEnum,Option *);
-
-void letsExecCommands(Command*);
-
 int getInt(string);
-
-void fillOptions(Option *it,int *size, int *add,Fit *fit,Unit *unit,TipoParticion *tipo,DeleteType *deltype,
-                 char **path,char *id,char *name,bool *isAdd,bool *isDelete);
 
 Response getContadorDiscos(int *contadorDiscos,char *id);
 
