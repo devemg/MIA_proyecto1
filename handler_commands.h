@@ -92,12 +92,13 @@ public:
 
 //**********************************************
 
-class cmd_fs{
+class cmd_fs:public Cmd{
 public:
     TypeFormat type;
     FileSistem fs;
     char *id;
     cmd_fs(char id[]);
+    void Exec();
 };
 
 class cmd_login{

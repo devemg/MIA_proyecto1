@@ -171,6 +171,24 @@ cmd_fs::cmd_fs(char id[]){
     fs = ext2;
 }
 
+//FILESYSTEM DE PARTICION
+void cmd_fs::Exec(){
+    MountedDisk *disk = getMountedDisk(this->id);
+    if(disk==NULL){
+        cout<<"El disco no ha sido montado.\n";
+    }
+    MountedPart *part = getMountedPartition(this->id);
+    if(part==NULL){
+        cout<<"la partición no fue encontrada.\n";
+    }
+    Response res = formatPart(disk->path,part->name,this->type,this->fs);
+    if(res==SUCCESS){
+        cout<<"¡Sistema de archivos creado con éxito!\n";
+    }else{
+        showMessageError(res);
+    }
+}
+
 cmd_login::cmd_login(char usr[], char pwd[], char id[]){
     this->usr = usr;
     this->pwd = pwd;
