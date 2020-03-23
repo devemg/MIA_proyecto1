@@ -14,6 +14,10 @@ using namespace std;
 
 void clearArray(char [],int);
 
+string getNamePath(char *path,int *poss);
+
+string getPathWithoutName(char *path,int sizeName);
+
 void getFullPathDisk(char [],char[],char[]);
 
 void getFullPath(char [],char[],char[]);

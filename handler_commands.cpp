@@ -7,14 +7,63 @@ cmd_mkdisk::cmd_mkdisk(int size, char path[]){
     this->unit = MB;
 }
 
+//CREAR DISCO
+void cmd_mkdisk::Exec(){
+    int ext = 0;
+    string ss;
+    ss = getNamePath(path,&ext);
+    char *chh = &ss[0];
+    string hh = getPathWithoutName(path,strlen(chh)+ext);
+    Response res = newDisk(size,fit,unit,&hh[0],chh);
+    if(res==SUCCESS){
+        cout<<"¡Disco creado con éxito!\n";
+
+    }else{
+        showMessageError(res);
+    }
+}
+
 cmd_rmdisk::cmd_rmdisk(char path[]){
     this->path = path;
+}
+
+//ELIMINAR DISCO
+void cmd_rmdisk::Exec(){
+    deleteDisk(path);
 }
 
 cmd_fdisk::cmd_fdisk(char name[], char path[], int size){
     this->name = name;
     this->path = path;
     this->size = size;
+}
+
+//CREAR PARTICION
+void cmd_fdisk::Exec(){
+    int ext = 0;
+    string ss;
+    ss = getNamePath(path,&ext);
+    char *chh = &ss[0];
+    string hh = getPathWithoutName(path,strlen(chh)+ext);
+
+    Response res =  createPartition(size,unit,&hh[0],chh,this->type,fit,name);
+    if(res == SUCCESS){
+        switch (this->type) {
+        case Primaria:
+            cout<<"¡La partición primaria fue creada con éxito!\n";
+            break;
+        case Extendida:
+            cout<<"¡La partición extendida fue creada con éxito!\n";
+            break;
+        case Logica:
+            cout<<"¡La partición lógica fue creada con éxito!\n";
+            break;
+        default:
+            break;
+        }
+    }else{
+        showMessageError(res);
+    }
 }
 
 cmd_addPart::cmd_addPart(char name[], char path[], int size){
@@ -24,10 +73,41 @@ cmd_addPart::cmd_addPart(char name[], char path[], int size){
     this->unit = KB;
 }
 
-cmd_rmPart::cmd_rmPart(char name[], char path[],TypeFormat type){
+//MODIFICAR PARTICION
+void cmd_addPart::Exec(){
+    int ext = 0;
+    string ss;
+    ss = getNamePath(path,&ext);
+    char *chh = &ss[0];
+    string hh = getPathWithoutName(path,strlen(chh)+ext);
+    Response res = updatepartition(&hh[0],chh,name,this->size,unit);
+    if(res == SUCCESS){
+        cout<<"¡La partición fue modificada cón éxito!\n";
+    }else{
+        showMessageError(res);
+    }
+}
+
+cmd_rmPart::cmd_rmPart(char name[], char path[],TypePartition typePart,TypeFormat type){
     this->name = name;
     this->path = path;
     this->typeDel = type;
+    this->typePart = typePart;
+}
+
+//ELIMINAR PARTICION
+void cmd_rmPart::Exec(){
+    int ext = 0;
+    string ss;
+    ss = getNamePath(path,&ext);
+    char *chh = &ss[0];
+    string hh = getPathWithoutName(path,strlen(chh)+ext);
+    Response res = deletePartition(&hh[0],chh,name,this->typePart,this->typeDel);
+    if(res==SUCCESS){
+        cout<<"¡Partición eliminada con éxito!\n";
+    }else{
+        showMessageError(res);
+    }
 }
 
 cmd_mount::cmd_mount(char path[], char name[]){
@@ -35,9 +115,55 @@ cmd_mount::cmd_mount(char path[], char name[]){
     this->name = name;
 }
 
+//MONTAR PARTICION
+void cmd_mount::Exec(){
+    Response res = mountPart(path,name);
+    if(res!=SUCCESS){
+        showMessageError(res);
+        return;
+    }else{
+        cout<<"¡Partición montada con éxito!\n";
+    }
+}
+
 cmd_unmount::cmd_unmount(char id[]){
     this->id = id;
 }
+
+//DESMONTAR PARTICION
+void cmd_unmount::Exec(){
+     Response res = unmountPart(id);
+    if(res!=SUCCESS){
+        showMessageError(res);
+        return;
+    }else{
+        showMounts();
+        cout<<"¡Partición desmontada con éxito!\n";
+    }
+}
+
+cmd_exec::cmd_exec(char path[]){
+    this->path = path;
+}
+
+//EJECUTAR SCRIPT
+void cmd_exec::Exec(){
+cout<<"Ejecutando script...\n\n";
+    FILE *myFile = fopen(path,"r");
+    if(myFile==NULL){
+        cout<<"Error al abrir el script.\n";
+        return;
+    }
+    char linea[1024];
+    while(fgets(linea, 1024, (FILE*) myFile)) {
+            cout<<linea<<endl;
+            writeCommand(linea,true);
+            readExecCommand(true);
+        }
+   fclose(myFile);
+}
+
+//**********************************************
 
 cmd_fs::cmd_fs(char id[]){
     type = Full;
@@ -132,11 +258,29 @@ cmd_rep::cmd_rep(char path[], TypeReport type, char id[]){
 }
 
 void cmd_rep::Exec(){
-    cout<<"ejecutando rep..\n";
-    cout<<this->id<<endl;
-    cout<<this->path<<endl;
-    cout<<this->path_report<<endl;
-    cout<<this->type<<endl;
+    //BUSCAR DISCO
+    int contadorDiscos;
+    Response res = getContadorDiscos(&contadorDiscos,id);
+    if(res!=SUCCESS){
+        //showMessageError(res);
+        return;
+    }
+    /*
+    MountedDisk *disk = partsMounted[contadorDiscos];
+    int ext = 0;
+    string ss = getNamePath(path,&ext);
+    char *chh = &ss[0];
+    char hh[] = getPathWithoutName(path,strlen(chh)+ext);
+
+    //cout<<"PATH: "<<hh<<endl;
+    //CREAR DIRECTORIO SI NO EXISTE
+    mkdir(hh.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+    if(strcmp(name,"mbr")==0){
+        reportMBR(disk->path,path);
+    }else{
+        reportDisk(disk->path,path);
+    }*/
 }
 
 Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
@@ -193,33 +337,33 @@ Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
               std::cout<<"Debe indicar un tamaño(-size).\n";
               return NULL;
           }
-          if(path!=NULL){
+          if(path==NULL){
               std::cout<<"Debe indicar una ruta(-path).\n";
               return NULL;
           }
           if(!validateParams()){
                 return NULL;
           }
-        /*  cmd_mkdisk *mkd =  new cmd_mkdisk(size,path);
+          cmd_mkdisk *mkd =  new cmd_mkdisk(size,path);
           if(unit!=UNIT_ERROR){
               mkd->unit = unit;
           }
           if(fit!=FIT_ERROR){
               mkd->fit = fit;
           }
-          return (Cmd*)mkd;*/
+          return (Cmd*)mkd;
       }
           break;
       case rmdisk:
       {
-          if(path!=NULL){
+          if(path==NULL){
               std::cout<<"Debe indicar una ruta(-path).\n";
               return NULL;
           }
           if(!validateParams()){
                 return NULL;
           }
-          //return cmd_rmdisk(path);
+          return new cmd_rmdisk(path);
       }
           break;
       case fdisk:
@@ -228,11 +372,11 @@ Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
               std::cout<<"Debe indicar un tamaño(-size).\n";
               return NULL;
           }
-          if(path!=NULL){
+          if(path==NULL){
               std::cout<<"Debe indicar una ruta(-path).\n";
               return NULL;
           }
-          if(name!=NULL){
+          if(name==NULL){
               std::cout<<"Debe indicar un nombre(-name).\n";
               return NULL;
           }
@@ -241,17 +385,21 @@ Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
           }
           if(typeFormat!=TF_ERROR){
               //eliminar particion
-             // return new cmd_rmPart(name,path,typeFormat);
+             cmd_rmPart *rp = new cmd_rmPart(name,path,Primaria,typeFormat);
+              if(typePartition!=TP_ERROR){
+                  rp->typePart = typePartition;
+              }
+              return rp;
           }
           if(existAdd){
               //modificar tamaño de particion
-             /* cmd_addPart *ap= new cmd_addPart(name,path,size);
+              cmd_addPart *ap= new cmd_addPart(name,path,size);
               if(unit!=NULL){
                   ap->unit = unit;
               }
-              return ap;*/
+              return ap;
           }
-          /*cmd_fdisk *fd =  new cmd_fdisk(name,path,size);
+          cmd_fdisk *fd =  new cmd_fdisk(name,path,size);
           if(fit!=FIT_ERROR){
               fd->fit = fit;
           }
@@ -261,38 +409,46 @@ Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
           if(unit!=UNIT_ERROR){
               fd->unit = unit;
           }
-          return fd;*/
+          return fd;
       }
           break;
       case mount:
       {
-          if(path!=NULL){
+          if(path==NULL){
               std::cout<<"Debe indicar una ruta(-path).\n";
               return NULL;
           }
-          if(name!=NULL){
+          if(name==NULL){
               std::cout<<"Debe indicar un nombre(-name).\n";
               return NULL;
           }
           if(!validateParams()){
                 return NULL;
           }
-          //return new cmd_mount(path,name);
+          return new cmd_mount(path,name);
       }
           break;
       case unmount:
       {
-          if(id!=NULL){
+          if(id==NULL){
               std::cout<<"Debe indicar un id(-id).\n";
               return NULL;
           }
           if(!validateParams()){
                 return NULL;
           }
-          //return new cmd_unmount(id);
+          return new cmd_unmount(id);
       }
           break;
       case exec:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar una ruta(-path).\n";
+              return NULL;
+          }
+          return new cmd_exec(path);
+      }
+          break;
       case mkfs:
       case login:
       case mkgrp:
@@ -360,7 +516,7 @@ Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
           break;
 
       }
-
+ return NULL;
 }
 
 bool validateParams(){

@@ -6,32 +6,36 @@
 #include <handler_commands.h>
 #include <parser.h>
 #include <scanner.h>
+#include <handler_disk.h>
+#include <handler_partitions.h>
+#include <utils.h>
 
 using namespace std;
 
 class Cmd{
 public:
-    virtual void Exec() = 0;
+    virtual void Exec(){}
     Cmd *next = NULL;
 };
 
-class cmd_mkdisk{
+class cmd_mkdisk:public Cmd{
 public:
     int size;
     Fit fit;
     Unit unit;
     char *path;
     cmd_mkdisk(int size,char path[]);
+    void Exec();
 };
 
-class cmd_rmdisk{
+class cmd_rmdisk:public Cmd{
 public:
     char *path;
     cmd_rmdisk(char path[]);
     void Exec();
 };
 
-class cmd_fdisk{
+class cmd_fdisk:public Cmd{
 public:
     int size;
     Unit unit;
@@ -43,7 +47,7 @@ public:
     void Exec();
 };
 
-class cmd_addPart{
+class cmd_addPart:public Cmd{
 public:
     int size;
     Unit unit;
@@ -54,16 +58,17 @@ public:
 };
 
 
-class cmd_rmPart{
+class cmd_rmPart:public Cmd{
 public:
     char *name;
     char *path;
     TypeFormat typeDel;
-    cmd_rmPart(char name[],char path[],TypeFormat type);
+    TypePartition typePart;
+    cmd_rmPart(char name[],char path[],TypePartition typePart,TypeFormat type);
     void Exec();
 };
 
-class cmd_mount{
+class cmd_mount:public Cmd{
 public:
     char *path;
     char *name;
@@ -71,14 +76,22 @@ public:
     void Exec();
 };
 
-class cmd_unmount{
+class cmd_unmount:public Cmd{
 public:
     char *id;
     cmd_unmount(char id[]);
     void Exec();
 };
 
+class cmd_exec:public Cmd{
+public:
+    char *path;
+    cmd_exec(char path[]);
+    void Exec();
+};
+
 //**********************************************
+
 class cmd_fs{
 public:
     TypeFormat type;

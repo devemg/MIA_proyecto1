@@ -96,7 +96,7 @@ path2 \"(\/[a-z]+[a-z0-9_\-\. ]+)+\"
                 columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, &str[0]); return WORD;
             }
 {Numero}        { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return NUMERO; }
-{comentario}    { std::cout <<yytext<<std::endl; }
+{comentario}    {/* std::cout <<yytext<<std::endl; */}
 [[:blank:]]     { /*Se ignoran*/ }
 .               {std::cout <<yytext<<"Comando incorrecto"<< std::endl;}
 %%

@@ -1,6 +1,6 @@
 #include "handler_disk.h"
 
-void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
+Response newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
 
      //VALIDAR TAMAÑO
      long final_size = getSize(size,unit);
@@ -27,7 +27,7 @@ void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
     getFullPathDisk(path,name,full_path);
     //ESCRIBIR ARCHIVO
     bool res= writeMBR(disco,path,full_path);
-    if(!res)return;
+    if(!res)return ERROR_DISK_NOT_EXIST;
     //ESCRIBIR RAID
     char nameMirror[50];
     clearArray(nameMirror,50);
@@ -36,8 +36,8 @@ void newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
     clearArray(full_path,sizeof(full_path));
     getFullPathDisk(path,nameMirror,full_path);
     writeMBR(disco,path,full_path);
-    cout<<"Disco \'"<<name<<"\' creado con éxito\n";
     delete disco;
+    return SUCCESS;
 }
 
 bool writeMBR(MBR *disco,char path[],char full_path[]){

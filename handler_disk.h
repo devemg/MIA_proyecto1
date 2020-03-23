@@ -13,7 +13,7 @@
 #include <iostream>
 using namespace std;
 
-void newDisk(int,Fit,Unit,char[],char[]);
+Response newDisk(int,Fit,Unit,char[],char[]);
 
 void deleteDisk(char[]);
 

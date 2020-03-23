@@ -1324,7 +1324,7 @@ case 65:
 /* rule 65 can match eol */
 YY_RULE_SETUP
 #line 99 "scanner.l"
-{ std::cout <<yytext<<std::endl; }
+{/* std::cout <<yytext<<std::endl; */}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
