@@ -34,6 +34,9 @@ long getSize(int size,Unit unit){
            final =  size * 1024;
            final = final *  1024;
         break;
+    default:
+        final = size*1024;
+        break;
   }
 return final;
 }

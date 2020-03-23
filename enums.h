@@ -1,10 +1,10 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-enum Fit {BestFit='b',FirstFit='f',WorstFit='w'};
-enum Unit {KB='k',MB='m',Byte='b'};
+enum Fit {BestFit='b',FirstFit='f',WorstFit='w',FIT_ERROR};
+enum Unit {KB='k',MB='m',Byte='b',UNIT_ERROR};
 enum Status {Activo=1,Inactivo=0};
-enum TypePartition {Primaria='p',Extendida='e',Logica='l'};
+enum TypePartition {Primaria='p',Extendida='e',Logica='l',TP_ERROR};
 enum Response {SUCCESS,
                ERROR_INSUFICIENT_SPACE,
                ERROR_FULL_PARTITION_PRIMARY,
@@ -25,14 +25,54 @@ enum Response {SUCCESS,
               ERROR_DIR_NOT_EXIST,
               ERROR_INODO_NOT_DIR,
               ERROR_LEVEL_FULL};
-enum TypeFormat {Fast,Full};
+enum TypeFormat {Fast,Full,TF_ERROR};
 enum statusBlock {OCUPADO,LIBRE};
-enum CommandEnum {mkdisk,rmdisk,fdisk,mount,unmount,rep,exec,
-                 loss,chgrp,ch_own,find_,mv,cp,mk_dir,ren,
-                 edit,rem,cat,mkfile,ch_mod,rmusr,mkusr,
-                 login,mkfs};
-enum Options {Id,Add,Delete,Type,Path,Unitt,Fitt,Size,Name,Format,FileSys,
-             Ruta,Dest,Fil_e,Cont,Recursive,Ugo,Grp,Pwd,Usr};
+enum CommandEnum {mkdisk,
+                  rmdisk,
+                  fdisk,
+                  mount,
+                  unmount,
+                  rep,
+                  exec,
+                 loss,
+                  chgrp,
+                  ch_own,
+                  find_,
+                  mv,
+                  cp,
+                  mk_dir,
+                  ren,
+                 edit,
+                  rem,
+                  cat,
+                  mkfile,
+                  ch_mod,
+                  rmusr,
+                  mkusr,
+                 login,
+                  mkfs,
+                  mkgrp,
+                  rmgrp};
+enum Options {Id,
+              Add,
+              Delete,
+              Type,
+              Path,
+              Unitt,
+              Fitt,
+              Size,
+              Name,
+              Format,
+              FileSys,
+              Ruta,
+              Dest,
+              Fil_e,
+              Cont,
+              Recursive,
+              Ugo,
+              Grp,
+              Pwd,
+              Usr};
 enum FileSistem {ext2 = 2,ext3 = 3};
 enum TypeInode{IN_FILE = 0,IN_DIRECTORY=1};
 enum TypeBlock{FILE_,DIRECTORY,POINTERS};

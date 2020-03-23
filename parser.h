@@ -127,7 +127,7 @@ TypeFormat FORMATTYPE;
 Unit UNIT;
 CommandEnum COMMAND_ENUM;
 struct Option * OPTION;
-class Command *COMMAND;
+class Cmd *COMMAND;
 FileSistem FILESYSTEM;
 
 #line 134 "parser.h" /* yacc.c:1909  */

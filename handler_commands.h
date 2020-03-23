@@ -3,6 +3,17 @@
 #include <iostream>
 #include <enums.h>
 #include <string.h>
+#include <handler_commands.h>
+#include <parser.h>
+#include <scanner.h>
+
+using namespace std;
+
+class Cmd{
+public:
+    virtual void Exec() = 0;
+    Cmd *next = NULL;
+};
 
 class cmd_mkdisk{
 public:
@@ -17,6 +28,7 @@ class cmd_rmdisk{
 public:
     char *path;
     cmd_rmdisk(char path[]);
+    void Exec();
 };
 
 class cmd_fdisk{
@@ -27,16 +39,28 @@ public:
     TypePartition type;
     Fit fit;
     char *name;
-    bool isForAdd;
-    cmd_fdisk(char name[],char path[],int size,bool isForAdd);
+    cmd_fdisk(char name[],char path[],int size);
+    void Exec();
 };
 
-class cmd_rmPartition{
+class cmd_addPart{
+public:
+    int size;
+    Unit unit;
+    char *path;
+    char *name;
+    cmd_addPart(char name[],char path[],int size);
+    void Exec();
+};
+
+
+class cmd_rmPart{
 public:
     char *name;
     char *path;
     TypeFormat typeDel;
-    cmd_rmPartition(char name[],char path[],TypeFormat type);
+    cmd_rmPart(char name[],char path[],TypeFormat type);
+    void Exec();
 };
 
 class cmd_mount{
@@ -44,14 +68,17 @@ public:
     char *path;
     char *name;
     cmd_mount(char path[],char name[]);
+    void Exec();
 };
 
 class cmd_unmount{
 public:
     char *id;
     cmd_unmount(char id[]);
+    void Exec();
 };
 
+//**********************************************
 class cmd_fs{
 public:
     TypeFormat type;
@@ -173,22 +200,16 @@ public:
     cmd_loss(char id[]);
 };
 
-class cmd_rep{
+class cmd_rep:public Cmd{
 public:
     char *path_report;
     TypeReport type;
     char *id;
     char *path;
     cmd_rep(char path[],TypeReport type,char id[]);
+    void Exec();
 };
 
-/*
-class Node{
-public:
-    virtual void Exec() = 0;
-};
-
-*/
 class Option
 {
 public:
@@ -208,18 +229,17 @@ public:
     Option *next;
     bool flag;
 };
-/*
-class Command:public Node {
-public:
-    CommandEnum cmd;
-    Option *opts;
-    Command *next;
-    Command(CommandEnum c,Option *o){
-        cmd = c;
-        opts = o;
-        next = NULL;
-    }
-};
-*/
+
+Cmd* getFormedCommand(CommandEnum command,Option *op,Cmd *cmd);
+
+bool validateParams();
+
+Cmd* ListCommand(Cmd *cmd,bool flag);
+
+void writeCommand(string command,bool isScript);
+
+void readExecCommand(bool isScript);
+
+void letsExecCommands(Cmd *commands);
 
 #endif // HANDLER_COMMANDS_H

@@ -37,7 +37,7 @@ TypeFormat FORMATTYPE;
 Unit UNIT;
 CommandEnum COMMAND_ENUM;
 struct Option * OPTION;
-class Command *COMMAND;
+class Cmd *COMMAND;
 FileSistem FILESYSTEM;
 }
 
@@ -128,13 +128,13 @@ FileSistem FILESYSTEM;
 %%
 
 INICIO :COMMANDS_LIST{
-//ListCommand($1,true);
+ListCommand($1,true);
 };
 
 COMMANDS_LIST: COMMANDS_LIST COMMAND{
- /*   if($1!=NULL){
+    if($1!=NULL){
         if($2!=NULL){
-            Command *first = $1;
+            Cmd *first = $1;
             while(first->next!=NULL){
                 first = first->next;
             }
@@ -147,24 +147,23 @@ COMMANDS_LIST: COMMANDS_LIST COMMAND{
         }else{
             $$=NULL;
         }
-    }*/
+    }
 }
 |COMMAND{
    $$ = $1;
 };
 
 COMMAND: STATE_COMMANDS OPTIONS_LIST{
-
-    /*  if(validateOptionCommand($1,$2)){
-        $$ = new Command($1,$2);
-   }else{
-       $$=NULL;
-   }
-*/
-
+    Cmd *cmd = getFormedCommand($1,$2,cmd);
+    $$ = cmd;
 };
 
-STATE_COMMANDS: MKDISK{$$=mkdisk;}|RMDISK{$$=rmdisk;}|FDISK{$$=fdisk;}|MOUNT{$$=mount;}|UNMOUNT{$$=unmount;}|REP{$$=rep;}
+STATE_COMMANDS: MKDISK{$$=mkdisk;}
+|RMDISK{$$=rmdisk;}
+|FDISK{$$=fdisk;}
+|MOUNT{$$=mount;}
+|UNMOUNT{$$=unmount;}
+|REP{$$=rep;}
 |EXEC{$$=exec;}
 |LOSS{$$=loss;}
 |CHGRP{$$=chgrp;}
@@ -187,14 +186,12 @@ STATE_COMMANDS: MKDISK{$$=mkdisk;}|RMDISK{$$=rmdisk;}|FDISK{$$=fdisk;}|MOUNT{$$=
 
 
 OPTIONS_LIST:OPTIONS_LIST STATE_OPTION{
-/*
 Option *op = $1;
 while(op->next!=NULL){
     op = op->next;
 }
 op->next = $2;
 $$ = $1;
-*/
 }
 |STATE_OPTION{
     $$ = $1;

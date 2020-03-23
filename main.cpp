@@ -9,6 +9,7 @@
 #include <scanner.h>
 #include <handler_fs.h>
 #include<handler_reports.h>
+#include <handler_commands.h>
 
 using namespace std;
 
@@ -31,8 +32,8 @@ int main()
             //***********
             continue;
         }
-        //writeCommand(command,false);
-        //readExecCommand(false);
+        writeCommand(command,false);
+        readExecCommand(false);
     }
 
 /*
