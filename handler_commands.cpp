@@ -197,11 +197,9 @@ cmd_login::cmd_login(char usr[], char pwd[], char id[]){
 
 //INICIAR SESION
 void cmd_login::Exec(){
-    cout<<"USR: "<<this->usr<<endl;
-    cout<<"PWD: "<<this->pwd<<endl;
-    if(active_sesion->isActive()){
+   /* if(active_sesion->isActive()){
         cout<<"El usuario "<<active_sesion->user<<" ya ha iniciado sesión.\n";
-    }else{
+    }else{*/
         MountedDisk *disk = getMountedDisk(this->id);
         if(disk==NULL){
             return;
@@ -222,7 +220,7 @@ void cmd_login::Exec(){
         }else{
             cout<<"Las credenciales son incorrectas.\n";
         }
-    }
+  //  }
 }
 
 cmd_grp::cmd_grp(char name[], bool isForCreate){
@@ -265,13 +263,13 @@ cmd_mkfile::cmd_mkfile(char path[]){
 
 //CREAR ARCHIVO
 void cmd_mkfile::Exec(){
-/*    if(!SESION.isActive()){
+    if(!active_sesion->isActive()){
         cout<<"No se ha iniciado sesión.\n";
         return;
-    }*/
+    }
     if(cont!=NULL){
        Response res = createFile (this->path,this->isRecursive,this->cont,
-                    "","");
+                                  active_sesion->path,active_sesion->namePartition);
        if(res==SUCCESS){
            cout<<"¡Archivo creado con éxito!\n";
        }else{
@@ -279,7 +277,7 @@ void cmd_mkfile::Exec(){
        }
     }else{
        Response res = createFile(this->path,this->isRecursive,this->size,
-                 "","");
+                 active_sesion->path,active_sesion->namePartition);
        if(res==SUCCESS){
            cout<<"¡Archivo creado con éxito!\n";
        }else{
@@ -293,7 +291,21 @@ cmd_file::cmd_file(char path[], bool isForCat){
     this->isForCat = isForCat;
 }
 
-void cmd_file::Exec(){}
+//MOSTRAR ARCHIVO
+void cmd_file::Exec(){
+    if(!active_sesion->isActive()){
+        cout<<"No se ha iniciado sesión.\n";
+        return;
+    }
+    if(isForCat){
+        Response res = catFile(this->path,active_sesion->path,active_sesion->namePartition);
+        if(res!=SUCCESS){
+            showMessageError(res);
+        }
+    }else{
+        //rem
+    }
+}
 
 cmd_edit::cmd_edit(char path[], char cont[]){
     this->path = path;
@@ -314,7 +326,19 @@ cmd_mkdir::cmd_mkdir(char path[], bool isRecursive){
     this->path = path;
 }
 
-void cmd_mkdir::Exec(){}
+//CREAR CARPETA
+void cmd_mkdir::Exec(){
+    if(!active_sesion->isActive()){
+        cout<<"No se ha iniciado sesión.\n";
+        return;
+    }
+    Response res = createDirectory(this->isRecursive,active_sesion->id,this->path);
+    if(res==SUCCESS){
+        cout<<"¡Carpeta creada con éxito!\n";
+    }else{
+        showMessageError(res);
+    }
+}
 
 cmd_cp::cmd_cp(char path[], char newPath[],bool isForCp){
     this->path = path;
@@ -361,8 +385,18 @@ cmd_rep::cmd_rep(char path[], TypeReport type, char id[]){
 
 //GENERAR REPORTE
 void cmd_rep::Exec(){
-    /*
-    MountedDisk *disk = partsMounted[contadorDiscos];
+
+    MountedDisk *disk = getMountedDisk(this->id);
+    if(disk==NULL){
+        cout<<"No hay un disco montado.\n";
+        return;
+    }
+    MountedPart *part = getMountedPartition(this->id);
+    if(part==NULL){
+        cout<<"La partición no fue montada.\n";
+        return;
+    }
+
     int ext = 0;
     string ss = getNamePath(path,&ext);
     char *chh = &ss[0];
@@ -372,11 +406,91 @@ void cmd_rep::Exec(){
     //CREAR DIRECTORIO SI NO EXISTE
     mkdir(hh.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-    if(strcmp(name,"mbr")==0){
-        reportMBR(disk->path,path);
-    }else{
-        reportDisk(disk->path,path);
-    }*/
+    switch (this->type) {
+    case Mbr:
+        reportMBR(disk->path,this->path_report);
+        break;
+    case Disk:
+        reportDisk(disk->path,this->path_report);
+        break;
+    case Inode:
+    {
+        Response res = reportInodes(disk->path,part->name, this->path_report);
+        if(res==SUCCESS){
+            cout<<"El reporte fue generado con éxito.\n";
+        }else{
+            showMessageError(res);
+        }
+    }
+        break;
+    case Block:
+    {
+        Response res =reportBlocks(disk->path,part->name, this->path_report);
+        if(res==SUCCESS){
+            cout<<"El reporte fue generado con éxito.\n";
+        }else{
+            showMessageError(res);
+        }
+    }
+        break;
+    case Journaling:
+        break;
+    case BM_block:
+    {
+        Response res =reportBitmap(1,disk->path,part->name,this->path_report);
+        if(res==SUCCESS){
+            cout<<"El reporte fue generado con éxito.\n";
+        }else{
+            showMessageError(res);
+        }
+    }
+        break;
+    case BM_inode:
+    {
+        Response res =reportBitmap(0,disk->path,part->name,this->path_report);
+        if(res==SUCCESS){
+            cout<<"El reporte fue generado con éxito.\n";
+        }else{
+            showMessageError(res);
+        }
+    }
+        break;
+    case Tree:
+    {
+        Response res =reportTree(this->path_report,this->id);
+        if(res==SUCCESS){
+            cout<<"El reporte fue generado con éxito.\n";
+        }else{
+            showMessageError(res);
+        }
+    }
+        break;
+    case Sb:
+    {
+        Response res =reportSuperBlock(disk->path,part->name,this->path_report);
+        if(res==SUCCESS){
+            cout<<"El reporte fue generado con éxito.\n";
+        }else{
+            showMessageError(res);
+        }
+    }
+        break;
+    case File:
+    {
+        Response res = reportFile(this->path,disk->path,part->name,this->path_report);
+        if(res==SUCCESS){
+            cout<<"El reporte fue generado con éxito.\n";
+        }else{
+            showMessageError(res);
+        }
+    }
+        break;
+    case Ls:
+        break;
+    default:
+        cout<<"Reporte no reconocido.\n";
+        break;
+    }
 }
 
 Cmd* getFormedCommand(CommandEnum command,Option *op){

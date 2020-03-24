@@ -76,5 +76,15 @@ enum Options {Id,
 enum FileSistem {ext2 = 2,ext3 = 3,FS_ERROR};
 enum TypeInode{IN_FILE = 0,IN_DIRECTORY=1};
 enum TypeBlock{FILE_,DIRECTORY,POINTERS};
-enum TypeReport{Inode,Journaling,Block,BM_inode,BM_block,Tree,Sb,File,Ls,Mbr,Disk};
+enum TypeReport{Inode,
+                Journaling,
+                Block,
+                BM_inode,
+                BM_block,
+                Tree,
+                Sb,
+                File,
+                Ls,
+                Mbr,
+                Disk};
 #endif // ENUMS_H

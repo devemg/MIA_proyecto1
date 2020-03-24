@@ -9,6 +9,7 @@
 #include <handler_disk.h>
 #include <handler_partitions.h>
 #include <utils.h>
+#include <handler_reports.h>
 
 using namespace std;
 

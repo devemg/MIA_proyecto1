@@ -137,20 +137,23 @@ public:
     char *user;
     char *path;
     char *namePartition;
+    char *id;
     Sesion(){
         this->user = NULL;
         this->path = NULL;
         this->namePartition = NULL;
+        this->id = NULL;
     }
 
     bool isActive(){
-        return user!=NULL && path!=NULL && namePartition!=NULL;
+        return user!=NULL && path!=NULL && namePartition!=NULL && id!=NULL;
     }
 
     void clear(){
         user = NULL;
         path = NULL;
         namePartition = NULL;
+        id = NULL;
     }
 };
 
