@@ -171,7 +171,7 @@ cmd_fs::cmd_fs(char id[]){
     fs = ext2;
 }
 
-//FILESYSTEM DE PARTICION
+//FILE-SYSTEM DE PARTICION
 void cmd_fs::Exec(){
     MountedDisk *disk = getMountedDisk(this->id);
     if(disk==NULL){
@@ -193,6 +193,12 @@ cmd_login::cmd_login(char usr[], char pwd[], char id[]){
     this->usr = usr;
     this->pwd = pwd;
     this->id = id;
+}
+
+//INICIAR SESION
+void cmd_login::Exec(){
+    cout<<"USR: "<<this->usr<<endl;
+    cout<<"PWD: "<<this->pwd<<endl;
 }
 
 cmd_grp::cmd_grp(char name[], bool isForCreate){
@@ -221,6 +227,31 @@ cmd_mkfile::cmd_mkfile(char path[]){
     this->isRecursive = false;
     this->size = 0;
     this->cont = NULL;
+}
+
+//CREAR ARCHIVO
+void cmd_mkfile::Exec(){
+/*    if(!SESION.isActive()){
+        cout<<"No se ha iniciado sesión.\n";
+        return;
+    }*/
+    if(cont!=NULL){
+       Response res = createFile (this->path,this->isRecursive,this->cont,
+                    "","");
+       if(res==SUCCESS){
+           cout<<"¡Archivo creado con éxito!\n";
+       }else{
+           showMessageError(res);
+       }
+    }else{
+       Response res = createFile(this->path,this->isRecursive,this->size,
+                 "","");
+       if(res==SUCCESS){
+           cout<<"¡Archivo creado con éxito!\n";
+       }else{
+           showMessageError(res);
+       }
+    }
 }
 
 cmd_file::cmd_file(char path[], bool isForCat){
@@ -275,14 +306,8 @@ cmd_rep::cmd_rep(char path[], TypeReport type, char id[]){
     this->path = NULL;
 }
 
+//GENERAR REPORTE
 void cmd_rep::Exec(){
-    //BUSCAR DISCO
-    int contadorDiscos;
-    Response res = getContadorDiscos(&contadorDiscos,id);
-    if(res!=SUCCESS){
-        //showMessageError(res);
-        return;
-    }
     /*
     MountedDisk *disk = partsMounted[contadorDiscos];
     int ext = 0;

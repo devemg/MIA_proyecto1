@@ -132,4 +132,20 @@ struct Journal{
 
 };
 
+class Sesion{
+public:
+    char *user;
+    char *path;
+    char *namePartition;
+    Sesion(){
+        this->user = NULL;
+        this->path = NULL;
+        this->namePartition = NULL;
+    }
+
+    bool isActive(){
+        return user!=NULL && path!=NULL && namePartition!=NULL;
+    }
+};
+
 #endif // STRUCTURES_H

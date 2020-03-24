@@ -101,12 +101,13 @@ public:
     void Exec();
 };
 
-class cmd_login{
+class cmd_login:public Cmd{
 public:
     char *usr;
     char *pwd;
     char *id;
     cmd_login(char usr[],char pwd[],char id[]);
+    void Exec();
 };
 
 class cmd_grp{
@@ -139,13 +140,14 @@ public:
     cmd_chmod(char path[],int ugo);
 };
 
-class cmd_mkfile{
+class cmd_mkfile: public Cmd{
 public:
      char *path;
      bool isRecursive;
      int size;
      char *cont;
      cmd_mkfile(char path[]);
+     void Exec();
 };
 
 class cmd_file{
