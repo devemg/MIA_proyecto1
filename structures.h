@@ -146,6 +146,12 @@ public:
     bool isActive(){
         return user!=NULL && path!=NULL && namePartition!=NULL;
     }
+
+    void clear(){
+        user = NULL;
+        path = NULL;
+        namePartition = NULL;
+    }
 };
 
 #endif // STRUCTURES_H

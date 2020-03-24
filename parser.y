@@ -14,10 +14,10 @@ extern char *yytext; //lexema actual
 int yyerror(const char* mens){
 //metodo que se llama al haber un error sintactico
 //SE IMPRIME EN CONSOLA EL ERROR
-    if(strcmp(yytext,"$end")==1){
+ //   if(strcmp(yytext,"$end")==1){
         std::cout<<"ERROR EN COMANDO: "<<mens<<" "<<yytext<< std::endl;
 
-    }
+   // }
 return 0;
 }
 
@@ -43,7 +43,7 @@ FileSistem FILESYSTEM;
 
 //TERMINALES DE TIPO TEXT, SON STRINGS
 %token<TEXT> WORD
-%token<INT> NUMERO
+%token<TEXT> NUMERO
 %token<TEXT> SIZE
 %token<TEXT> FIT
 %token<TEXT> UNIT
@@ -204,7 +204,7 @@ STATE_OPTION:NAME IGUAL WORD{
 }
 |SIZE IGUAL NUMERO{
     $$ = new Option(Size);
-    $$->num = $3;
+    $$->num = getInt($3);
 }
 |FIT IGUAL FIT_OPTIONS{
     $$ = new Option(Fitt);
@@ -228,7 +228,7 @@ STATE_OPTION:NAME IGUAL WORD{
 }
 |ADD IGUAL NUMERO{
     $$ = new Option(Add);
-    $$->num = $3;
+    $$->num = getInt($3);
 }
 |ID IGUAL WORD{
      $$ = new Option(Id);
@@ -250,13 +250,17 @@ STATE_OPTION:NAME IGUAL WORD{
     $$ = new Option(Pwd);
     strcpy($$->text, $3);
 }
+|PWD IGUAL NUMERO{
+    $$ = new Option(Pwd);
+    strcpy($$->text,$3);
+}
 |GRP IGUAL STRING{
     $$ = new Option(Grp);
     strcpy($$->text, $3);
 }
 |UGO IGUAL NUMERO{
     $$ = new Option(Ugo);
-    $$->num = $3;
+    $$->num = getInt($3);
 }
 |RECURSIVE{
     $$ = new Option(Recursive);

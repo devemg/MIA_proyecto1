@@ -29,7 +29,7 @@ int main()
             system("read -r -p \"Presiona cualquier tecla para continuar...\" key");
             continue;
         }else if(strcmp(command.c_str(),"logout")==0){
-            //***********
+            active_sesion->clear();
             continue;
         }
         writeCommand(command,false);

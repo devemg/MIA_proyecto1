@@ -199,6 +199,30 @@ cmd_login::cmd_login(char usr[], char pwd[], char id[]){
 void cmd_login::Exec(){
     cout<<"USR: "<<this->usr<<endl;
     cout<<"PWD: "<<this->pwd<<endl;
+    if(active_sesion->isActive()){
+        cout<<"El usuario "<<active_sesion->user<<" ya ha iniciado sesión.\n";
+    }else{
+        MountedDisk *disk = getMountedDisk(this->id);
+        if(disk==NULL){
+            return;
+        }
+        MountedPart *part = getMountedPartition(this->id);
+        if(part==NULL){
+            return;
+        }
+        //COMPROBAR SESION
+
+        int check = 0; //loginInSystem(usr,pwd);
+        if(check == 0){
+            active_sesion->user = this->usr;
+            active_sesion->path = disk->path;
+            active_sesion->namePartition = part->name;
+        }else if(check == 1){
+            cout<<"El usuario no existe\n";
+        }else{
+            cout<<"Las credenciales son incorrectas.\n";
+        }
+    }
 }
 
 cmd_grp::cmd_grp(char name[], bool isForCreate){
