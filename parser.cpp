@@ -1417,7 +1417,7 @@ ListCommand((yyvsp[0].COMMAND),true);
   case 5:
 #line 156 "parser.y" /* yacc.c:1646  */
     {
-    Cmd *cmd = getFormedCommand((yyvsp[-1].COMMAND_ENUM),(yyvsp[0].OPTION),cmd);
+    Cmd *cmd = getFormedCommand((yyvsp[-1].COMMAND_ENUM),(yyvsp[0].OPTION));
     (yyval.COMMAND) = cmd;
 }
 #line 1424 "parser.cpp" /* yacc.c:1646  */

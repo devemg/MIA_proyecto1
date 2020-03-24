@@ -110,37 +110,41 @@ public:
     void Exec();
 };
 
-class cmd_grp{
+class cmd_grp:public Cmd{
 public:
     char *name;
     bool isForCreate;
     cmd_grp(char name[],bool isForCreate);
+    void Exec();
 };
 
-class cmd_mkusr{
+class cmd_mkusr:public Cmd{
 public:
     char *usr;
     char *pwd;
     char *grp;
     cmd_mkusr(char usr[],char pwd[],char grp[]);
+    void Exec();
 };
 
-class cmd_rmusr{
+class cmd_rmusr:public Cmd{
 public:
     char *usr;
     cmd_rmusr(char usr[]);
+    void Exec();
 };
 
 
-class cmd_chmod{
+class cmd_chmod:public Cmd{
 public:
     char *path;
     int ugo;
     bool isRecursive;
     cmd_chmod(char path[],int ugo);
+    void Exec();
 };
 
-class cmd_mkfile: public Cmd{
+class cmd_mkfile:public Cmd{
 public:
      char *path;
      bool isRecursive;
@@ -150,70 +154,78 @@ public:
      void Exec();
 };
 
-class cmd_file{
+class cmd_file:public Cmd{
 public:
     char *path;
     bool isForCat;//rem
     cmd_file(char path[],bool isForCat);
+    void Exec();
 };
 
-class cmd_edit{
+class cmd_edit:public Cmd{
 public:
     char *path;
     char *cont;
     cmd_edit(char path[],char cont[]);
+    void Exec();
 };
 
-class cmd_ren{
+class cmd_ren:public Cmd{
 public:
     char *path;
     char *newName;
     cmd_ren(char path[],char newName[]);
+    void Exec();
 };
 
 
-class cmd_mkdir{
+class cmd_mkdir:public Cmd{
 public:
      char *path;
      bool isRecursive;
-     cmd_mkdir(char path[]);
+     cmd_mkdir(char path[],bool isRecursive);
+     void Exec();
 };
 
-class cmd_cp{
+class cmd_cp:public Cmd{
 public:
     char *path;
     char *newPath;
     bool isForCp; //isForMove
-    cmd_cp(char path[],char newPath[]);
+    cmd_cp(char path[],char newPath[],bool isForCp);
+    void Exec();
 };
 
-class cmd_find{
+class cmd_find:public Cmd{
 public:
     char *path;
     char *name;
     cmd_find(char path[],char name[]);
-
+    void Exec();
 };
 
-class cmd_chown{
+class cmd_chown:public Cmd{
 public:
     char *path;
     char *usr;
     bool isRecursive;
-    cmd_chown(char path[],char usr[]);
+    cmd_chown(char path[],char usr[],bool isRecursive);
+    void Exec();
 };
 
-class cmd_chgrp{
+class cmd_chgrp:public Cmd{
 public:
     char *usr;
     char *grp;
     cmd_chgrp(char usr[],char grp[]);
+    void Exec();
 };
 
-class cmd_loss{
+class cmd_loss:public Cmd{
 public:
     char *id;
     cmd_loss(char id[]);
+    void Exec();
 };
 
 class cmd_rep:public Cmd{
@@ -246,7 +258,7 @@ public:
     bool flag;
 };
 
-Cmd* getFormedCommand(CommandEnum command,Option *op,Cmd *cmd);
+Cmd* getFormedCommand(CommandEnum command,Option *op);
 
 bool validateParams();
 

@@ -154,7 +154,7 @@ COMMANDS_LIST: COMMANDS_LIST COMMAND{
 };
 
 COMMAND: STATE_COMMANDS OPTIONS_LIST{
-    Cmd *cmd = getFormedCommand($1,$2,cmd);
+    Cmd *cmd = getFormedCommand($1,$2);
     $$ = cmd;
 };
 

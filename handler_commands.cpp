@@ -206,21 +206,31 @@ cmd_grp::cmd_grp(char name[], bool isForCreate){
     this->isForCreate = isForCreate;
 }
 
+void cmd_grp::Exec(){
+
+}
+
 cmd_mkusr::cmd_mkusr(char usr[], char pwd[], char grp[]){
     this->usr = usr;
     this->pwd = pwd;
     this->grp = grp;
 }
 
+void cmd_mkusr::Exec(){}
+
 cmd_rmusr::cmd_rmusr(char usr[]){
     this->usr = usr;
 }
+
+void cmd_rmusr::Exec(){}
 
 cmd_chmod::cmd_chmod(char path[], int ugo){
     this->path = path;
     this->ugo = ugo;
     this->isRecursive = false;
 }
+
+void cmd_chmod::Exec(){}
 
 cmd_mkfile::cmd_mkfile(char path[]){
     this->path = path;
@@ -259,45 +269,64 @@ cmd_file::cmd_file(char path[], bool isForCat){
     this->isForCat = isForCat;
 }
 
+void cmd_file::Exec(){}
+
 cmd_edit::cmd_edit(char path[], char cont[]){
     this->path = path;
     this->cont = cont;
 }
+
+void cmd_edit::Exec(){}
 
 cmd_ren::cmd_ren(char path[], char newName[]){
     this->path = path;
     this->newName = newName;
 }
 
-cmd_mkdir::cmd_mkdir(char path[]){
-    this->isRecursive = false;
+void cmd_ren::Exec(){}
+
+cmd_mkdir::cmd_mkdir(char path[], bool isRecursive){
+    this->isRecursive = isRecursive;
     this->path = path;
 }
 
-cmd_cp::cmd_cp(char path[], char newPath[]){
+void cmd_mkdir::Exec(){}
+
+cmd_cp::cmd_cp(char path[], char newPath[],bool isForCp){
     this->path = path;
     this->newPath = newPath;
+    this->isForCp = isForCp;
 }
+
+void cmd_cp::Exec(){}
 
 cmd_find::cmd_find(char path[], char name[]){
     this->path = path;
     this->name = name;
 }
 
-cmd_chown::cmd_chown(char path[], char usr[]){
+void cmd_find::Exec(){}
+
+cmd_chown::cmd_chown(char path[], char usr[],bool isRecursive){
     this->path = path;
-    this->isRecursive = false;
+    this->isRecursive = isRecursive;
     this->usr = usr;
 }
+
+void cmd_chown::Exec(){}
 
 cmd_chgrp::cmd_chgrp(char usr[], char grp[]){
     this->usr = usr;
     this->grp = grp;
 }
 
+void cmd_chgrp::Exec(){}
+
 cmd_loss::cmd_loss(char id[]){
     this->id = id;
 }
+
+void cmd_loss::Exec(){}
 
 cmd_rep::cmd_rep(char path[], TypeReport type, char id[]){
     this->path_report = path;
@@ -326,19 +355,33 @@ void cmd_rep::Exec(){
     }*/
 }
 
-Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
+Cmd* getFormedCommand(CommandEnum command,Option *op){
     Option *it = op;
 
     char *name = NULL;
     char *path = NULL;
     char *id = NULL;
+    char *usr = NULL;
+    char *pwd=NULL;
+    char *grp=NULL;
+    char *cont=NULL;
+    char *file=NULL;
+    char *dest=NULL;
+
     int size = -1;
+    int ugo=-1;
+
+    bool isRecursive=false;
     Fit fit = FIT_ERROR;
     Unit unit = UNIT_ERROR;
     TypeFormat typeFormat = TF_ERROR;
     TypePartition typePartition = TP_ERROR;
+    FileSistem fsystem = FS_ERROR;
+
     bool existSize = false;
     bool existAdd = false;
+    bool existUgo = false;
+
     while(it!=NULL){
         switch (it->option) {
         case Name:
@@ -369,6 +412,37 @@ Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
         case Add:
             size = it->num;
             existAdd = true;
+            break;
+        case Usr:
+            usr = it->text;
+            break;
+        case Pwd:
+            pwd = it->text;
+            break;
+        case Grp:
+            grp = it->text;
+            break;
+        case Cont:
+            cont=it->text;
+            break;
+        case Fil_e:
+            file = it->text;
+            break;
+        case Dest:
+            dest = it->text;
+            break;
+        case Ugo:
+            ugo = it->num;
+            existUgo = true;
+            break;
+        case Recursive:
+            isRecursive = it->flag;
+            break;
+        case FileSys:
+            fsystem = it->fs;
+            break;
+        default:
+            cout<<"La opción no es válida.\n";
             break;
         }
           it = it->next;
@@ -493,26 +567,247 @@ Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
       }
           break;
       case mkfs:
+      {
+          if(id==NULL){
+              std::cout<<"Debe indicar un id(-id).\n";
+              return NULL;
+          }
+          cmd_fs *fs = new cmd_fs(id);
+          if(typeFormat!=TF_ERROR){
+              fs->type = typeFormat;
+          }
+          if(fsystem!=FS_ERROR){
+              fs->fs = fsystem;
+          }
+          return fs;
+      }
+          break;
       case login:
+      {
+          if(usr==NULL){
+              std::cout<<"Debe indicar un usr(-usr).\n";
+              return NULL;
+          }
+          if(pwd==NULL){
+              std::cout<<"Debe indicar un pwd(-pwd).\n";
+              return NULL;
+          }
+          if(id==NULL){
+              std::cout<<"Debe indicar un id(-id).\n";
+              return NULL;
+          }
+          return new cmd_login(usr,pwd,id);
+      }
+          break;
       case mkgrp:
+      {
+          if(name==NULL){
+              std::cout<<"Debe indicar un name(-name).\n";
+              return NULL;
+          }
+          return new cmd_grp(name,true);
+      }
+          break;
       case rmgrp:
+      {
+          if(name==NULL){
+              std::cout<<"Debe indicar un name(-name).\n";
+              return NULL;
+          }
+          return new cmd_grp(name,false);
+      }
+          break;
       case mkusr:
+      {
+          if(usr==NULL){
+              std::cout<<"Debe indicar un usr(-usr).\n";
+              return NULL;
+          }
+          if(pwd==NULL){
+              std::cout<<"Debe indicar un pwd(-pwd).\n";
+              return NULL;
+          }
+          if(grp==NULL){
+              std::cout<<"Debe indicar un grp(-grp).\n";
+              return NULL;
+          }
+          return new cmd_mkusr(usr,pwd,grp);
+      }
+          break;
       case rmusr:
+      {
+          if(usr==NULL){
+              std::cout<<"Debe indicar un usr(-usr).\n";
+              return NULL;
+          }
+          return new cmd_rmusr(usr);
+      }
+          break;
       case ch_mod:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar un path(-path).\n";
+              return NULL;
+          }
+          if(!existUgo){
+              std::cout<<"Debe indicar los permisos(-ugo).\n";
+              return NULL;
+          }
+          cmd_chmod *cmod = new cmd_chmod(path,ugo);
+          cmod->isRecursive = isRecursive;
+          return cmod;
+      }
+          break;
       case mkfile:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar un path(-path).\n";
+              return NULL;
+          }
+          if(!existSize && cont == NULL ){
+              std::cout<<"Debe indicar un tamaño(-size) o la ruta de un archivo(-cont).\n";
+              return NULL;
+          }
+          cmd_mkfile *mk = new cmd_mkfile(path);
+          mk->isRecursive = isRecursive;
+          if(existSize){
+              mk->size = size;
+          }
+          if(cont !=NULL){
+              mk->cont = cont;
+          }
+          return mk;
+      }
+          break;
       case cat:
+      {
+          if(file==NULL){
+              std::cout<<"Debe indicar una ruta de archivo(-file).\n";
+              return NULL;
+          }
+          return new cmd_file(file,true);
+      }
+          break;
       case rem:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar un path(-path).\n";
+              return NULL;
+          }
+          return new cmd_file(path,false);
+      }
+          break;
       case edit:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar un path(-path).\n";
+              return NULL;
+          }
+          if(cont==NULL){
+              std::cout<<"Debe indicar una ruta de archivo(-cont).\n";
+              return NULL;
+          }
+          return new cmd_edit(path,cont);
+      }
+          break;
       case ren:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar un path(-path).\n";
+              return NULL;
+          }
+          if(name==NULL){
+              std::cout<<"Debe indicar un name(-name).\n";
+              return NULL;
+          }
+         return new cmd_ren(path,name);
+      }
+          break;
       case mk_dir:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar un path(-path).\n";
+              return NULL;
+          }
+          return new cmd_mkdir(path,isRecursive);
+      }
+          break;
       case cp:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar un path(-path).\n";
+              return NULL;
+          }
+          if(dest==NULL){
+              std::cout<<"Debe indicar un dest(-dest).\n";
+              return NULL;
+          }
+          return new cmd_cp(path,dest,true);
+      }
+          break;
       case mv:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar un path(-path).\n";
+              return NULL;
+          }
+          if(dest==NULL){
+              std::cout<<"Debe indicar un dest(-dest).\n";
+              return NULL;
+          }
+          return new cmd_cp(path,dest,false);
+      }
+          break;
       case find_:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar un path(-path).\n";
+              return NULL;
+          }
+          if(name==NULL){
+              std::cout<<"Debe indicar un nombre(-name).\n";
+              return NULL;
+          }
+          return new cmd_find(path,name);
+      }
+          break;
       case ch_own:
+      {
+          if(path==NULL){
+              std::cout<<"Debe indicar una ruta(-path).\n";
+              return NULL;
+          }
+          if(usr==NULL){
+              std::cout<<"Debe indicar un usuario(-usr).\n";
+              return NULL;
+          }
+          return new cmd_chown(path,usr,isRecursive);
+      }
+          break;
       case chgrp:
+      {
+          if(usr==NULL){
+              std::cout<<"Debe indicar un usuario(-usr).\n";
+              return NULL;
+          }
+          if(grp==NULL){
+              std::cout<<"Debe indicar un grupo(-grp).\n";
+              return NULL;
+          }
+          return new cmd_chgrp(usr,grp);
+      }
+          break;
       case loss:
+      {
+          if(id==NULL){
+              std::cout<<"Debe indicar un id(-id).\n";
+              return NULL;
+          }
+          return new cmd_loss(id);
+      }
           break;
       case rep:
+      {
           if(name==NULL){
               cout<<"Error: Debe ingresar un nombre(-name)\n";
               return NULL;
@@ -556,8 +851,8 @@ Cmd* getFormedCommand(CommandEnum command,Option *op, Cmd *cmd){
                           return NULL;
                       }
           return new cmd_rep(path,typeReport,id);
+      }
           break;
-
       }
  return NULL;
 }
