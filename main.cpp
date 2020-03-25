@@ -45,6 +45,13 @@ int main()
   addUser("/home/emely/Escritorio/testData/disk1.disk","particion_1","emely","abcd","root");
 
   addGroup("/home/emely/Escritorio/testData/disk1.disk","particion_1","users");
+
+
+  addUser("/home/emely/Escritorio/testData/disk1.disk","particion_1","emely","abcd","root");
+
+  addGroup("/home/emely/Escritorio/testData/disk1.disk","particion_1","users");
+  reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
+
   //createFile("/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
   /*
   createDirectory(true,"vda0","/a");
@@ -139,7 +146,6 @@ int main()
   //showMounts();
   //reportBlocks("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/blocks.png");
   //reportInodes("/home/emely/Escritorio/testData/disk1.disk","particion_1", "/home/emely/Escritorio/testData/inodos.png");
-  //reportTree("/home/emely/Escritorio/testData/tree.png","vda0");
   //cout<<"reporte generado\n";
   //myPause();
   //reportSuperBlock("/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/superblock.png");

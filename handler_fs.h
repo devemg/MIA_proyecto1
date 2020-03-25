@@ -87,14 +87,20 @@ Response addFileBlockPointers(Inodo *inodo,int *indexofInodo,BlockFile *block,Su
 
 int findDirectoryInPointers(int level,int indexBlock,int *indexInodoActual,char namedir[],SuperBlock *sb,char path[]);
 
-Group* getGroup(char name[],char *contentUsers,int *contador);
+Group* getGroup(char name[],char *contentg);
 
-User* getUser(char usr[],char *contentUsers,int *contadorUsuarios);
+User* getUser(char usr[],char *contentUsers);
 
 Response addGroup(char *path,char *partition,char grp[]);
 
 Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]);
 
 User* getUser(char usr[]);
+
+Response ReplaceContentFile(int indexInode,char *content,char path[],char namePart[]);
+
+int countUsers(char contentUsers[]);
+
+int countGroups(char contentGroups[]);
 
 #endif // HANDLERFILESISTEM_H

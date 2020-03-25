@@ -95,7 +95,7 @@ Response formatPart(char path[], char partition[], TypeFormat tipoFormateo, File
     writeDirectory(sb,path,"/","/",0);
     writeSuperBlock(sb,path,initPart);
     //CREAR ARCHIVO DE USERS
-    char *users = "1,G,root,\n1,U,root,root,123\n";
+    char *users = "1,G,root\n1,U,root,root,123\n";
     createFileWithText("/users.txt",true,users,28,path,partition);
     delete disco;
     delete sb;
@@ -959,15 +959,25 @@ Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
     char *content;
      char *title;
      char *filePath="/users.txt";
-     Response res = findContentFile(filePath,path,partition,&content,&title);
+     //******************
+     int indexInode = findFile(filePath,path,partition,&title);
+     if(indexInode==-1){
+         return ERROR_UNHANDLED;
+     }
+     int startSb = -1;
+     SuperBlock *sb = readSuperBlock(path,partition,&startSb);
+     if(sb==NULL){
+         return ERROR_UNHANDLED;
+     }
+     Response res = getContentFile(indexInode,path,sb,&content);
      if(res!=SUCCESS)return res;
-    int contadorUsuarios = 0;
-    Group *grpp=getGroup(grp,content,&contadorUsuarios);
+     //***************************
+    Group *grpp=getGroup(grp,content);
     if(grpp == NULL){
         return ERROR_GROUP_NOT_EXISTS;
     }
-    contadorUsuarios=0;
-        User *user=getUser(usr,content,&contadorUsuarios);
+    int contadorUsuarios = countUsers(content);
+        User *user=getUser(usr,content);
         if(user != NULL){
             return ERROR_USER_EXISTS;
         }
@@ -979,8 +989,9 @@ Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
     strcat(content,",");
     strcat(content,pwd);
     strcat(content,"\n");
-    cout<<content<<endl;
-
+    Response r = ReplaceContentFile(indexInode,content,path,partition);
+    delete sb;
+    return r;
     return SUCCESS;
 }
 
@@ -988,23 +999,98 @@ Response addGroup(char *path,char *partition,char grp[]){
     char *content;
      char *title;
      char *filePath="/users.txt";
-     Response res = findContentFile(filePath,path,partition,&content,&title);
+     //******************
+     int indexInode = findFile(filePath,path,partition,&title);
+     if(indexInode==-1){
+         return ERROR_UNHANDLED;
+     }
+     int startSb = -1;
+     SuperBlock *sb = readSuperBlock(path,partition,&startSb);
+     if(sb==NULL){
+         return ERROR_UNHANDLED;
+     }
+     Response res = getContentFile(indexInode,path,sb,&content);
      if(res!=SUCCESS)return res;
-    int contadorGrupos=0;
-    Group *grpp=getGroup(grp,content,&contadorGrupos);
+     //***************************
+    int contadorGrupos=countGroups(content);
+    /*Group *grpp=getGroup(grp,content);
     if(grpp != NULL){
         return ERROR_GROUP_EXISTS;
-    }
+    }*/
     strcat(content,&to_string(contadorGrupos+1)[0]);
     strcat(content,",G,");
     strcat(content,grp);
     strcat(content,"\n");
-    cout<<content<<endl;
+    Response r = ReplaceContentFile(indexInode,content,path,partition);
+    delete sb;
+    return r;
 
     return SUCCESS;
 }
 
-User* getUser(char usr[],char *contentUsers,int *contadorUsuarios){
+int countUsers(char contentUsers[]){
+    int contadortoken;
+    std::stringstream ss(contentUsers);
+    std::string token;
+    int contadorUsuarios = 0;
+    while (std::getline(ss, token, '\n')) {
+        if(token!=""){
+            contadortoken = 0;
+            std::stringstream line(token);
+               std::string tokenLine;
+               while (std::getline(line, tokenLine, ',')) {
+                   if(contadortoken == 0){
+                       if(tokenLine == "0"){
+                           continue;
+                       }
+                   }else if(contadortoken==1){
+                       if(tokenLine == "U"){
+                           contadorUsuarios++;
+                       }else{
+                           break;
+                       }
+                   }else{
+                       break;
+                   }
+                   contadortoken++;
+               }
+        }
+    }
+    return contadorUsuarios;
+}
+
+int countGroups(char contentGroups[]){
+    int contadortoken;
+    std::stringstream ss(contentGroups);
+    std::string token;
+    int contadorGrupos = 0;
+    while (std::getline(ss, token, '\n')) {
+        if(token!=""){
+            contadortoken = 0;
+            std::stringstream line(token);
+               std::string tokenLine;
+               while (std::getline(line, tokenLine, ',')) {
+                   if(contadortoken == 0){
+                       if(tokenLine == "0"){
+                           continue;
+                       }
+                   }else if(contadortoken==1){
+                       if(tokenLine == "G"){
+                           contadorGrupos++;
+                       }else{
+                           break;
+                       }
+                   }else{
+                       break;
+                   }
+                   contadortoken++;
+               }
+        }
+    }
+    return contadorGrupos;
+}
+
+User* getUser(char usr[],char *contentUsers){
     int contadortoken;
     string nameUser(usr);
     User *user = NULL;
@@ -1027,8 +1113,6 @@ User* getUser(char usr[],char *contentUsers,int *contadorUsuarios){
                    if(tokenLine != "U"){
                        user = NULL;
                        break;
-                   }else{
-                       (*contadorUsuarios)++;
                    }
                }else if(contadortoken == 2){
                    user->group = tokenLine;
@@ -1051,9 +1135,9 @@ User* getUser(char usr[],char *contentUsers,int *contadorUsuarios){
     return user;
 }
 
-Group* getGroup(char name[],char *contentUsers,int *contador){
+Group* getGroup(char name[],char *contentUsers){
     int contadortoken;
-    string nameGroup(name);
+    string nameG(name);
     Group *grp = NULL;
     std::stringstream ss(contentUsers);
     std::string token;
@@ -1074,11 +1158,9 @@ Group* getGroup(char name[],char *contentUsers,int *contador){
                    if(tokenLine != "G"){
                        grp = NULL;
                        break;
-                   }else{
-                       (*contador)++;
                    }
                }else if(contadortoken == 2){
-                   if(tokenLine == nameGroup ){
+                   if(tokenLine == nameG ){
                        grp->name = tokenLine;
                    }else{
                        grp = NULL;
@@ -1100,6 +1182,56 @@ User* getUser(char usr[]){
      char *filePath="/users.txt";
      Response res = findContentFile(filePath,active_sesion->path,active_sesion->namePartition,&content,&title);
      if(res!=SUCCESS)return NULL;
-    int contadorUsuarios=0;
-    return getUser(usr,content,&contadorUsuarios);
+    return getUser(usr,content);
+}
+
+Response ReplaceContentFile(int indexInode,char *content,char path[],char namePart[]){
+    int startSb = 0;
+    SuperBlock *sb = readSuperBlock(path,namePart,&startSb);
+    if(sb==NULL){
+        return ERROR_UNHANDLED;
+    }
+    Inodo *inodo = readInodo(path,getInitInode(sb,indexInode));
+    if(inodo==NULL){
+         return ERROR_UNHANDLED;
+    }
+    BlockFile *block = getNewBlockFile();
+    int indexofInodo = 0;
+    int contadorCaracteres = 0;
+    int indexCaracteres = 0;
+    bool keepSaving = true;
+    while(keepSaving){
+        if(contadorCaracteres>=64 || content[indexCaracteres]=='\0'){
+            if(indexofInodo<12){
+                if(inodo->i_block[indexofInodo]!=-1){
+                    writeBlockFile(block,path,getInitBlock(sb,inodo->i_block[indexofInodo]));
+                    indexofInodo++;
+                }else{
+                    inodo->i_block[indexofInodo] = sb->s_first_blo;
+                    saveBlockFile(block,sb,path);
+                    indexofInodo++;
+                }
+            }else{
+               /*Response r = addFileBlockPointers(inodo,&indexofInodo,block,sb,path);
+               if(r==ERROR_LEVEL_FULL){
+                   if(indexofInodo<14){
+                        indexofInodo++;
+                        continue;
+                   }
+               }else if(r!=SUCCESS){
+                   return r;
+               }*/
+            }
+            block = getNewBlockFile();
+            contadorCaracteres = 0;
+        }
+        block->b_content[contadorCaracteres] = content[indexCaracteres];
+        if( content[indexCaracteres]=='\0'){
+            break;
+        }
+        contadorCaracteres++;
+        indexCaracteres++;
+    }
+    writeInodo(inodo,path,getInitInode(sb,indexInode));
+    return SUCCESS;
 }
