@@ -85,7 +85,9 @@ int main()
 
   //createFile("/coke/file.txt",true,15,"/home/emely/Escritorio/testData/disk1.disk","particion_1");
 
-  //catFile("/coke/file.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //catFile("/users.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
+  //reportFile("/users.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1","/home/emely/Escritorio/testData/file.png");
+
   /*
   int i;
   //llenando apuntadores directos

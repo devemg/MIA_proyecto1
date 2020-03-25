@@ -69,7 +69,9 @@ Response createChildFile(int size,char *text,char path[],char dirPad[],char name
 
 Response catFile(char filePath[],char path[],char partition[]);
 
-Response findFile(char filePath[], char path[], char partition[],char **content,char **title);
+int findFile(char filePath[], char path[], char partition[],char **title);
+
+Response findContentFile(char filePath[], char path[], char partition[],char **content,char **title);
 
 Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content);
 

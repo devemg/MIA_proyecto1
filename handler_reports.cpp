@@ -652,8 +652,9 @@ Response reportBlocks(char path[], char name[], char path_report[]){
 
 Response reportFile(char filePath[], char path[], char partition[], char reportPath[]){
     char *content;
-    char *title;
-    findFile(filePath,path,partition,&content,&title);
+    char *title="";
+    Response res = findContentFile(filePath,path,partition,&content,&title);
+    if(res!=SUCCESS)return res;
     return graphFile(content,title,reportPath);
 }
 
@@ -668,7 +669,14 @@ Response graphFile(char *text, char *title,char reportPath[]){
      fseek(fileReport, 0, SEEK_SET);
      fputs("digraph di{\n", fileReport);
      fputs("nodo[label=\"",fileReport);
-     fputs(text,fileReport);
+        int index = 0;
+         while(text[index]!='\0'){
+            fprintf(fileReport,"%c", text[index]);
+            if(index%64 == 0 && index!=0){
+                fputs("\n",fileReport);
+            }
+            index++;
+         }
      fputs("\"\n shape=\"note\"];\n",fileReport);
      fputs("labelloc=\"t\";\nlabel=\"",fileReport);
      fputs(title,fileReport);

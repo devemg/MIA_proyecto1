@@ -847,14 +847,29 @@ int getInitInode(SuperBlock *sb, int index){
 Response catFile(char filePath[], char path[], char partition[]){
     char *content;
      char *title;
-    Response res = findFile(filePath,path,partition,&content,&title);
+    Response res = findContentFile(filePath,path,partition,&content,&title);
     if(res!=SUCCESS)return res;
     //cout<<"--->"<<title<<"<---\n";
     cout<<content<<endl;
     return SUCCESS;
 }
 
-Response findFile(char filePath[], char path[], char partition[],char **content,char **title){
+Response findContentFile(char filePath[], char path[], char partition[],char **content,char **title){
+    int indexInode = findFile(filePath,path,partition,title);
+    if(indexInode==-1){
+        return ERROR_UNHANDLED;
+    }
+    int startSb = -1;
+    SuperBlock *sb = readSuperBlock(path,partition,&startSb);
+    if(sb==NULL){
+        return ERROR_UNHANDLED;
+    }
+    Response res = getContentFile(indexInode,path,sb,content);
+    delete sb;
+    return res;
+}
+
+int findFile(char filePath[], char path[], char partition[],char **title){
     //VALIDAR QUE HAYA ESPACIO PARA CREAR INODOS Y BLOQUES
     int startSb;
     SuperBlock *sb = readSuperBlock(path,partition,&startSb);
@@ -889,28 +904,34 @@ Response findFile(char filePath[], char path[], char partition[],char **content,
                                 for(indexInodoBloque = 2;indexInodoBloque <4;indexInodoBloque++){
                                     if(strcmp(directory->b_content[indexInodoBloque].b_name,&token[0])==0){
                                         //encontrado
-                                        *title=(char*)malloc(sizeof(directory->b_content[indexInodoBloque].b_name));
-                                        strcpy(*title,directory->b_content[indexInodoBloque].b_name);
-                                       return getContentFile(directory->b_content[indexInodoBloque].b_inodo,path,sb,content);
-                                    }
+                                        Inodo *file=readInodo(path,getInitInode(sb,directory->b_content[indexInodoBloque].b_inodo));
+                                        if(file!=NULL){
+                                            if(file->i_type == IN_FILE){
+                                                *title=(char*)malloc(sizeof(directory->b_content[indexInodoBloque].b_name));
+                                                strcpy(*title,directory->b_content[indexInodoBloque].b_name);
+                                                return directory->b_content[indexInodoBloque].b_inodo;
+                                            }
+                                        }
+                                        }
                                 }
                             }
                         }
                     }else{
-                        return ERROR_UNHANDLED;
+                        return -1;
                     }
                 }else{
                     int indexBloque = findDirectory(&token[0],path,&indexInodoPadre,sb);
                     if(indexBloque!=-1){
                         indexBloqueActual = indexBloque;
                     }else{
-                        return ERROR_DIR_NOT_EXIST;
+                        showMessageError(ERROR_DIR_NOT_EXIST);
+                        return -1;
                 }
                 dirPad = token;
             }
           }
         }
-  return ERROR_UNHANDLED;
+  return -1;
 }
 
 Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content){
@@ -934,13 +955,12 @@ Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **conten
     return SUCCESS;
 }
 
-
 Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
     char *content;
      char *title;
      char *filePath="/users.txt";
-    Response res = findFile(filePath,path,partition,&content,&title);
-    if(res!=SUCCESS)return res;
+     Response res = findContentFile(filePath,path,partition,&content,&title);
+     if(res!=SUCCESS)return res;
     int contadorUsuarios = 0;
     Group *grpp=getGroup(grp,content,&contadorUsuarios);
     if(grpp == NULL){
@@ -960,6 +980,7 @@ Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
     strcat(content,pwd);
     strcat(content,"\n");
     cout<<content<<endl;
+
     return SUCCESS;
 }
 
@@ -967,8 +988,8 @@ Response addGroup(char *path,char *partition,char grp[]){
     char *content;
      char *title;
      char *filePath="/users.txt";
-    Response res = findFile(filePath,path,partition,&content,&title);
-    if(res!=SUCCESS)return res;
+     Response res = findContentFile(filePath,path,partition,&content,&title);
+     if(res!=SUCCESS)return res;
     int contadorGrupos=0;
     Group *grpp=getGroup(grp,content,&contadorGrupos);
     if(grpp != NULL){
@@ -979,6 +1000,7 @@ Response addGroup(char *path,char *partition,char grp[]){
     strcat(content,grp);
     strcat(content,"\n");
     cout<<content<<endl;
+
     return SUCCESS;
 }
 
@@ -1076,8 +1098,8 @@ User* getUser(char usr[]){
     char *content;
      char *title;
      char *filePath="/users.txt";
-    Response res = findFile(filePath,active_sesion->path,active_sesion->namePartition,&content,&title);
-    if(res!=SUCCESS)return NULL;
+     Response res = findContentFile(filePath,active_sesion->path,active_sesion->namePartition,&content,&title);
+     if(res!=SUCCESS)return NULL;
     int contadorUsuarios=0;
     return getUser(usr,content,&contadorUsuarios);
 }
