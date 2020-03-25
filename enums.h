@@ -24,7 +24,11 @@ enum Response {SUCCESS,
               ERROR_PARTITION_MOUNTED_DEL,
               ERROR_DIR_NOT_EXIST,
               ERROR_INODO_NOT_DIR,
-              ERROR_LEVEL_FULL};
+              ERROR_LEVEL_FULL,
+               ERROR_USER_EXISTS,
+                ERROR_GROUP_EXISTS,
+               ERROR_USER_NOT_EXISTS,
+               ERROR_GROUP_NOT_EXISTS};
 enum TypeFormat {Fast,Full,TF_ERROR};
 enum statusBlock {OCUPADO,LIBRE};
 enum CommandEnum {mkdisk,

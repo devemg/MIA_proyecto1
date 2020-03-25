@@ -15,7 +15,7 @@ using namespace std;
 
 int main()
 {
-
+/*
     std::string command;
     while(true){
         cout << ">";
@@ -35,13 +35,16 @@ int main()
         writeCommand(command,false);
         readExecCommand(false);
     }
+*/
 
-/*
   newDisk(50,FirstFit,MB,"/home/emely/Escritorio/testData","disk1");
   createPartition(30,MB,"/home/emely/Escritorio/testData","disk1",Primaria,WorstFit,"particion_1");
   formatPart("/home/emely/Escritorio/testData/disk1.disk","particion_1",Fast,ext2);
   mountPart("/home/emely/Escritorio/testData/disk1.disk","particion_1");
-*/
+
+  addUser("/home/emely/Escritorio/testData/disk1.disk","particion_1","emely","abcd","root");
+
+  addGroup("/home/emely/Escritorio/testData/disk1.disk","particion_1","users");
   //createFile("/file.txt",true,"/home/emely/Escritorio/texto.txt","/home/emely/Escritorio/testData/disk1.disk","particion_1");
   /*
   createDirectory(true,"vda0","/a");

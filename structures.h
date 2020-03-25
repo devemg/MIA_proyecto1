@@ -1,7 +1,7 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 #include <enums.h>
-#include <stdio.h>
+#include <iostream>
 
 //info of partitions
 struct Partition
@@ -155,6 +155,22 @@ public:
         namePartition = NULL;
         id = NULL;
     }
+};
+
+
+class User{
+public:
+    std::string id;
+    char type;
+    std::string name;
+    std::string pwd;
+    std::string group;
+};
+
+class Group{
+public:
+    std::string id;
+    std::string name;
 };
 
 #endif // STRUCTURES_H

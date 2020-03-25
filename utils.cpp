@@ -97,6 +97,18 @@ void showMessageError(Response response){
     case ERROR_LEVEL_FULL:
         cout<<"No hay suficiente espacio para crear más directorios/archivos\n";
         break;
+    case ERROR_USER_EXISTS:
+        cout<<"Error: El usuario ya existe.\n";
+        break;
+    case ERROR_GROUP_EXISTS:
+        cout<<"Error: El grupo ya existe.\n";
+        break;
+    case ERROR_USER_NOT_EXISTS:
+        cout<<"Error: El usuario no existe.\n";
+        break;
+    case ERROR_GROUP_NOT_EXISTS:
+        cout<<"Error: El grupo no existe.\n";
+        break;
     default:
         break;
 

@@ -869,8 +869,8 @@ Response findFile(char filePath[], char path[], char partition[],char **content,
         int indexBloqueActual = 0;
         while (std::getline(ss, token, '/')) {
             if(token!=""){
-                cout<<"padre: "<<dirPad<<endl;
-                cout<<"carpeta: "<<token<<endl;
+                //cout<<"padre: "<<dirPad<<endl;
+                //cout<<"carpeta: "<<token<<endl;
                if (ss.tellg() == -1) {
                    //inodo de directorio
                    Inodo *inodo = readInodo(path,getInitInode(sb,indexInodoPadre));
@@ -932,4 +932,142 @@ Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **conten
 
     }
     return SUCCESS;
+}
+
+
+Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
+    char *content;
+     char *title;
+     char *filePath="/users.txt";
+    Response res = findFile(filePath,path,partition,&content,&title);
+    if(res!=SUCCESS)return res;
+    int contadorUsuarios = 0;
+    Group *grpp=getGroup(grp,content,&contadorUsuarios);
+    if(grpp == NULL){
+        return ERROR_GROUP_NOT_EXISTS;
+    }
+    contadorUsuarios=0;
+        User *user=getUser(usr,content,&contadorUsuarios);
+        if(user != NULL){
+            return ERROR_USER_EXISTS;
+        }
+    strcat(content,&to_string(contadorUsuarios+1)[0]);
+    strcat(content,",U,");
+    strcat(content,usr);
+    strcat(content,",");
+    strcat(content,grp);
+    strcat(content,",");
+    strcat(content,pwd);
+    strcat(content,"\n");
+    cout<<content<<endl;
+    return SUCCESS;
+}
+
+Response addGroup(char *path,char *partition,char grp[]){
+    char *content;
+     char *title;
+     char *filePath="/users.txt";
+    Response res = findFile(filePath,path,partition,&content,&title);
+    if(res!=SUCCESS)return res;
+    int contadorGrupos=0;
+    Group *grpp=getGroup(grp,content,&contadorGrupos);
+    if(grpp != NULL){
+        return ERROR_GROUP_EXISTS;
+    }
+    strcat(content,&to_string(contadorGrupos+1)[0]);
+    strcat(content,",G,");
+    strcat(content,grp);
+    strcat(content,"\n");
+    cout<<content<<endl;
+    return SUCCESS;
+}
+
+User* getUser(char usr[],char *contentUsers,int *contadorUsuarios){
+    int contadortoken;
+    string nameUser(usr);
+    User *user = NULL;
+    std::stringstream ss(contentUsers);
+    std::string token;
+
+    while (std::getline(ss, token, '\n')) {
+        user = new User();
+        contadortoken = 0;
+        std::stringstream line(token);
+           std::string tokenLine;
+           while (std::getline(line, tokenLine, ',')) {
+               if(contadortoken == 0){
+                   if(tokenLine == "0"){
+                       continue;
+                   }else{
+                       user->id = tokenLine;
+                   }
+               }else if(contadortoken==1){
+                   if(tokenLine != "U"){
+                       user = NULL;
+                       break;
+                   }else{
+                       (*contadorUsuarios)++;
+                   }
+               }else if(contadortoken == 2){
+                   user->group = tokenLine;
+               }else if(contadortoken == 3){
+                   if(tokenLine == nameUser ){
+                       user->name = tokenLine;
+                   }else{
+                       user = NULL;
+                       break;
+                   }
+               }else if(contadortoken == 4){
+                   user->pwd = tokenLine;
+               }else{
+                   break;
+               }
+               contadortoken++;
+           }
+           if(user!=NULL)return user;
+    }
+    return user;
+}
+
+Group* getGroup(char name[],char *contentUsers,int *contador){
+    int contadortoken;
+    string nameGroup(name);
+    Group *grp = NULL;
+    std::stringstream ss(contentUsers);
+    std::string token;
+
+    while (std::getline(ss, token, '\n')) {
+        grp = new Group();
+        contadortoken = 0;
+        std::stringstream line(token);
+           std::string tokenLine;
+           while (std::getline(line, tokenLine, ',')) {
+               if(contadortoken == 0){
+                   if(tokenLine == "0"){
+                       continue;
+                   }else{
+                       grp->id = tokenLine;
+                   }
+               }else if(contadortoken==1){
+                   if(tokenLine != "G"){
+                       grp = NULL;
+                       break;
+                   }else{
+                       (*contador)++;
+                   }
+               }else if(contadortoken == 2){
+                   if(tokenLine == nameGroup ){
+                       grp->name = tokenLine;
+                   }else{
+                       grp = NULL;
+                       break;
+                   }
+               }else{
+                   break;
+               }
+               contadortoken++;
+           }
+           if(grp!=NULL)return grp;
+    }
+    return grp;
 }
