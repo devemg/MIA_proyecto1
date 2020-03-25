@@ -208,8 +208,18 @@ void cmd_login::Exec(){
         if(part==NULL){
             return;
         }
+        //************************************************
         //COMPROBAR SESION
-
+        User *user = getUser(this->usr);
+        if(user==NULL){
+            showMessageError(ERROR_USER_NOT_EXISTS);
+            return;
+        }
+        if(user->pwd != this->pwd){
+            showMessageError(ERROR_BAD_PASSWD);
+            return;
+        }
+        //************************************************
         int check = 0; //loginInSystem(usr,pwd);
         if(check == 0){
             active_sesion->user = this->usr;
@@ -258,7 +268,7 @@ void cmd_mkusr::Exec(){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
-    Response res = addUser(active_sesion->path,active_sesion->namePartition,,this->usr,this->pwd,this->grp);
+    Response res = addUser(active_sesion->path,active_sesion->namePartition,this->usr,this->pwd,this->grp);
     if(res==SUCCESS){
         cout<<"¡Grupo creado con éxito!\n";
     }else{

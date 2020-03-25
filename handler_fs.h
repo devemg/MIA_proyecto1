@@ -93,5 +93,6 @@ Response addGroup(char *path,char *partition,char grp[]);
 
 Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]);
 
+User* getUser(char usr[]);
 
 #endif // HANDLERFILESISTEM_H

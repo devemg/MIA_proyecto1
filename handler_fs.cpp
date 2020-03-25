@@ -1071,3 +1071,13 @@ Group* getGroup(char name[],char *contentUsers,int *contador){
     }
     return grp;
 }
+
+User* getUser(char usr[]){
+    char *content;
+     char *title;
+     char *filePath="/users.txt";
+    Response res = findFile(filePath,active_sesion->path,active_sesion->namePartition,&content,&title);
+    if(res!=SUCCESS)return NULL;
+    int contadorUsuarios=0;
+    return getUser(usr,content,&contadorUsuarios);
+}

@@ -109,6 +109,9 @@ void showMessageError(Response response){
     case ERROR_GROUP_NOT_EXISTS:
         cout<<"Error: El grupo no existe.\n";
         break;
+    case ERROR_BAD_PASSWD:
+        cout<<"Error: La contraseña es incorrecta.\n";
+        break;
     default:
         break;
 

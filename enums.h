@@ -28,7 +28,8 @@ enum Response {SUCCESS,
                ERROR_USER_EXISTS,
                 ERROR_GROUP_EXISTS,
                ERROR_USER_NOT_EXISTS,
-               ERROR_GROUP_NOT_EXISTS};
+               ERROR_GROUP_NOT_EXISTS,
+              ERROR_BAD_PASSWD};
 enum TypeFormat {Fast,Full,TF_ERROR};
 enum statusBlock {OCUPADO,LIBRE};
 enum CommandEnum {mkdisk,
