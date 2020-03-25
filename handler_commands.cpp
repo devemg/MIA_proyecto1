@@ -398,9 +398,10 @@ void cmd_rep::Exec(){
     }
 
     int ext = 0;
-    string ss = getNamePath(path,&ext);
+    string ss;
+    ss = getNamePath(path,&ext);
     char *chh = &ss[0];
-    char hh[] = getPathWithoutName(path,strlen(chh)+ext);
+    string hh = getPathWithoutName(path,strlen(chh)+ext);
 
     //cout<<"PATH: "<<hh<<endl;
     //CREAR DIRECTORIO SI NO EXISTE
@@ -457,22 +458,15 @@ void cmd_rep::Exec(){
         break;
     case Tree:
     {
-        Response res =reportTree(this->path_report,this->id);
-        if(res==SUCCESS){
+        reportTree(this->path_report,this->id);
             cout<<"El reporte fue generado con éxito.\n";
-        }else{
-            showMessageError(res);
-        }
+
     }
         break;
     case Sb:
     {
-        Response res =reportSuperBlock(disk->path,part->name,this->path_report);
-        if(res==SUCCESS){
+        reportSuperBlock(disk->path,part->name,this->path_report);
             cout<<"El reporte fue generado con éxito.\n";
-        }else{
-            showMessageError(res);
-        }
     }
         break;
     case File:
