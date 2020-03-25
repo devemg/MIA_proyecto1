@@ -103,4 +103,6 @@ int countUsers(char contentUsers[]);
 
 int countGroups(char contentGroups[]);
 
+Response editFile(char pathFile[],char newCont[],char path[],char namePart[]);
+
 #endif // HANDLERFILESISTEM_H

@@ -1235,3 +1235,23 @@ Response ReplaceContentFile(int indexInode,char *content,char path[],char namePa
     writeInodo(inodo,path,getInitInode(sb,indexInode));
     return SUCCESS;
 }
+
+Response editFile(char pathFile[],char newCont[],char path[],char namePart[]){
+    char *title;
+    char *content;
+    int indexInode = findFile(pathFile,path,namePart,&title);
+    if(indexInode==-1){
+        return ERROR_UNHANDLED;
+    }
+    int startSb = -1;
+    SuperBlock *sb = readSuperBlock(path,namePart,&startSb);
+    if(sb==NULL){
+        return ERROR_UNHANDLED;
+    }
+    Response res = getContentFile(indexInode,path,sb,&content);
+    if(res!=SUCCESS){
+        return res;
+    }
+    strcat(content,newCont);
+    return ReplaceContentFile(indexInode,content,path,namePart);
+}
