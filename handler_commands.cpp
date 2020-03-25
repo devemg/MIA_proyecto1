@@ -228,8 +228,22 @@ cmd_grp::cmd_grp(char name[], bool isForCreate){
     this->isForCreate = isForCreate;
 }
 
+//CREAR GRUPOS
 void cmd_grp::Exec(){
+    if(!active_sesion->isActive()){
+        cout<<"No se ha iniciado sesión.\n";
+        return;
+    }
+    if(isForCreate){
+        Response res = addGroup(active_sesion->path,active_sesion->namePartition,this->name);
+        if(res==SUCCESS){
+            cout<<"¡Grupo creado con éxito!\n";
+        }else{
+            showMessageError(res);
+        }
+    }else{
 
+    }
 }
 
 cmd_mkusr::cmd_mkusr(char usr[], char pwd[], char grp[]){
@@ -238,7 +252,19 @@ cmd_mkusr::cmd_mkusr(char usr[], char pwd[], char grp[]){
     this->grp = grp;
 }
 
-void cmd_mkusr::Exec(){}
+//CREAR USUARIOS
+void cmd_mkusr::Exec(){
+    if(!active_sesion->isActive()){
+        cout<<"No se ha iniciado sesión.\n";
+        return;
+    }
+    Response res = addUser(active_sesion->path,active_sesion->namePartition,,this->usr,this->pwd,this->grp);
+    if(res==SUCCESS){
+        cout<<"¡Grupo creado con éxito!\n";
+    }else{
+        showMessageError(res);
+    }
+}
 
 cmd_rmusr::cmd_rmusr(char usr[]){
     this->usr = usr;
