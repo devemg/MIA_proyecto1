@@ -105,4 +105,6 @@ int countGroups(char contentGroups[]);
 
 Response editFile(char pathFile[],char newCont[],char path[],char namePart[]);
 
+Response deleteUser(char path[], char partition[],char name[]);
+
 #endif // HANDLERFILESISTEM_H
