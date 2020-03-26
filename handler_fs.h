@@ -71,9 +71,9 @@ Response catFile(char filePath[],char path[],char partition[]);
 
 int findFile(char filePath[], char path[], char partition[],char **title);
 
-Response findContentFile(char filePath[], char path[], char partition[],char **content,char **title);
+std::string findContentFile(char filePath[], char path[], char partition[],char **title);
 
-Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content);
+std::string getContentFile(int indexInodo, char path[],SuperBlock *sb);
 
 int getFreeIndexFromBlockPointer(int nivel,Inodo *inodo,int idBloque,char path[],SuperBlock *sb,int *freeIndex);
 

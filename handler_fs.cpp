@@ -845,28 +845,26 @@ int getInitInode(SuperBlock *sb, int index){
 }
 
 Response catFile(char filePath[], char path[], char partition[]){
-    char *content;
      char *title;
-    Response res = findContentFile(filePath,path,partition,&content,&title);
-    if(res!=SUCCESS)return res;
+    string res = findContentFile(filePath,path,partition,&title);
     //cout<<"--->"<<title<<"<---\n";
-    cout<<content<<endl;
+    cout<<res<<endl;
     return SUCCESS;
 }
 
-Response findContentFile(char filePath[], char path[], char partition[],char **content,char **title){
+string findContentFile(char filePath[], char path[], char partition[],char **title){
     int indexInode = findFile(filePath,path,partition,title);
     if(indexInode==-1){
-        return ERROR_UNHANDLED;
+        return "";
     }
     int startSb = -1;
     SuperBlock *sb = readSuperBlock(path,partition,&startSb);
     if(sb==NULL){
-        return ERROR_UNHANDLED;
+        return "";
     }
-    Response res = getContentFile(indexInode,path,sb,content);
+    string contentResponse = getContentFile(indexInode,path,sb);
     delete sb;
-    return res;
+    return contentResponse;
 }
 
 int findFile(char filePath[], char path[], char partition[],char **title){
@@ -934,29 +932,31 @@ int findFile(char filePath[], char path[], char partition[],char **title){
   return -1;
 }
 
-Response getContentFile(int indexInodo, char path[],SuperBlock *sb,char **content){
+std::string getContentFile(int indexInodo, char path[],SuperBlock *sb){
+    string contenido = "";
     Inodo *inodo = readInodo(path,getInitInode(sb,indexInodo));
     if(inodo->i_type == IN_FILE){
-        (*content) =(char*)malloc(inodo->i_size);
-        clearArray(*content,inodo->i_size);
         int indexBloque;
         for(indexBloque = 0;indexBloque<12;indexBloque++){
             if(inodo->i_block[indexBloque]!=-1){
                 BlockFile *file = readBlockFile(path,getInitBlock(sb,inodo->i_block[indexBloque]));
                 if(file== NULL){
-                    return ERROR_UNHANDLED;
+                    return "";
                 }
-                strcat((*content),file->b_content);
+                int index;
+                for(index=0;index<64;index++){
+                    contenido+=file->b_content[index];
+                }
+
             }
         }
         //APUNTADORES INDIRECTOS
 
     }
-    return SUCCESS;
+    return contenido;
 }
 
 Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
-    char *content;
      char *title;
      char *filePath="/users.txt";
      //******************
@@ -969,8 +969,9 @@ Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
      if(sb==NULL){
          return ERROR_UNHANDLED;
      }
-     Response res = getContentFile(indexInode,path,sb,&content);
-     if(res!=SUCCESS)return res;
+
+     string resContent = getContentFile(indexInode,path,sb);
+     char *content = &resContent[0];
      //***************************
     Group *grpp=getGroup(grp,content);
     if(grpp == NULL){
@@ -992,11 +993,9 @@ Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
     Response r = ReplaceContentFile(indexInode,content,path,partition);
     delete sb;
     return r;
-    return SUCCESS;
 }
 
 Response addGroup(char *path,char *partition,char grp[]){
-    char *content;
      char *title;
      char *filePath="/users.txt";
      //******************
@@ -1009,14 +1008,14 @@ Response addGroup(char *path,char *partition,char grp[]){
      if(sb==NULL){
          return ERROR_UNHANDLED;
      }
-     Response res = getContentFile(indexInode,path,sb,&content);
-     if(res!=SUCCESS)return res;
+     std::string resContent = getContentFile(indexInode,path,sb);
+     char *content = &resContent[0];
      //***************************
     int contadorGrupos=countGroups(content);
-    /*Group *grpp=getGroup(grp,content);
+    Group *grpp=getGroup(grp,content);
     if(grpp != NULL){
         return ERROR_GROUP_EXISTS;
-    }*/
+    }
     strcat(content,&to_string(contadorGrupos+1)[0]);
     strcat(content,",G,");
     strcat(content,grp);
@@ -1177,12 +1176,10 @@ Group* getGroup(char name[],char *contentUsers){
 }
 
 User* getUser(char usr[]){
-    char *content;
      char *title;
      char *filePath="/users.txt";
-     Response res = findContentFile(filePath,active_sesion->path,active_sesion->namePartition,&content,&title);
-     if(res!=SUCCESS)return NULL;
-    return getUser(usr,content);
+     string res = findContentFile(filePath,active_sesion->path,active_sesion->namePartition,&title);
+    return getUser(usr,&res[0]);
 }
 
 Response ReplaceContentFile(int indexInode,char *content,char path[],char namePart[]){
@@ -1238,7 +1235,6 @@ Response ReplaceContentFile(int indexInode,char *content,char path[],char namePa
 
 Response editFile(char pathFile[],char newCont[],char path[],char namePart[]){
     char *title;
-    char *content;
     int indexInode = findFile(pathFile,path,namePart,&title);
     if(indexInode==-1){
         return ERROR_UNHANDLED;
@@ -1248,16 +1244,15 @@ Response editFile(char pathFile[],char newCont[],char path[],char namePart[]){
     if(sb==NULL){
         return ERROR_UNHANDLED;
     }
-    Response res = getContentFile(indexInode,path,sb,&content);
-    if(res!=SUCCESS){
-        return res;
-    }
-    strcat(content,newCont);
-    return ReplaceContentFile(indexInode,content,path,namePart);
+   string content  = getContentFile(indexInode,path,sb);
+    /*if(content!=NULL){
+        return ERROR_UNHANDLED;
+    }*/
+    //strcat(content,newCont);
+    //return ReplaceContentFile(indexInode,content,path,namePart);
 }
 
 Response deleteUser(char path[], char partition[],char name[]){
-     char *content;
      char *title;
      char *filePath="/users.txt";
      int indexInode = findFile(filePath,path,partition,&title);
@@ -1269,8 +1264,8 @@ Response deleteUser(char path[], char partition[],char name[]){
      if(sb==NULL){
          return ERROR_UNHANDLED;
      }
-     Response res = getContentFile(indexInode,path,sb,&content);
-     if(res!=SUCCESS)return res;
+     string content = getContentFile(indexInode,path,sb);
+     //if(content!=NULL)return ERROR_UNHANDLED;
     //***********************************************************
      std::stringstream ss(content);
      std::string token;
@@ -1339,7 +1334,6 @@ Response deleteUser(char path[], char partition[],char name[]){
 }
 
 Response deleteGroup(char path[], char partition[],char name[]){
-     char *content;
      char *title;
      char *filePath="/users.txt";
      int indexInode = findFile(filePath,path,partition,&title);
@@ -1351,9 +1345,8 @@ Response deleteGroup(char path[], char partition[],char name[]){
      if(sb==NULL){
          return ERROR_UNHANDLED;
      }
-     Response res = getContentFile(indexInode,path,sb,&content);
-     if(res!=SUCCESS)return res;
-    //***********************************************************
+     std::string content = getContentFile(indexInode,path,sb);
+     //***********************************************************
      std::stringstream ss(content);
      std::string token;
      std::string newContent="";

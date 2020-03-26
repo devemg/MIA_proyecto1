@@ -651,11 +651,9 @@ Response reportBlocks(char path[], char name[], char path_report[]){
 }
 
 Response reportFile(char filePath[], char path[], char partition[], char reportPath[]){
-    char *content;
     char *title="";
-    Response res = findContentFile(filePath,path,partition,&content,&title);
-    if(res!=SUCCESS)return res;
-    return graphFile(content,title,reportPath);
+    string res = findContentFile(filePath,path,partition,&title);
+    return graphFile(&res[0],title,reportPath);
 }
 
 Response graphFile(char *text, char *title,char reportPath[]){
