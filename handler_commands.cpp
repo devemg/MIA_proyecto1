@@ -365,7 +365,19 @@ cmd_edit::cmd_edit(char path[], char cont[]){
     this->cont = cont;
 }
 
-void cmd_edit::Exec(){}
+//EDITAR ARCHIVO
+void cmd_edit::Exec(){
+    if(!active_sesion->isActive()){
+        cout<<"No se ha iniciado sesión.\n";
+        return;
+    }
+    Response res = editFile(this->path,this->cont,active_sesion->path,active_sesion->namePartition);
+    if(res==SUCCESS){
+        cout<<"¡Archivo creado con éxito!\n";
+    }else{
+        showMessageError(res);
+    }
+}
 
 cmd_ren::cmd_ren(char path[], char newName[]){
     this->path = path;
