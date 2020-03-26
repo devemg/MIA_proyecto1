@@ -470,7 +470,7 @@ void graphBlockFile(BlockFile *block,int initBlock, FILE *myFile,int indexInodo)
     fputs("<tr><td>",myFile);
     int i;
     for(i=0;i<64;i++){
-        if(block->b_content[i]!='\0'){
+        if(block->b_content[i]!='\0' && block->b_content[i]>0){
            fprintf(myFile,"%c", block->b_content[i]);
            if(i%10 == 0 && i!=0){
                fputs("<br/>",myFile);

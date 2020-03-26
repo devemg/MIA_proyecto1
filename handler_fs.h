@@ -109,4 +109,8 @@ Response deleteUser(char path[], char partition[],char name[]);
 
 Response deleteGroup(char path[], char partition[],char name[]);
 
+void clearInodePointers(Inodo *inodo);
+
+std::string getContentFileFromPointers(int level,int indexBlock,char path[],SuperBlock *sb);
+
 #endif // HANDLERFILESISTEM_H

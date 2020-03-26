@@ -935,6 +935,9 @@ int findFile(char filePath[], char path[], char partition[],char **title){
 std::string getContentFile(int indexInodo, char path[],SuperBlock *sb){
     string contenido = "";
     Inodo *inodo = readInodo(path,getInitInode(sb,indexInodo));
+    if(inodo == NULL){
+        return "";
+    }
     if(inodo->i_type == IN_FILE){
         int indexBloque;
         for(indexBloque = 0;indexBloque<12;indexBloque++){
@@ -951,9 +954,47 @@ std::string getContentFile(int indexInodo, char path[],SuperBlock *sb){
             }
         }
         //APUNTADORES INDIRECTOS
-
+        for(indexBloque = 12;indexBloque<14;indexBloque++){
+            if(inodo->i_block[indexBloque]!=-1){
+                contenido+=getContentFileFromPointers(indexBloque-11,inodo->i_block[indexBloque],path,sb);
+            }
+        }
     }
     return contenido;
+}
+
+std::string getContentFileFromPointers(int level,int indexBlock,char path[],SuperBlock *sb){
+    BlockPointer *points = readBlockPointer(path,getInitBlock(sb,indexBlock));
+    if(points == NULL){
+        return "";
+    }
+    if(level == 1){
+        string contenido = "";
+        int indexBloque;
+        for(indexBloque = 0;indexBloque<15;indexBloque++){
+            if(points->b_pointers[indexBloque]!=-1){
+                BlockFile *file = readBlockFile(path,getInitBlock(sb,points->b_pointers[indexBloque]));
+                if(file== NULL){
+                    return "";
+                }
+                int index;
+                for(index=0;index<64;index++){
+                    contenido+=file->b_content[index];
+                }
+
+            }
+        }
+        return contenido;
+    }else{
+        string contenido = "";
+        int indexBloque;
+        for(indexBloque = 0;indexBloque<15;indexBloque++){
+            if(points->b_pointers[indexBloque]!=-1){
+                contenido+=getContentFileFromPointers(level-1,points->b_pointers[indexBloque],path,sb);
+            }
+        }
+        return contenido;
+    }
 }
 
 Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
@@ -1233,6 +1274,15 @@ Response ReplaceContentFile(int indexInode,char *content,char path[],char namePa
     return SUCCESS;
 }
 
+void clearInodePointers(Inodo *inodo){
+    if(inodo!=NULL){
+        int i;
+        for(i=0;i<15;i++){
+           inodo->i_block[i] = -1;
+        }
+    }
+}
+
 Response editFile(char pathFile[],char newCont[],char path[],char namePart[]){
     char *title;
     int indexInode = findFile(pathFile,path,namePart,&title);
@@ -1245,11 +1295,8 @@ Response editFile(char pathFile[],char newCont[],char path[],char namePart[]){
         return ERROR_UNHANDLED;
     }
    string content  = getContentFile(indexInode,path,sb);
-    /*if(content!=NULL){
-        return ERROR_UNHANDLED;
-    }*/
-    //strcat(content,newCont);
-    //return ReplaceContentFile(indexInode,content,path,namePart);
+   content+=newCont;
+   return ReplaceContentFile(indexInode,&content[0],path,namePart);
 }
 
 Response deleteUser(char path[], char partition[],char name[]){
