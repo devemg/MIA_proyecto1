@@ -238,7 +238,7 @@ cmd_grp::cmd_grp(char name[], bool isForCreate){
     this->isForCreate = isForCreate;
 }
 
-//CREAR GRUPOS
+//CREAR-ELIMINAR GRUPOS
 void cmd_grp::Exec(){
     if(!active_sesion->isActive()){
         cout<<"No se ha iniciado sesión.\n";
@@ -252,7 +252,12 @@ void cmd_grp::Exec(){
             showMessageError(res);
         }
     }else{
-
+        Response res = deleteGroup(active_sesion->path,active_sesion->namePartition,this->name);
+        if(res==SUCCESS){
+            cout<<"¡Grupo eliminado con éxito!\n";
+        }else{
+            showMessageError(res);
+        }
     }
 }
 
@@ -280,7 +285,19 @@ cmd_rmusr::cmd_rmusr(char usr[]){
     this->usr = usr;
 }
 
-void cmd_rmusr::Exec(){}
+//ELIMINAR USUARIOS
+void cmd_rmusr::Exec(){
+    if(!active_sesion->isActive()){
+        cout<<"No se ha iniciado sesión.\n";
+        return;
+    }
+    Response res = deleteGroup(active_sesion->path,active_sesion->namePartition,this->usr);
+    if(res==SUCCESS){
+        cout<<"¡Usuario eliminado con éxito!\n";
+    }else{
+        showMessageError(res);
+    }
+}
 
 cmd_chmod::cmd_chmod(char path[], int ugo){
     this->path = path;
