@@ -1337,3 +1337,79 @@ Response deleteUser(char path[], char partition[],char name[]){
     delete sb;
     return r;
 }
+
+Response deleteGroup(char path[], char partition[],char name[]){
+     char *content;
+     char *title;
+     char *filePath="/users.txt";
+     int indexInode = findFile(filePath,path,partition,&title);
+     if(indexInode==-1){
+         return ERROR_UNHANDLED;
+     }
+     int startSb = -1;
+     SuperBlock *sb = readSuperBlock(path,partition,&startSb);
+     if(sb==NULL){
+         return ERROR_UNHANDLED;
+     }
+     Response res = getContentFile(indexInode,path,sb,&content);
+     if(res!=SUCCESS)return res;
+    //***********************************************************
+     std::stringstream ss(content);
+     std::string token;
+     std::string newContent="";
+     int contadorToken = 0;
+     bool found = false;
+     bool save=false;
+     while (std::getline(ss, token, '\n')) {
+         if(!found){
+             //******************************
+             std::stringstream ss2(token);
+             std::string tokenLine;
+             std::string newline="";
+             contadorToken = 0;
+             while (std::getline(ss2, tokenLine, ',')) {
+                 if(token!=""){
+                     if(contadorToken == 0){
+                         if(tokenLine != "0"){
+                             newline +="0,";
+                         }else{
+                             newline+=tokenLine;
+                             newline+=",";
+                         }
+                     }else if(contadorToken == 1){
+                         if(tokenLine != "G"){
+                             break;
+                         }else{
+                             newline+="G,";
+                         }
+                     }else if(contadorToken == 2){
+                         newline+=tokenLine;
+                         newline+="\n";
+                         if(name == tokenLine){
+                             save = true;
+                             found = true;
+                         }else{
+                             break;
+                         }
+                     }
+                 }
+                 contadorToken++;
+             }
+             if(save){
+                 newContent+=newline;
+                 newContent+="\n";
+             }else{
+                 newContent+=token;
+                 newContent+="\n";
+             }
+             //******************************
+         }else{
+             newContent+=token;
+             newContent+="\n";
+         }
+     }
+     char *my_argument = const_cast<char*> (newContent.c_str());
+    Response r = ReplaceContentFile(indexInode,my_argument,path,partition);
+    delete sb;
+    return r;
+}

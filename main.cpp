@@ -46,7 +46,9 @@ int main()
   //reportTree("/home/emely/Escritorio/testData/tree1.png","vda0");
 
   deleteUser("/home/emely/Escritorio/testData/disk1.disk","particion_1","emely");
-  //addGroup("/home/emely/Escritorio/testData/disk1.disk","particion_1","users");
+
+  addGroup("/home/emely/Escritorio/testData/disk1.disk","particion_1","users");
+  deleteGroup("/home/emely/Escritorio/testData/disk1.disk","particion_1","users");
 
 
   //addUser("/home/emely/Escritorio/testData/disk1.disk","particion_1","emely","abcd","root");
