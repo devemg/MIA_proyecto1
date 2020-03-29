@@ -1674,7 +1674,7 @@ Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartitio
         }
             switch (journal->j_operation) {
             case MKDIRECTORY:
-                createDirectory(true,id,path,true);
+                createDirectory(journal->j_boolean,id,journal->j_path,true);
                 break;
             case MKFILE_PATH:
                 createFile(journal->j_path,journal->j_boolean,journal->j_content,path,namePartition,true);
