@@ -29,7 +29,9 @@ enum Response {SUCCESS,
                 ERROR_GROUP_EXISTS,
                ERROR_USER_NOT_EXISTS,
                ERROR_GROUP_NOT_EXISTS,
-              ERROR_BAD_PASSWD};
+              ERROR_BAD_PASSWD,
+              ERROR_FILESYSTEM,
+              ERROR_RECOVERY};
 enum TypeFormat {Fast,Full,TF_ERROR};
 enum statusBlock {OCUPADO,LIBRE};
 enum CommandEnum {mkdisk,
@@ -57,7 +59,8 @@ enum CommandEnum {mkdisk,
                  login,
                   mkfs,
                   mkgrp,
-                  rmgrp};
+                  rmgrp,
+                  recovery};
 enum Options {Id,
               Add,
               Delete,
@@ -92,4 +95,5 @@ enum TypeReport{Inode,
                 Ls,
                 Mbr,
                 Disk};
+enum Operation{MKDIRECTORY,MKFILE_PATH,MKFILE_SIZE,EMPTY};
 #endif // ENUMS_H

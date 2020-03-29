@@ -105,7 +105,8 @@ extern int yydebug;
     MKUSR = 315,
     RMGRP = 316,
     LOGIN = 317,
-    MKFS = 318
+    MKFS = 318,
+    MKGRP = 319
   };
 #endif
 
@@ -130,7 +131,7 @@ struct Option * OPTION;
 class Cmd *COMMAND;
 FileSistem FILESYSTEM;
 
-#line 134 "parser.h" /* yacc.c:1909  */
+#line 135 "parser.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

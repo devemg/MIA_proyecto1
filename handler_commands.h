@@ -239,6 +239,13 @@ public:
     void Exec();
 };
 
+class cmd_recovery:public Cmd{
+public:
+    char *id;
+    cmd_recovery(char *id);
+    void Exec();
+};
+
 class Option
 {
 public:
@@ -270,5 +277,7 @@ void writeCommand(string command,bool isScript);
 void readExecCommand(bool isScript);
 
 void letsExecCommands(Cmd *commands);
+
+bool isSesionActive();
 
 #endif // HANDLER_COMMANDS_H

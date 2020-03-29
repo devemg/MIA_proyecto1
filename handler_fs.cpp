@@ -1216,10 +1216,10 @@ Group* getGroup(char name[],char *contentUsers){
     return grp;
 }
 
-User* getUser(char usr[]){
+User* getUser(char usr[],char path[],char namePartition[]){
      char *title;
      char *filePath="/users.txt";
-     string res = findContentFile(filePath,active_sesion->path,active_sesion->namePartition,&title);
+     string res = findContentFile(filePath,path,namePartition,&title);
     return getUser(usr,&res[0]);
 }
 
@@ -1453,3 +1453,99 @@ Response deleteGroup(char path[], char partition[],char name[]){
     delete sb;
     return r;
 }
+
+Response clearAllSystem(char path[],char name[]){
+    int startSb;
+    SuperBlock *sb = readSuperBlock(path,name,&startSb);
+    if(sb==NULL){
+        return ERROR_UNHANDLED;
+    }
+    if(sb->s_filesystem_type == ext2){
+        return ERROR_FILESYSTEM;
+    }
+    //limpiando bitmaps
+    int contador;
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return ERROR_UNHANDLED;
+     }
+     //LIMPIAR BITMAP DE INODOS
+     fseek(myFile, sb->s_bm_inode_start, SEEK_SET);
+     contador=0;
+       while(contador<sb->s_inodes_count){
+            fwrite("\0", sizeof(char), 1, myFile);
+            contador++;
+        }
+       //LIMPIAR BITMAP DE BLOQUES
+       fseek(myFile, sb->s_bm_block_start, SEEK_SET);
+       contador=0;
+         while(contador<sb->s_blocks_count){
+              fwrite("\0", sizeof(char), 1, myFile);
+              contador++;
+          }
+      //LIMPIAR BITMAP DE INODOS
+         fseek(myFile, sb->s_bm_inode_start, SEEK_SET);
+         contador=0;
+           while(contador<sb->s_blocks_count){
+                fwrite("\0", sizeof(char), 1, myFile);
+                contador++;
+            }
+           //LIMPIAR INODOS
+           fseek(myFile, sb->s_inode_start, SEEK_SET);
+           contador=0;
+             while(contador<(sb->s_inodes_count*sb->s_inode_size)){
+                  fwrite("\0", sizeof(char), 1, myFile);
+                  contador++;
+              }
+             //LIMPIAR BLOQUES
+             fseek(myFile, sb->s_block_start, SEEK_SET);
+             contador=0;
+               while(contador<(sb->s_blocks_count*sb->s_block_size)){
+                    fwrite("\0", sizeof(char), 1, myFile);
+                    contador++;
+                }
+    //cerrando stream
+    fclose (myFile);
+    return SUCCESS;
+}
+
+Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartition[],char id[]){
+ int startOperations = startSb+sizeof(SuperBlock);
+ FILE * myFile;
+ int contador = 0;
+  myFile = fopen (path,"rb+");
+  if (myFile==NULL)
+  {
+      cout<<"Error al abrir el disco\n";
+      return ERROR_UNHANDLED;
+  }
+  Journal *journal = (Journal*)malloc(sizeof(Journal));
+    fseek(myFile, startOperations, SEEK_SET);
+  while(contador<sb->s_inodes_count){
+        fread(journal,sizeof(Journal),1,myFile);
+        if(journal == NULL){
+            return ERROR_RECOVERY;
+        }
+            switch (journal->j_operation) {
+            case MKDIRECTORY:
+                createDirectory(true,id,path);
+                break;
+            case MKFILE_PATH:
+                createFile(journal->j_path,true,journal->j_content,path,namePartition);
+                break;
+            case MKFILE_SIZE:
+                createFile(journal->j_path,true,journal->j_size,path,namePartition);
+                break;
+            default:
+                break;
+            }
+
+      contador++;
+  }
+
+  fclose (myFile);
+}
+

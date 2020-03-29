@@ -106,6 +106,8 @@ FileSistem FILESYSTEM;
 %token<TEXT>  RMGRP
 %token<TEXT>  LOGIN
 %token<TEXT>  MKFS
+%token<TEXT>  MKGRP
+%token<TEXT>  RECOVERY
 
 //NO TERMINALES DE TIPO VAL, POSEEN ATRIBUTOS INT VALOR, Y QSTRING TEXTO
 %type<TEXT>  INICIO
@@ -182,6 +184,8 @@ STATE_COMMANDS: MKDISK{$$=mkdisk;}
 |MKUSR{$$=mkusr;}
 |LOGIN{$$=login;}
 |MKFS{$$=mkfs;}
+|MKGRP{$$=mkgrp;}
+|RECOVERY{$$=recovery;}
 ;
 
 

@@ -197,9 +197,9 @@ cmd_login::cmd_login(char usr[], char pwd[], char id[]){
 
 //INICIAR SESION
 void cmd_login::Exec(){
-   /* if(active_sesion->isActive()){
+    if(isSesionActive()){
         cout<<"El usuario "<<active_sesion->user<<" ya ha iniciado sesión.\n";
-    }else{*/
+    }else{
         MountedDisk *disk = getMountedDisk(this->id);
         if(disk==NULL){
             return;
@@ -210,7 +210,7 @@ void cmd_login::Exec(){
         }
         //************************************************
         //COMPROBAR SESION
-        User *user = getUser(this->usr);
+        User *user = getUser(this->usr,disk->path,part->name);
         if(user==NULL){
             showMessageError(ERROR_USER_NOT_EXISTS);
             return;
@@ -225,12 +225,13 @@ void cmd_login::Exec(){
             active_sesion->user = this->usr;
             active_sesion->path = disk->path;
             active_sesion->namePartition = part->name;
+            cout<<"¡Sesión iniciada!\n";
         }else if(check == 1){
             cout<<"El usuario no existe\n";
         }else{
             cout<<"Las credenciales son incorrectas.\n";
         }
-  //  }
+    }
 }
 
 cmd_grp::cmd_grp(char name[], bool isForCreate){
@@ -240,11 +241,16 @@ cmd_grp::cmd_grp(char name[], bool isForCreate){
 
 //CREAR-ELIMINAR GRUPOS
 void cmd_grp::Exec(){
-    if(!active_sesion->isActive()){
+    if(!isSesionActive()){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
     if(isForCreate){
+        if(strcmp(active_sesion->user,"root")!=0){
+            cout<<"Solo el usuario root puede crear grupos.\n";
+            return;
+        }
+
         Response res = addGroup(active_sesion->path,active_sesion->namePartition,this->name);
         if(res==SUCCESS){
             cout<<"¡Grupo creado con éxito!\n";
@@ -269,7 +275,7 @@ cmd_mkusr::cmd_mkusr(char usr[], char pwd[], char grp[]){
 
 //CREAR USUARIOS
 void cmd_mkusr::Exec(){
-    if(!active_sesion->isActive()){
+    if(!isSesionActive()){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
@@ -287,7 +293,7 @@ cmd_rmusr::cmd_rmusr(char usr[]){
 
 //ELIMINAR USUARIOS
 void cmd_rmusr::Exec(){
-    if(!active_sesion->isActive()){
+    if(!isSesionActive()){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
@@ -316,7 +322,7 @@ cmd_mkfile::cmd_mkfile(char path[]){
 
 //CREAR ARCHIVO
 void cmd_mkfile::Exec(){
-    if(!active_sesion->isActive()){
+    if(!isSesionActive()){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
@@ -346,7 +352,7 @@ cmd_file::cmd_file(char path[], bool isForCat){
 
 //MOSTRAR ARCHIVO
 void cmd_file::Exec(){
-    if(!active_sesion->isActive()){
+    if(!isSesionActive()){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
@@ -367,7 +373,7 @@ cmd_edit::cmd_edit(char path[], char cont[]){
 
 //EDITAR ARCHIVO
 void cmd_edit::Exec(){
-    if(!active_sesion->isActive()){
+    if(!isSesionActive()){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
@@ -393,7 +399,7 @@ cmd_mkdir::cmd_mkdir(char path[], bool isRecursive){
 
 //CREAR CARPETA
 void cmd_mkdir::Exec(){
-    if(!active_sesion->isActive()){
+    if(!isSesionActive()){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
@@ -439,7 +445,26 @@ cmd_loss::cmd_loss(char id[]){
     this->id = id;
 }
 
-void cmd_loss::Exec(){}
+//LIMPIAR
+void cmd_loss::Exec(){
+    MountedDisk *disk = getMountedDisk(this->id);
+    if(disk==NULL){
+        cout<<"El disco no ha sido montado.\n";
+        return;
+    }
+    MountedPart *part = getMountedPartition(this->id);
+    if(part==NULL){
+        cout<<"la partición no fue encontrada.\n";
+        return;
+    }
+
+    Response res =  clearAllSystem(disk->path,part->name);
+    if(res == SUCCESS){
+        cout<<"¡El sistema de archivos ha sido corrompido!\n";
+    }else{
+        showMessageError(res);
+    }
+}
 
 cmd_rep::cmd_rep(char path[], TypeReport type, char id[]){
     this->path_report = path;
@@ -464,9 +489,9 @@ void cmd_rep::Exec(){
 
     int ext = 0;
     string ss;
-    ss = getNamePath(path,&ext);
+    ss = getNamePath(this->path_report,&ext);
     char *chh = &ss[0];
-    string hh = getPathWithoutName(path,strlen(chh)+ext);
+    string hh = getPathWithoutName(this->path_report,strlen(chh)+ext);
 
     //cout<<"PATH: "<<hh<<endl;
     //CREAR DIRECTORIO SI NO EXISTE
@@ -552,6 +577,41 @@ void cmd_rep::Exec(){
     }
 }
 
+cmd_recovery::cmd_recovery(char *id){
+    this->id = id;
+}
+
+//RECONSTRUIR SISTEMA DE ARCHIVOS
+void cmd_recovery::Exec(){
+    MountedDisk *disk = getMountedDisk(this->id);
+    if(disk==NULL){
+        cout<<"El disco no ha sido montado.\n";
+        return;
+    }
+    MountedPart *part = getMountedPartition(this->id);
+    if(part==NULL){
+        cout<<"la partición no fue encontrada.\n";
+        return;
+    }
+    int startSb=0;
+    SuperBlock *sb = readSuperBlock(disk->path,part->name,&startSb);
+    if(sb==NULL){
+        showMessageError(ERROR_FILESYSTEM);
+        return;
+    }
+    if(sb->s_filesystem_type == ext2){
+        showMessageError(ERROR_FILESYSTEM);
+        return;
+    }
+    Response res = recoverySystem(sb,startSb,disk->path,part->name,this->id);
+    if(res == SUCCESS){
+        cout<<"¡El sistema de archivos ha sido recuperado con éxito!\n";
+    }else{
+        showMessageError(res);
+    }
+    delete sb;
+}
+
 Cmd* getFormedCommand(CommandEnum command,Option *op){
     Option *it = op;
 
@@ -604,6 +664,7 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
             typePartition = it->type;
             break;
         case Delete:
+        case Format:
             typeFormat = it->delType;
             break;
         case Add:
@@ -708,7 +769,7 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
           if(existAdd){
               //modificar tamaño de particion
               cmd_addPart *ap= new cmd_addPart(name,path,size);
-              if(unit!=NULL){
+              if(unit!=UNIT_ERROR){
                   ap->unit = unit;
               }
               return ap;
@@ -1003,6 +1064,16 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
           return new cmd_loss(id);
       }
           break;
+      case recovery:
+      {
+          if(id== NULL){
+              std::cout<<"Debe indicar un id(-id).\n";
+              return NULL;
+          }
+
+          return new cmd_recovery(id);
+      }
+          break;
       case rep:
       {
           if(name==NULL){
@@ -1106,3 +1177,22 @@ void letsExecCommands(Cmd *commands){
     }
 }
 
+bool isSesionActive(){
+    if(active_sesion->user){
+        //cout<<active_sesion->user<<endl;
+        return true;
+    }
+    if(active_sesion->path!=NULL){
+        //cout<<active_sesion->path<<endl;
+        return true;
+    }
+    if( active_sesion->namePartition!=NULL){
+        //cout<<active_sesion->namePartition<<endl;
+        return true;
+    }
+    if(active_sesion->id!=NULL){
+        //cout<<active_sesion->id<<endl;
+        return true;
+    }
+    return false;
+}

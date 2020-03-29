@@ -112,6 +112,12 @@ void showMessageError(Response response){
     case ERROR_BAD_PASSWD:
         cout<<"Error: La contraseña es incorrecta.\n";
         break;
+    case ERROR_FILESYSTEM:
+        cout<<"Error: El sistema de archivos no puede ejecutar la instrucción.\n";
+        break;
+    case ERROR_RECOVERY:
+        cout<<"Error: El sistema no se pudo restaurar completamente.\n";
+        break;
     default:
         break;
 

@@ -129,7 +129,14 @@ struct BlockPointer
 
 
 struct Journal{
-
+    Operation j_operation;
+    char j_date[16];
+    char j_path[100];
+    char j_content[200];
+    int j_user;
+    int j_size;
+    int j_group;
+    int j_perms;
 };
 
 class Sesion{
@@ -144,11 +151,6 @@ public:
         this->namePartition = NULL;
         this->id = NULL;
     }
-
-    bool isActive(){
-        return user!=NULL && path!=NULL && namePartition!=NULL && id!=NULL;
-    }
-
     void clear(){
         user = NULL;
         path = NULL;

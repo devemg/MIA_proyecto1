@@ -668,7 +668,7 @@ Response graphFile(char *text, char *title,char reportPath[]){
      fputs("digraph di{\n", fileReport);
      fputs("nodo[label=\"",fileReport);
         int index = 0;
-         while(text[index]!='\0'){
+         while(text[index]!='\0' && text[index]>0){
             fprintf(fileReport,"%c", text[index]);
             if(index%64 == 0 && index!=0){
                 fputs("\n",fileReport);

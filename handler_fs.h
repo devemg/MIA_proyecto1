@@ -95,7 +95,7 @@ Response addGroup(char *path,char *partition,char grp[]);
 
 Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]);
 
-User* getUser(char usr[]);
+User* getUser(char usr[],char path[],char namePartition[]);
 
 Response ReplaceContentFile(int indexInode,char *content,char path[],char namePart[]);
 
@@ -112,5 +112,9 @@ Response deleteGroup(char path[], char partition[],char name[]);
 void clearInodePointers(Inodo *inodo);
 
 std::string getContentFileFromPointers(int level,int indexBlock,char path[],SuperBlock *sb);
+
+Response clearAllSystem(char path[],char name[]);
+
+Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartition[],char id[]);
 
 #endif // HANDLERFILESISTEM_H

@@ -46,7 +46,8 @@ path2 \"(\/[a-z]+[a-z0-9_\-\. ]+)+\"
 "rep"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return REP; }
 "exec"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return EXEC; }
 
-"Loss"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return LOSS; }
+"recovery"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return RECOVERY; }
+"loss"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return LOSS; }
 "chgrp"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return CHGRP; }
 "chown"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return CHOWN; }
 "find"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return FIND; }
@@ -63,6 +64,7 @@ path2 \"(\/[a-z]+[a-z0-9_\-\. ]+)+\"
 
 "rmusr"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return RMUSR; }
 "mkusr"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return MKUSR; }
+"mkgrp"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return MKGRP; }
 "rmgrp"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return RMGRP; }
 "login"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return LOGIN; }
 "mkfs"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return MKFS; }
