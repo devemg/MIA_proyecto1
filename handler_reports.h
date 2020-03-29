@@ -34,4 +34,6 @@ Response graphFile(char *text,char *title,char reportPath[]);
 
 void graphBlockPointer(int level,int indexBlock,int indexInodo,FILE *fileReport,char path[],SuperBlock *sb,bool graphConnection,TypeInode type);
 
+Response reportJournal(char path[],char namePart[],char reportPath[]);
+
 #endif // HANDLER_REPORTS_H

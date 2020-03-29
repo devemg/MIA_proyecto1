@@ -77,7 +77,7 @@ Response formatPart(char path[], char partition[], TypeFormat tipoFormateo, File
     if(sistem == ext2){
         sb->s_bm_inode_start = initPart+sizeof(SuperBlock);
     }else{
-        sb->s_bm_inode_start = initPart+sizeof(SuperBlock)+sizeof(Journal);
+        sb->s_bm_inode_start = initPart+sizeof(SuperBlock)+(sizeof(Journal)*cantInodos);
     }
     sb->s_bm_block_start = sb->s_bm_inode_start+cantInodos;
     sb->s_inode_start = sb->s_bm_block_start + cantBloques;
@@ -115,7 +115,11 @@ void fillJournal(int init,int cant,char path[]){
      }
      Journal *journal = new Journal();
      fseek(myFile, init, SEEK_SET);
-     fwrite(journal,sizeof(Journal),cant,myFile);
+     int contador=0;
+     while(contador<cant){
+         fwrite(journal,sizeof(Journal),1,myFile);
+         contador++;
+     }
      fclose (myFile);
 }
 
@@ -173,8 +177,11 @@ Response createDirectory(bool createMk,char id[],char path[]){
    newj->j_operation = MKDIRECTORY;
    newj->j_path = path;
    newj->j_boolean = createMk;
+   newj->j_group = active_sesion->idGrp;
+   newj->j_user = active_sesion->idUser;
+   newj->j_perms = 777;
+   getCurrentDate(newj->j_date);
    addJournal(sb,startSb,disk->path,newj);
-   //agregar usuario
  return SUCCESS;
 }
 
@@ -699,7 +706,28 @@ Response createFile(char newPath[], bool createPath, char pathFile[], char path[
      fread(txt,file_size,1,fileText);
 
      fclose(fileText);
-    return createFileWithText(newPath,createPath,txt,file_size,path,namePartition);
+    Response res = createFileWithText(newPath,createPath,txt,file_size,path,namePartition);
+    if(res == SUCCESS){
+        //AGREGAR A JOURNAL
+        Journal *newj = new Journal();
+        newj->j_operation = MKFILE_PATH;
+        newj->j_path = newPath;
+        newj->j_group = active_sesion->idGrp;
+        newj->j_user = active_sesion->idUser;
+        newj->j_content = pathFile;
+        newj->j_boolean = createPath;
+        newj->j_perms = 664;
+        getCurrentDate(newj->j_date);
+
+        int startSb;
+        SuperBlock *sb = readSuperBlock(path,namePartition,&startSb);
+        if(sb==NULL){
+            return ERROR_UNHANDLED;
+        }
+        addJournal(sb,startSb,path,newj);
+        delete sb;
+    }
+    return res;
 }
 
 Response createFileWithText(char newPath[], bool createPath, char text[],int size, char path[], char namePartition[]){
@@ -757,7 +785,28 @@ Response createFile(char newPath[], bool createPath, int size,char path[],char n
             caracter = '0';
         }
     }
-    return createFileWithText(newPath,createPath,txt,size,path,namePartition);
+    Response res = createFileWithText(newPath,createPath,txt,size,path,namePartition);
+    if(res == SUCCESS){
+        //AGREGAR A JOURNAL
+        Journal *newj = new Journal();
+        newj->j_operation = MKFILE_SIZE;
+        newj->j_path = newPath;
+        newj->j_group = active_sesion->idGrp;
+        newj->j_user = active_sesion->idUser;
+        newj->j_size = size;
+        newj->j_perms = 664;
+        newj->j_boolean = createPath;
+        getCurrentDate(newj->j_date);
+
+        int startSb;
+        SuperBlock *sb = readSuperBlock(path,namePartition,&startSb);
+        if(sb==NULL){
+            return ERROR_UNHANDLED;
+        }
+        addJournal(sb,startSb,path,newj);
+        delete sb;
+    }
+    return res;
 }
 
 Response createChildFile(int size,char *text,char path[],char dirPad[],char name[],SuperBlock *sb,int indexBloqueActual,int indexInodoPadre){
@@ -884,6 +933,7 @@ string findContentFile(char filePath[], char path[], char partition[],char **tit
     int startSb = -1;
     SuperBlock *sb = readSuperBlock(path,partition,&startSb);
     if(sb==NULL){
+
         return "";
     }
     string contentResponse = getContentFile(indexInode,path,sb);
@@ -1194,8 +1244,20 @@ User* getUser(char usr[],char *contentUsers){
                }
                contadortoken++;
            }
-           if(user!=NULL)return user;
+           if(user!=NULL){
+               Group *grp = getGroup(&user->group[0],contentUsers);
+               if(grp!=NULL){
+                   user->group = grp->id;
+               }
+               return user;
+           }
     }
+
+    Group *grp = getGroup(&user->group[0],contentUsers);
+    if(grp!=NULL){
+        user->group = grp->id;
+    }
+
     return user;
 }
 

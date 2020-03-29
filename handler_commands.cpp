@@ -219,13 +219,16 @@ void cmd_login::Exec(){
             showMessageError(ERROR_BAD_PASSWD);
             return;
         }
+
         //************************************************
         int check = 0; //loginInSystem(usr,pwd);
         if(check == 0){
-            active_sesion->user = this->usr;
+            active_sesion->user = &user->name[0];
             active_sesion->path = disk->path;
             active_sesion->namePartition = part->name;
             active_sesion->id = this->id;
+            active_sesion->idUser = &user->id[0];
+            active_sesion->idGrp = &user->group[0];
             cout<<"¡Sesión iniciada!\n";
         }else if(check == 1){
             cout<<"El usuario no existe\n";
@@ -526,6 +529,14 @@ void cmd_rep::Exec(){
     }
         break;
     case Journaling:
+    {
+        Response res =reportJournal(disk->path,part->name,this->path_report);
+        if(res==SUCCESS){
+            cout<<"El reporte fue generado con éxito.\n";
+        }else{
+            showMessageError(res);
+        }
+    }
         break;
     case BM_block:
     {

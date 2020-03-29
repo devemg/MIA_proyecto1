@@ -131,22 +131,22 @@ struct BlockPointer
 class Journal{
 public:
     Operation j_operation;
-    char *j_date;
+    char  j_date[16];
     char *j_path;
     char *j_content;
-    int j_user;
+    char *j_user;
+    char *j_group;
     int j_size;
-    int j_group;
     int j_perms;
     bool j_boolean;
     Journal(){
         this->j_operation = EMPTY;
-        this->j_date = NULL;
+        //this->j_date = NULL;
         this->j_path = NULL;
         this->j_content = NULL;
-        this->j_user = -1;
+        this->j_group = NULL;
+        this->j_user = NULL;
         this->j_size = -1;
-        this->j_group = -1;
         this->j_perms = -1;
         this->j_boolean = false;
     }
@@ -158,17 +158,24 @@ public:
     char *path;
     char *namePartition;
     char *id;
+    char *idUser;
+    char *idGrp;
     Sesion(){
         this->user = NULL;
         this->path = NULL;
         this->namePartition = NULL;
         this->id = NULL;
+        this->idGrp = NULL;
+        this->idUser = NULL;
     }
     void clear(){
         user = NULL;
         path = NULL;
         namePartition = NULL;
         id = NULL;
+
+        this->idGrp = NULL;
+        this->idUser = NULL;
     }
 };
 

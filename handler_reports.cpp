@@ -686,3 +686,175 @@ Response graphFile(char *text, char *title,char reportPath[]){
      system(command.c_str());
      return SUCCESS;
 }
+
+Response reportJournal(char path[], char namePart[],char reportPath[]){
+    int startSb;
+    SuperBlock *sb = readSuperBlock(path,namePart,&startSb);
+    if(sb==NULL){
+        return ERROR_UNHANDLED;
+    }
+
+    FILE * fileReport;
+     fileReport = fopen ("report_journal.dot","w+");
+     if (fileReport==NULL)
+     {
+         cout<<"Error al crear archivo de reporte\n";
+         return ERROR_UNHANDLED;
+     }
+     fseek(fileReport, 0, SEEK_SET);
+     fputs("digraph di{\n", fileReport);
+     fputs("i_3[ shape=plaintext label=<\n",fileReport);
+     fputs("<table>\n",fileReport);
+     fputs("<tr><td colspan=\"9\" bgcolor=\"#DAF7A6\">Journal</td></tr>\n",fileReport);
+     fputs("<tr>\n",fileReport);
+     fputs("<td bgcolor=\"#DAF7A6\">Operacion</td>\n",fileReport);
+     fputs("<td bgcolor=\"#DAF7A6\">Fecha</td>\n",fileReport);
+     fputs("<td bgcolor=\"#DAF7A6\">Ruta</td>\n",fileReport);
+     fputs("<td bgcolor=\"#DAF7A6\">Contenido</td>\n",fileReport);
+     fputs("<td bgcolor=\"#DAF7A6\">Tamaño</td>\n",fileReport);
+     fputs("<td bgcolor=\"#DAF7A6\">Grupo</td>\n",fileReport);
+     fputs("<td bgcolor=\"#DAF7A6\">Usuario</td>\n",fileReport);
+     fputs("<td bgcolor=\"#DAF7A6\">Permisos</td>\n",fileReport);
+     fputs("<td bgcolor=\"#DAF7A6\">Recursivo</td>\n",fileReport);
+     fputs("</tr>\n",fileReport);
+     int startOperations = startSb+sizeof(SuperBlock);
+     FILE * myFile;
+     int contador = 0;
+      myFile = fopen (path,"rb+");
+      if (myFile==NULL)
+      {
+          cout<<"Error al abrir el disco\n";
+          return SUCCESS;
+      }
+      Journal *journal = (Journal*)malloc(sizeof(Journal));
+        fseek(myFile, startOperations, SEEK_SET);
+      while(contador<sb->s_inodes_count){
+            fread(journal,sizeof(Journal),1,myFile);
+            if(journal == NULL){
+                return ERROR_UNHANDLED;
+            }
+                switch (journal->j_operation) {
+                case MKDIRECTORY:
+                {
+                    fputs("<tr>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">Mkdir</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_date,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_path,fileReport);
+                    fputs("</td>\n",fileReport);
+                    //contenido
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    //tamaño
+                    fputs("<td bgcolor=\"#DAF7A6\">-</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_group,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_user,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(&to_string(journal->j_perms)[0],fileReport);
+                    fputs("</td>\n",fileReport);
+                    if(journal->j_boolean){
+                        fputs("<td bgcolor=\"#DAF7A6\">SI</td>\n",fileReport);
+
+                    }else{
+                        fputs("<td bgcolor=\"#DAF7A6\">NO</td>\n",fileReport);
+                    }
+
+                    fputs("</tr>\n",fileReport);
+                }
+                    break;
+                case MKFILE_PATH:
+                {
+                    fputs("<tr>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">Mkfile</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_date,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_path,fileReport);
+                    fputs("</td>\n",fileReport);
+                    //contenido
+                    fputs("<td bgcolor=\"#DAF7A6\"> ",fileReport);
+                    fputs(journal->j_content,fileReport);
+                    fputs(" </td>\n",fileReport);
+                    //tamaño
+                    fputs("<td bgcolor=\"#DAF7A6\">-</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_group,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_user,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(&to_string(journal->j_perms)[0],fileReport);
+                    fputs("</td>\n",fileReport);
+                    if(journal->j_boolean){
+                        fputs("<td bgcolor=\"#DAF7A6\">SI</td>\n",fileReport);
+
+                    }else{
+                        fputs("<td bgcolor=\"#DAF7A6\">NO</td>\n",fileReport);
+                    }
+
+
+
+                    fputs("</tr>\n",fileReport);
+                }
+                    break;
+                case MKFILE_SIZE:
+                {
+                    fputs("<tr>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">Mkfile</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_date,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_path,fileReport);
+                    fputs("</td>\n",fileReport);
+                    //contenido
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    //tamaño
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(&to_string(journal->j_size)[0],fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_group,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_user,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(&to_string(journal->j_perms)[0],fileReport);
+                    fputs("</td>\n",fileReport);
+                    if(journal->j_boolean){
+                        fputs("<td bgcolor=\"#DAF7A6\">SI</td>\n",fileReport);
+
+                    }else{
+                        fputs("<td bgcolor=\"#DAF7A6\">NO</td>\n",fileReport);
+                    }
+
+                    fputs("</tr>\n",fileReport);
+                }
+                    break;
+                default:
+                    contador = sb->s_inodes_count+1;
+                    break;
+            }
+          contador++;
+      }
+
+      fclose (myFile);
+
+
+     fputs("</table>\n",fileReport);
+     fputs(">];\n",fileReport);
+     fputs("}\n",fileReport);
+     fclose (fileReport);
+     string pathString(reportPath);
+     string command = "dot -Tpng report_journal.dot -o \""+pathString+"\"";//+"/report_mbr.png";
+     system(command.c_str());
+     return SUCCESS;
+}
