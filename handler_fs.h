@@ -121,4 +121,8 @@ void fillJournal(int init,int cant,char path[]);
 
 void addJournal(SuperBlock *sb,int startSb,char path[],Journal *newj);
 
+User* getUserById(char id[],char path[],char namePartition[]);
+
+Group* getGroupById(char name[],char path[],char namePartition[]);
+
 #endif // HANDLERFILESISTEM_H

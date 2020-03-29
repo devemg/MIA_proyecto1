@@ -1333,6 +1333,106 @@ User* getUser(char usr[],char path[],char namePartition[]){
     return getUser(usr,&res[0]);
 }
 
+User* getUserById(char id[],char path[],char namePartition[]){
+    char *title;
+    char *filePath="/users.txt";
+    string res = findContentFile(filePath,path,namePartition,&title);
+    //**********************
+    int contadortoken;
+    string idUser(id);
+    User *user = NULL;
+    std::stringstream ss(res);
+    std::string token;
+    bool found = false;
+    while (std::getline(ss, token, '\n')) {
+        if(token!=""){
+            user = new User();
+            contadortoken = 0;
+            std::stringstream line(token);
+               std::string tokenLine;
+               while (std::getline(line, tokenLine, ',')) {
+                   if(tokenLine!=""){
+                       if(contadortoken == 0){
+                           if(tokenLine == "0"){
+                               continue;
+                           }else{
+                               user->id = tokenLine;
+                               if(tokenLine == idUser ){
+                                   found = true;
+                               }
+                           }
+                       }else if(contadortoken==1){
+                           if(tokenLine != "U"){
+                               user = NULL;
+                               break;
+                           }
+                       }else if(contadortoken == 2){
+                           user->group = tokenLine;
+                       }else if(contadortoken == 3){
+                           user->name = tokenLine;
+                       }else if(contadortoken == 4){
+                           user->pwd = tokenLine;
+                       }else{
+                           break;
+                       }
+                       contadortoken++;
+                   }
+               }
+               if(user!=NULL && found){
+                   return user;
+               }
+        }
+    }
+    if(!found) return NULL;
+    return user;
+}
+
+Group* getGroupById(char name[],char path[],char namePartition[]){
+    char *title;
+    char *filePath="/users.txt";
+    string res = findContentFile(filePath,path,namePartition,&title);
+    //**********************
+    int contadortoken;
+    string nameG(name);
+    Group *grp = NULL;
+    std::stringstream ss(res);
+    std::string token;
+    bool found = false;
+    while (std::getline(ss, token, '\n')) {
+        grp = new Group();
+        contadortoken = 0;
+        std::stringstream line(token);
+           std::string tokenLine;
+           while (std::getline(line, tokenLine, ',')) {
+               if(contadortoken == 0){
+                   if(tokenLine == "0"){
+                       continue;
+                   }else{
+                       grp->id = tokenLine;
+                       if(tokenLine == nameG){
+                           found = true;
+                       }
+                   }
+               }else if(contadortoken==1){
+                   if(tokenLine != "G"){
+                       grp = NULL;
+                       break;
+                   }
+               }else if(contadortoken == 2){
+                       grp->name = tokenLine;
+               }else{
+                   break;
+               }
+               contadortoken++;
+           }
+           if(grp!=NULL && found){
+               return grp;
+           }
+    }
+    if(!found) return NULL;
+    return grp;
+}
+
 Response ReplaceContentFile(int indexInode,char *content,char path[],char namePart[]){
     int startSb = 0;
     SuperBlock *sb = readSuperBlock(path,namePart,&startSb);
