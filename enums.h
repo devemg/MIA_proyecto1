@@ -60,7 +60,9 @@ enum CommandEnum {mkdisk,
                   mkfs,
                   mkgrp,
                   rmgrp,
-                  recovery};
+                  recovery,
+                 pauseSys,
+                 logout};
 enum Options {Id,
               Add,
               Delete,

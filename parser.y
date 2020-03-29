@@ -108,6 +108,8 @@ FileSistem FILESYSTEM;
 %token<TEXT>  MKFS
 %token<TEXT>  MKGRP
 %token<TEXT>  RECOVERY
+%token<TEXT>  LOGOUT
+%token<TEXT>  PAUSE
 
 //NO TERMINALES DE TIPO VAL, POSEEN ATRIBUTOS INT VALOR, Y QSTRING TEXTO
 %type<TEXT>  INICIO
@@ -158,7 +160,9 @@ COMMANDS_LIST: COMMANDS_LIST COMMAND{
 COMMAND: STATE_COMMANDS OPTIONS_LIST{
     Cmd *cmd = getFormedCommand($1,$2);
     $$ = cmd;
-};
+}
+|PAUSE{$$=new cmd_pause();}
+|LOGOUT{$$=new cmd_logout();};
 
 STATE_COMMANDS: MKDISK{$$=mkdisk;}
 |RMDISK{$$=rmdisk;}

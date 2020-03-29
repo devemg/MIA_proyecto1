@@ -93,6 +93,14 @@ public:
 
 //**********************************************
 
+class cmd_logout:public Cmd{
+    void Exec();
+};
+
+class cmd_pause:public Cmd{
+    void Exec();
+};
+
 class cmd_fs:public Cmd{
 public:
     TypeFormat type;

@@ -69,6 +69,9 @@ path2 \"(\/[a-z]+[a-z0-9_\-\. ]+)+\"
 "login"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return LOGIN; }
 "mkfs"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return MKFS; }
 
+"logout"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return LOGOUT; }
+"pause"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return PAUSE; }
+
 "BF"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return BF; }
 "FF"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return FF; }
 "WF"         { columna=columna+strlen(yylval.TEXT); strcpy(yylval.TEXT, yytext); return WF; }

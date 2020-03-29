@@ -156,7 +156,7 @@ cout<<"Ejecutando script...\n\n";
     }
     char linea[1024];
     while(fgets(linea, 1024, (FILE*) myFile)) {
-            cout<<linea<<endl;
+            cout<<linea;
             writeCommand(linea,true);
             readExecCommand(true);
         }
@@ -164,6 +164,15 @@ cout<<"Ejecutando script...\n\n";
 }
 
 //**********************************************
+
+void cmd_logout::Exec(){
+    active_sesion->clear();
+    cout<<"¡Sesión cerrada!\n";
+}
+
+void cmd_pause::Exec(){
+ system("read -r -p \"Presiona cualquier tecla para continuar...\" key");
+}
 
 cmd_fs::cmd_fs(char id[]){
     type = Full;
