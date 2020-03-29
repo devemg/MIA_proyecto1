@@ -96,10 +96,27 @@ Response formatPart(char path[], char partition[], TypeFormat tipoFormateo, File
     writeSuperBlock(sb,path,initPart);
     //CREAR ARCHIVO DE USERS
     char *users = "1,G,root\n1,U,root,root,123\n";
-    createFileWithText("/users.txt",true,users,28,path,partition);
+    createFileWithText("/users.txt",true,users,28,path,partition);    
+    if(sistem == ext3){
+        fillJournal(initPart+sizeof(SuperBlock),cantInodos,path);
+    }
     delete disco;
     delete sb;
     return SUCCESS;
+}
+
+void fillJournal(int init,int cant,char path[]){
+    FILE * myFile;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return;
+     }
+     Journal *journal = new Journal();
+     fseek(myFile, init, SEEK_SET);
+     fwrite(journal,sizeof(Journal),cant,myFile);
+     fclose (myFile);
 }
 
 Response createDirectory(bool createMk,char id[],char path[]){
@@ -1514,6 +1531,7 @@ Response clearAllSystem(char path[],char name[]){
 
 Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartition[],char id[]){
  int startOperations = startSb+sizeof(SuperBlock);
+ formatPart(path,namePartition,Full,ext3);
  FILE * myFile;
  int contador = 0;
   myFile = fopen (path,"rb+");
@@ -1528,6 +1546,9 @@ Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartitio
         fread(journal,sizeof(Journal),1,myFile);
         if(journal == NULL){
             return ERROR_RECOVERY;
+        }
+        if(journal->j_operation == EMPTY){
+            return SUCCESS;
         }
             switch (journal->j_operation) {
             case MKDIRECTORY:

@@ -117,4 +117,6 @@ Response clearAllSystem(char path[],char name[]);
 
 Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartition[],char id[]);
 
+void fillJournal(int init,int cant,char path[]);
+
 #endif // HANDLERFILESISTEM_H

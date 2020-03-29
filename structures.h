@@ -128,7 +128,8 @@ struct BlockPointer
 };
 
 
-struct Journal{
+class Journal{
+public:
     Operation j_operation;
     char j_date[16];
     char j_path[100];
@@ -137,6 +138,16 @@ struct Journal{
     int j_size;
     int j_group;
     int j_perms;
+    Journal(){
+        this->j_operation = EMPTY;
+        //this->j_date = NULL;
+        //this->j_path = NULL;
+        //this->j_content = NULL;
+        this->j_user = -1;
+        this->j_size = -1;
+        this->j_group = -1;
+        this->j_perms = -1;
+    }
 };
 
 class Sesion{
