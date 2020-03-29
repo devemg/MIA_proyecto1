@@ -1404,7 +1404,20 @@ Response editFile(char pathFile[],char newCont[],char path[],char namePart[]){
     }
    string content  = getContentFile(indexInode,path,sb);
    content+=newCont;
-   return ReplaceContentFile(indexInode,&content[0],path,namePart);
+   Response r = ReplaceContentFile(indexInode,&content[0],path,namePart);
+   if(r == SUCCESS){
+       //AGREGAR A JOURNAL
+       Journal *newj = new Journal();
+       newj->j_operation = EDIT_FILE;
+       newj->j_user =active_sesion->idUser;
+       newj->j_group = active_sesion->idGrp;
+       newj->j_content = newCont;
+       newj->j_path = pathFile;
+       getCurrentDate(newj->j_date);
+       addJournal(sb,startSb,path,newj);
+   }
+   delete sb;
+   return r;
 }
 
 Response deleteUser(char path[], char partition[],char name[]){
@@ -1678,6 +1691,9 @@ Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartitio
                 break;
             case DELUSER:
                 deleteUser(path,namePartition,journal->j_user);
+                break;
+            case EDIT_FILE:
+                editFile(journal->j_path,journal->j_content,path,namePartition);
                 break;
             default:
                 break;

@@ -919,11 +919,37 @@ Response reportJournal(char path[], char namePart[],char reportPath[]){
                     fputs("<td bgcolor=\"#DAF7A6\"> ",fileReport);
                     fputs(journal->j_group,fileReport);
                     fputs(" </td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> ",fileReport);
+                    fputs(journal->j_user,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("</tr>\n",fileReport);
+                }
+                    break;
+                case EDIT_FILE:
+                {
+                    fputs("<tr>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">mkusr</td>\n",fileReport);
                     fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_date,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> ",fileReport);
+                    fputs(journal->j_path,fileReport);
+                    fputs(" </td>\n",fileReport);
+                    //contenido
+                    fputs("<td bgcolor=\"#DAF7A6\"> ",fileReport);
+                    fputs(journal->j_content,fileReport);
+                    fputs(" </td>\n",fileReport);
+                    //tamaño
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> ",fileReport);
+                    fputs(journal->j_group,fileReport);
                     fputs(" </td>\n",fileReport);
                     fputs("<td bgcolor=\"#DAF7A6\"> ",fileReport);
                     fputs(journal->j_user,fileReport);
                     fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
                     fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
                     fputs("</tr>\n",fileReport);
                 }
