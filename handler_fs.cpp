@@ -1106,6 +1106,16 @@ Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
     strcat(content,pwd);
     strcat(content,"\n");
     Response r = ReplaceContentFile(indexInode,content,path,partition);
+    if(r == SUCCESS){
+        //AGREGAR A JOURNAL
+        Journal *newj = new Journal();
+        newj->j_operation = ADDUSER;
+        newj->j_user =usr;
+        newj->j_group = grp;
+        newj->j_content = pwd;
+        getCurrentDate(newj->j_date);
+        addJournal(sb,startSb,path,newj);
+    }
     delete sb;
     return r;
 }
@@ -1218,50 +1228,56 @@ User* getUser(char usr[],char *contentUsers){
     std::string token;
 
     while (std::getline(ss, token, '\n')) {
-        user = new User();
-        contadortoken = 0;
-        std::stringstream line(token);
-           std::string tokenLine;
-           while (std::getline(line, tokenLine, ',')) {
-               if(contadortoken == 0){
-                   if(tokenLine == "0"){
-                       continue;
-                   }else{
-                       user->id = tokenLine;
+        if(token!=""){
+            user = new User();
+            contadortoken = 0;
+            std::stringstream line(token);
+               std::string tokenLine;
+               while (std::getline(line, tokenLine, ',')) {
+                   if(tokenLine!=""){
+                       if(contadortoken == 0){
+                           if(tokenLine == "0"){
+                               continue;
+                           }else{
+                               user->id = tokenLine;
+                           }
+                       }else if(contadortoken==1){
+                           if(tokenLine != "U"){
+                               user = NULL;
+                               break;
+                           }
+                       }else if(contadortoken == 2){
+                           user->group = tokenLine;
+                       }else if(contadortoken == 3){
+                           if(tokenLine == nameUser ){
+                               user->name = tokenLine;
+                           }else{
+                               user = NULL;
+                               break;
+                           }
+                       }else if(contadortoken == 4){
+                           user->pwd = tokenLine;
+                       }else{
+                           break;
+                       }
+                       contadortoken++;
                    }
-               }else if(contadortoken==1){
-                   if(tokenLine != "U"){
-                       user = NULL;
-                       break;
-                   }
-               }else if(contadortoken == 2){
-                   user->group = tokenLine;
-               }else if(contadortoken == 3){
-                   if(tokenLine == nameUser ){
-                       user->name = tokenLine;
-                   }else{
-                       user = NULL;
-                       break;
-                   }
-               }else if(contadortoken == 4){
-                   user->pwd = tokenLine;
-               }else{
-                   break;
                }
-               contadortoken++;
-           }
-           if(user!=NULL){
-               Group *grp = getGroup(&user->group[0],contentUsers);
-               if(grp!=NULL){
-                   user->group = grp->id;
+               if(user!=NULL){
+                   Group *grp = getGroup(&user->group[0],contentUsers);
+                   if(grp!=NULL){
+                       user->group = grp->id;
+                   }
+                   return user;
                }
-               return user;
-           }
+        }
     }
 
-    Group *grp = getGroup(&user->group[0],contentUsers);
-    if(grp!=NULL){
-        user->group = grp->id;
+    if(user!=NULL){
+        Group *grp = getGroup(&user->group[0],contentUsers);
+        if(grp!=NULL){
+            user->group = grp->id;
+        }
     }
 
     return user;
@@ -1468,6 +1484,14 @@ Response deleteUser(char path[], char partition[],char name[]){
      }
      char *my_argument = const_cast<char*> (newContent.c_str());
     Response r = ReplaceContentFile(indexInode,my_argument,path,partition);
+    if(r == SUCCESS){
+        //AGREGAR A JOURNAL
+        Journal *newj = new Journal();
+        newj->j_operation = DELUSER;
+        newj->j_user =name;
+        getCurrentDate(newj->j_date);
+        addJournal(sb,startSb,path,newj);
+    }
     delete sb;
     return r;
 }
@@ -1648,6 +1672,12 @@ Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartitio
                 break;
             case RMGRP:
                 deleteGroup(path,namePartition,journal->j_group);
+                break;
+            case ADDUSER:
+                addUser(path,namePartition,journal->j_user,journal->j_content,journal->j_group);
+                break;
+            case DELUSER:
+                deleteUser(path,namePartition,journal->j_user);
                 break;
             default:
                 break;

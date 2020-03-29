@@ -301,7 +301,7 @@ void cmd_rmusr::Exec(){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
-    Response res = deleteGroup(active_sesion->path,active_sesion->namePartition,this->usr);
+    Response res = deleteUser(active_sesion->path,active_sesion->namePartition,this->usr);
     if(res==SUCCESS){
         cout<<"¡Usuario eliminado con éxito!\n";
     }else{

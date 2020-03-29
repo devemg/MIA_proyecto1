@@ -95,5 +95,5 @@ enum TypeReport{Inode,
                 Ls,
                 Mbr,
                 Disk};
-enum Operation{MKDIRECTORY,MKFILE_PATH,MKFILE_SIZE,EMPTY,ADDUSR,ADDGRP,DELUSR,DELGRP};
+enum Operation{MKDIRECTORY,MKFILE_PATH,MKFILE_SIZE,EMPTY,ADDUSER,ADDGRP,DELUSER,DELGRP};
 #endif // ENUMS_H
