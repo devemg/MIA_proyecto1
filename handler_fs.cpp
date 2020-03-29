@@ -1405,8 +1405,14 @@ Response editFile(char pathFile[],char newCont[],char path[],char namePart[],boo
         return ERROR_UNHANDLED;
     }
    string content  = getContentFile(indexInode,path,sb);
-   content+=newCont;
-   Response r = ReplaceContentFile(indexInode,&content[0],path,namePart);
+   string newContent = "";
+   int contador = 0;
+   while(content[contador]!='\0'){
+       newContent+=content[contador];
+       contador++;
+   }
+   newContent+=newCont;
+   Response r = ReplaceContentFile(indexInode,&newContent[0],path,namePart);
    if(r == SUCCESS && !isRecovery){
        //AGREGAR A JOURNAL
        Journal *newj = new Journal();
