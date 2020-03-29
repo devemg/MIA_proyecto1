@@ -131,22 +131,24 @@ struct BlockPointer
 class Journal{
 public:
     Operation j_operation;
-    char j_date[16];
-    char j_path[100];
-    char j_content[200];
+    char *j_date;
+    char *j_path;
+    char *j_content;
     int j_user;
     int j_size;
     int j_group;
     int j_perms;
+    bool j_boolean;
     Journal(){
         this->j_operation = EMPTY;
-        //this->j_date = NULL;
-        //this->j_path = NULL;
-        //this->j_content = NULL;
+        this->j_date = NULL;
+        this->j_path = NULL;
+        this->j_content = NULL;
         this->j_user = -1;
         this->j_size = -1;
         this->j_group = -1;
         this->j_perms = -1;
+        this->j_boolean = false;
     }
 };
 

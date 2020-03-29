@@ -776,6 +776,7 @@ MountedPart* getMountedPartition(char id[]){
 }
 
 MountedDisk* getMountedDisk(char id[]){
+    if(id==NULL) return NULL;
     string str(id);
     if(strlen(id)<4){
         showMessageError(ERROR_ID_MALFORMED);

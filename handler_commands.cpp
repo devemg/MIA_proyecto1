@@ -225,6 +225,7 @@ void cmd_login::Exec(){
             active_sesion->user = this->usr;
             active_sesion->path = disk->path;
             active_sesion->namePartition = part->name;
+            active_sesion->id = this->id;
             cout<<"¡Sesión iniciada!\n";
         }else if(check == 1){
             cout<<"El usuario no existe\n";
@@ -1178,7 +1179,7 @@ void letsExecCommands(Cmd *commands){
 }
 
 bool isSesionActive(){
-    if(active_sesion->user){
+    if(active_sesion->user!=NULL){
         //cout<<active_sesion->user<<endl;
         return true;
     }

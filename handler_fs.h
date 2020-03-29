@@ -119,4 +119,6 @@ Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartitio
 
 void fillJournal(int init,int cant,char path[]);
 
+void addJournal(SuperBlock *sb,int startSb,char path[],Journal *newj);
+
 #endif // HANDLERFILESISTEM_H

@@ -168,6 +168,13 @@ Response createDirectory(bool createMk,char id[],char path[]){
             }
         }
    writeSuperBlock(sb,disk->path,startSb);
+   //AGREGAR A JOURNAL
+   Journal *newj = new Journal();
+   newj->j_operation = MKDIRECTORY;
+   newj->j_path = path;
+   newj->j_boolean = createMk;
+   addJournal(sb,startSb,disk->path,newj);
+   //agregar usuario
  return SUCCESS;
 }
 
@@ -1555,10 +1562,10 @@ Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartitio
                 createDirectory(true,id,path);
                 break;
             case MKFILE_PATH:
-                createFile(journal->j_path,true,journal->j_content,path,namePartition);
+                createFile(journal->j_path,journal->j_boolean,journal->j_content,path,namePartition);
                 break;
             case MKFILE_SIZE:
-                createFile(journal->j_path,true,journal->j_size,path,namePartition);
+                createFile(journal->j_path,journal->j_boolean,journal->j_size,path,namePartition);
                 break;
             default:
                 break;
@@ -1570,3 +1577,31 @@ Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartitio
   fclose (myFile);
 }
 
+void addJournal(SuperBlock *sb,int startSb,char path[],Journal *newj){
+    int startOperations = startSb+sizeof(SuperBlock);
+    FILE * myFile;
+    int contador = 0;
+     myFile = fopen (path,"rb+");
+     if (myFile==NULL)
+     {
+         cout<<"Error al abrir el disco\n";
+         return ;
+     }
+     Journal *journal = (Journal*)malloc(sizeof(Journal));
+       fseek(myFile, startOperations, SEEK_SET);
+     while(contador<sb->s_inodes_count){
+           fread(journal,sizeof(Journal),1,myFile);
+           if(journal == NULL){
+               return ;
+           }
+           if(journal->j_operation == EMPTY){
+              fseek(myFile,-sizeof(Journal),SEEK_CUR);
+              fwrite(newj,sizeof(Journal),1,myFile);
+              fclose (myFile);
+               return ;
+           }
+         contador++;
+     }
+
+     fclose (myFile);
+}
