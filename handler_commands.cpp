@@ -591,6 +591,14 @@ void cmd_rep::Exec(){
     }
         break;
     case Ls:
+    {
+        Response res = reportLs(disk->path,part->name,this->path_report);
+        if(res==SUCCESS){
+            cout<<"El reporte fue generado con éxito.\n";
+        }else{
+            showMessageError(res);
+        }
+    }
         break;
     default:
         cout<<"Reporte no reconocido.\n";

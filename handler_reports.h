@@ -36,4 +36,10 @@ void graphBlockPointer(int level,int indexBlock,int indexInodo,FILE *fileReport,
 
 Response reportJournal(char path[],char namePart[],char reportPath[]);
 
+Response reportLs(char path[], char name[], char path_report[]);
+
+void graphInodoForLs(Inodo* inodo,FILE *myFile,char path[],SuperBlock *sb,char name[]);
+
+void graphInodoForLsRec(int level,int indexBlock,FILE *fileReport,char path[],SuperBlock *sb,TypeInode type);
+
 #endif // HANDLER_REPORTS_H
