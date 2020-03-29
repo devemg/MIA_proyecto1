@@ -123,7 +123,7 @@ void fillJournal(int init,int cant,char path[]){
      fclose (myFile);
 }
 
-Response createDirectory(bool createMk,char id[],char path[]){
+Response createDirectory(bool createMk,char id[],char path[],bool isRecovery){
     MountedDisk *disk =getMountedDisk(id);
     if(disk==NULL){
         return ERROR_UNHANDLED;
@@ -172,16 +172,18 @@ Response createDirectory(bool createMk,char id[],char path[]){
             }
         }
    writeSuperBlock(sb,disk->path,startSb);
-   //AGREGAR A JOURNAL
-   Journal *newj = new Journal();
-   newj->j_operation = MKDIRECTORY;
-   newj->j_path = path;
-   newj->j_boolean = createMk;
-   newj->j_group = active_sesion->idGrp;
-   newj->j_user = active_sesion->idUser;
-   newj->j_perms = 777;
-   getCurrentDate(newj->j_date);
-   addJournal(sb,startSb,disk->path,newj);
+   if(!isRecovery){
+       //AGREGAR A JOURNAL
+       Journal *newj = new Journal();
+       newj->j_operation = MKDIRECTORY;
+       newj->j_path = path;
+       newj->j_boolean = createMk;
+       newj->j_group = active_sesion->idGrp;
+       newj->j_user = active_sesion->idUser;
+       newj->j_perms = 777;
+       getCurrentDate(newj->j_date);
+       addJournal(sb,startSb,disk->path,newj);
+   }
  return SUCCESS;
 }
 
@@ -691,7 +693,7 @@ void writeInodo(Inodo *inodo, char path[], int init){
     fclose(myFile);
 }
 
-Response createFile(char newPath[], bool createPath, char pathFile[], char path[], char namePartition[]){
+Response createFile(char newPath[], bool createPath, char pathFile[], char path[], char namePartition[],bool isRecovery){
     FILE *fileText;
     fileText = fopen(pathFile,"r+");
     if(fileText==NULL){
@@ -707,7 +709,7 @@ Response createFile(char newPath[], bool createPath, char pathFile[], char path[
 
      fclose(fileText);
     Response res = createFileWithText(newPath,createPath,txt,file_size,path,namePartition);
-    if(res == SUCCESS){
+    if(res == SUCCESS && !isRecovery){
         //AGREGAR A JOURNAL
         Journal *newj = new Journal();
         newj->j_operation = MKFILE_PATH;
@@ -773,7 +775,7 @@ Response createFileWithText(char newPath[], bool createPath, char text[],int siz
     return SUCCESS;
 }
 
-Response createFile(char newPath[], bool createPath, int size,char path[],char namePartition[]){
+Response createFile(char newPath[], bool createPath, int size,char path[],char namePartition[],bool isRecovery){
     //generar texto
     char *txt = (char*)malloc(sizeof(char)*size);
     int i;
@@ -786,7 +788,7 @@ Response createFile(char newPath[], bool createPath, int size,char path[],char n
         }
     }
     Response res = createFileWithText(newPath,createPath,txt,size,path,namePartition);
-    if(res == SUCCESS){
+    if(res == SUCCESS && !isRecovery){
         //AGREGAR A JOURNAL
         Journal *newj = new Journal();
         newj->j_operation = MKFILE_SIZE;
@@ -1071,7 +1073,7 @@ std::string getContentFileFromPointers(int level,int indexBlock,char path[],Supe
     }
 }
 
-Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
+Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[],bool isRecovery){
      char *title;
      char *filePath="/users.txt";
      //******************
@@ -1106,7 +1108,7 @@ Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
     strcat(content,pwd);
     strcat(content,"\n");
     Response r = ReplaceContentFile(indexInode,content,path,partition);
-    if(r == SUCCESS){
+    if(r == SUCCESS && !isRecovery){
         //AGREGAR A JOURNAL
         Journal *newj = new Journal();
         newj->j_operation = ADDUSER;
@@ -1120,7 +1122,7 @@ Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]){
     return r;
 }
 
-Response addGroup(char *path,char *partition,char grp[]){
+Response addGroup(char *path,char *partition,char grp[],bool isRecovery){
      char *title;
      char *filePath="/users.txt";
      //******************
@@ -1146,7 +1148,7 @@ Response addGroup(char *path,char *partition,char grp[]){
     strcat(content,grp);
     strcat(content,"\n");
     Response r = ReplaceContentFile(indexInode,content,path,partition);
-    if(r == SUCCESS){
+    if(r == SUCCESS && !isRecovery){
         //AGREGAR A JOURNAL
         Journal *newj = new Journal();
         newj->j_operation = ADDGRP;
@@ -1391,7 +1393,7 @@ void clearInodePointers(Inodo *inodo){
     }
 }
 
-Response editFile(char pathFile[],char newCont[],char path[],char namePart[]){
+Response editFile(char pathFile[],char newCont[],char path[],char namePart[],bool isRecovery){
     char *title;
     int indexInode = findFile(pathFile,path,namePart,&title);
     if(indexInode==-1){
@@ -1405,7 +1407,7 @@ Response editFile(char pathFile[],char newCont[],char path[],char namePart[]){
    string content  = getContentFile(indexInode,path,sb);
    content+=newCont;
    Response r = ReplaceContentFile(indexInode,&content[0],path,namePart);
-   if(r == SUCCESS){
+   if(r == SUCCESS && !isRecovery){
        //AGREGAR A JOURNAL
        Journal *newj = new Journal();
        newj->j_operation = EDIT_FILE;
@@ -1420,7 +1422,7 @@ Response editFile(char pathFile[],char newCont[],char path[],char namePart[]){
    return r;
 }
 
-Response deleteUser(char path[], char partition[],char name[]){
+Response deleteUser(char path[], char partition[],char name[],bool isRecovery){
      char *title;
      char *filePath="/users.txt";
      int indexInode = findFile(filePath,path,partition,&title);
@@ -1497,7 +1499,7 @@ Response deleteUser(char path[], char partition[],char name[]){
      }
      char *my_argument = const_cast<char*> (newContent.c_str());
     Response r = ReplaceContentFile(indexInode,my_argument,path,partition);
-    if(r == SUCCESS){
+    if(r == SUCCESS && !isRecovery){
         //AGREGAR A JOURNAL
         Journal *newj = new Journal();
         newj->j_operation = DELUSER;
@@ -1509,7 +1511,7 @@ Response deleteUser(char path[], char partition[],char name[]){
     return r;
 }
 
-Response deleteGroup(char path[], char partition[],char name[]){
+Response deleteGroup(char path[], char partition[],char name[],bool isRecovery){
      char *title;
      char *filePath="/users.txt";
      int indexInode = findFile(filePath,path,partition,&title);
@@ -1579,7 +1581,7 @@ Response deleteGroup(char path[], char partition[],char name[]){
      }
      char *my_argument = const_cast<char*> (newContent.c_str());
     Response r = ReplaceContentFile(indexInode,my_argument,path,partition);
-    if(r == SUCCESS){
+    if(r == SUCCESS && !isRecovery){
         //AGREGAR A JOURNAL
         Journal *newj = new Journal();
         newj->j_operation = DELGRP;
@@ -1672,28 +1674,28 @@ Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartitio
         }
             switch (journal->j_operation) {
             case MKDIRECTORY:
-                createDirectory(true,id,path);
+                createDirectory(true,id,path,true);
                 break;
             case MKFILE_PATH:
-                createFile(journal->j_path,journal->j_boolean,journal->j_content,path,namePartition);
+                createFile(journal->j_path,journal->j_boolean,journal->j_content,path,namePartition,true);
                 break;
             case MKFILE_SIZE:
-                createFile(journal->j_path,journal->j_boolean,journal->j_size,path,namePartition);
+                createFile(journal->j_path,journal->j_boolean,journal->j_size,path,namePartition,true);
                 break;
             case ADDGRP:
-                addGroup(path,namePartition,journal->j_group);
+                addGroup(path,namePartition,journal->j_group,true);
                 break;
             case RMGRP:
-                deleteGroup(path,namePartition,journal->j_group);
+                deleteGroup(path,namePartition,journal->j_group,true);
                 break;
             case ADDUSER:
-                addUser(path,namePartition,journal->j_user,journal->j_content,journal->j_group);
+                addUser(path,namePartition,journal->j_user,journal->j_content,journal->j_group,true);
                 break;
             case DELUSER:
-                deleteUser(path,namePartition,journal->j_user);
+                deleteUser(path,namePartition,journal->j_user,true);
                 break;
             case EDIT_FILE:
-                editFile(journal->j_path,journal->j_content,path,namePartition);
+                editFile(journal->j_path,journal->j_content,path,namePartition,true);
                 break;
             default:
                 break;

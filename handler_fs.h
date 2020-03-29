@@ -47,7 +47,7 @@ BlockDirectory* getNewBlockDir(char name[],int indexDir,char namepad[],int index
 
 BlockFile* getNewBlockFile();
 
-Response createDirectory(bool createMk,char id[],char path[]);
+Response createDirectory(bool createMk,char id[],char path[],bool isRecovery);
 
 int writeDirectory(SuperBlock *sb,char path[],char nameDir[],char namePad[],int indexPad);
 
@@ -59,9 +59,9 @@ Response createChildDirectory(char dirPad[],char dirName[],char path[],SuperBloc
 
 int findDirectory(char namedir[],char path[],int *indexInodoActual,SuperBlock *sb);
 
-Response createFile(char newPath[],bool createPath,int size,char path[],char namePartition[]);
+Response createFile(char newPath[],bool createPath,int size,char path[],char namePartition[], bool isRecovery);
 
-Response createFile(char newPath[],bool createPath,char pathFile[],char path[],char namePartition[]);
+Response createFile(char newPath[],bool createPath,char pathFile[],char path[],char namePartition[],bool isRecovery);
 
 Response createFileWithText(char newPath[],bool createPath,char text[],int size,char path[],char namePartition[]);
 
@@ -91,9 +91,9 @@ Group* getGroup(char name[],char *contentg);
 
 User* getUser(char usr[],char *contentUsers);
 
-Response addGroup(char *path,char *partition,char grp[]);
+Response addGroup(char *path,char *partition,char grp[],bool isRecovery);
 
-Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[]);
+Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[],bool isRecovery);
 
 User* getUser(char usr[],char path[],char namePartition[]);
 
@@ -103,11 +103,11 @@ int countUsers(char contentUsers[]);
 
 int countGroups(char contentGroups[]);
 
-Response editFile(char pathFile[],char newCont[],char path[],char namePart[]);
+Response editFile(char pathFile[],char newCont[],char path[],char namePart[],bool isRecovery);
 
-Response deleteUser(char path[], char partition[],char name[]);
+Response deleteUser(char path[], char partition[],char name[],bool isRecovery);
 
-Response deleteGroup(char path[], char partition[],char name[]);
+Response deleteGroup(char path[], char partition[],char name[],bool isRecovery);
 
 void clearInodePointers(Inodo *inodo);
 

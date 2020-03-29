@@ -255,14 +255,14 @@ void cmd_grp::Exec(){
             return;
         }
 
-        Response res = addGroup(active_sesion->path,active_sesion->namePartition,this->name);
+        Response res = addGroup(active_sesion->path,active_sesion->namePartition,this->name,false);
         if(res==SUCCESS){
             cout<<"¡Grupo creado con éxito!\n";
         }else{
             showMessageError(res);
         }
     }else{
-        Response res = deleteGroup(active_sesion->path,active_sesion->namePartition,this->name);
+        Response res = deleteGroup(active_sesion->path,active_sesion->namePartition,this->name,false);
         if(res==SUCCESS){
             cout<<"¡Grupo eliminado con éxito!\n";
         }else{
@@ -283,7 +283,7 @@ void cmd_mkusr::Exec(){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
-    Response res = addUser(active_sesion->path,active_sesion->namePartition,this->usr,this->pwd,this->grp);
+    Response res = addUser(active_sesion->path,active_sesion->namePartition,this->usr,this->pwd,this->grp,false);
     if(res==SUCCESS){
         cout<<"¡Grupo creado con éxito!\n";
     }else{
@@ -301,7 +301,7 @@ void cmd_rmusr::Exec(){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
-    Response res = deleteUser(active_sesion->path,active_sesion->namePartition,this->usr);
+    Response res = deleteUser(active_sesion->path,active_sesion->namePartition,this->usr,false);
     if(res==SUCCESS){
         cout<<"¡Usuario eliminado con éxito!\n";
     }else{
@@ -332,7 +332,7 @@ void cmd_mkfile::Exec(){
     }
     if(cont!=NULL){
        Response res = createFile (this->path,this->isRecursive,this->cont,
-                                  active_sesion->path,active_sesion->namePartition);
+                                  active_sesion->path,active_sesion->namePartition,false);
        if(res==SUCCESS){
            cout<<"¡Archivo creado con éxito!\n";
        }else{
@@ -340,7 +340,7 @@ void cmd_mkfile::Exec(){
        }
     }else{
        Response res = createFile(this->path,this->isRecursive,this->size,
-                 active_sesion->path,active_sesion->namePartition);
+                 active_sesion->path,active_sesion->namePartition,false);
        if(res==SUCCESS){
            cout<<"¡Archivo creado con éxito!\n";
        }else{
@@ -381,7 +381,7 @@ void cmd_edit::Exec(){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
-    Response res = editFile(this->path,this->cont,active_sesion->path,active_sesion->namePartition);
+    Response res = editFile(this->path,this->cont,active_sesion->path,active_sesion->namePartition,false);
     if(res==SUCCESS){
         cout<<"¡Archivo modificado con éxito!\n";
     }else{
@@ -407,7 +407,7 @@ void cmd_mkdir::Exec(){
         cout<<"No se ha iniciado sesión.\n";
         return;
     }
-    Response res = createDirectory(this->isRecursive,active_sesion->id,this->path);
+    Response res = createDirectory(this->isRecursive,active_sesion->id,this->path,false);
     if(res==SUCCESS){
         cout<<"¡Carpeta creada con éxito!\n";
     }else{
