@@ -7,7 +7,7 @@
 #include <handler_disk.h>
 #include <sstream>
 
-Response formatPart(char path[],char partition[],TypeFormat tipoFormateo,FileSistem sistem);
+Response formatPart(char path[],char partition[],TypeFormat tipoFormateo,FileSistem sistem,bool isRecovery);
 
 Response getStartPartition(MBR*,char[],int*);
 

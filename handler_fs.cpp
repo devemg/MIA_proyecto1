@@ -40,7 +40,7 @@ int getBitmapIndex(int startBm,int finBm,char path[]){
     return contador;
 }
 
-Response formatPart(char path[], char partition[], TypeFormat tipoFormateo, FileSistem sistem){
+Response formatPart(char path[], char partition[], TypeFormat tipoFormateo, FileSistem sistem,bool isRecovery){
     MBR *disco = openMBR(path);
     if(disco==NULL){
         return ERROR_DISK_NOT_EXIST;
@@ -97,7 +97,7 @@ Response formatPart(char path[], char partition[], TypeFormat tipoFormateo, File
     //CREAR ARCHIVO DE USERS
     char *users = "1,G,root\n1,U,root,root,123\n";
     createFileWithText("/users.txt",true,users,28,path,partition);    
-    if(sistem == ext3){
+    if(sistem == ext3 && !isRecovery){
         fillJournal(initPart+sizeof(SuperBlock),cantInodos,path);
     }
     delete disco;
@@ -1136,10 +1136,16 @@ Response addGroup(char *path,char *partition,char grp[]){
     strcat(content,grp);
     strcat(content,"\n");
     Response r = ReplaceContentFile(indexInode,content,path,partition);
+    if(r == SUCCESS){
+        //AGREGAR A JOURNAL
+        Journal *newj = new Journal();
+        newj->j_operation = ADDGRP;
+        newj->j_group =grp;
+        getCurrentDate(newj->j_date);
+        addJournal(sb,startSb,path,newj);
+    }
     delete sb;
     return r;
-
-    return SUCCESS;
 }
 
 int countUsers(char contentUsers[]){
@@ -1536,6 +1542,14 @@ Response deleteGroup(char path[], char partition[],char name[]){
      }
      char *my_argument = const_cast<char*> (newContent.c_str());
     Response r = ReplaceContentFile(indexInode,my_argument,path,partition);
+    if(r == SUCCESS){
+        //AGREGAR A JOURNAL
+        Journal *newj = new Journal();
+        newj->j_operation = DELGRP;
+        newj->j_group =name;
+        getCurrentDate(newj->j_date);
+        addJournal(sb,startSb,path,newj);
+    }
     delete sb;
     return r;
 }
@@ -1600,7 +1614,7 @@ Response clearAllSystem(char path[],char name[]){
 
 Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartition[],char id[]){
  int startOperations = startSb+sizeof(SuperBlock);
- formatPart(path,namePartition,Full,ext3);
+ formatPart(path,namePartition,Full,ext3,true);
  FILE * myFile;
  int contador = 0;
   myFile = fopen (path,"rb+");
@@ -1628,6 +1642,12 @@ Response recoverySystem(SuperBlock *sb,int startSb,char path[],char namePartitio
                 break;
             case MKFILE_SIZE:
                 createFile(journal->j_path,journal->j_boolean,journal->j_size,path,namePartition);
+                break;
+            case ADDGRP:
+                addGroup(path,namePartition,journal->j_group);
+                break;
+            case RMGRP:
+                deleteGroup(path,namePartition,journal->j_group);
                 break;
             default:
                 break;

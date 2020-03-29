@@ -839,6 +839,48 @@ Response reportJournal(char path[], char namePart[],char reportPath[]){
                     fputs("</tr>\n",fileReport);
                 }
                     break;
+                case ADDGRP:
+                {
+                    fputs("<tr>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">mkgrp</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_date,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    //contenido
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    //tamaño
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_group,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("</tr>\n",fileReport);
+                }
+                    break;
+                case DELGRP:
+                {
+                    fputs("<tr>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">rmgrp</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_date,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    //contenido
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    //tamaño
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\">",fileReport);
+                    fputs(journal->j_group,fileReport);
+                    fputs("</td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("<td bgcolor=\"#DAF7A6\"> - </td>\n",fileReport);
+                    fputs("</tr>\n",fileReport);
+                }
+                    break;
                 default:
                     contador = sb->s_inodes_count+1;
                     break;

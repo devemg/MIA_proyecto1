@@ -181,7 +181,7 @@ void cmd_fs::Exec(){
     if(part==NULL){
         cout<<"la partición no fue encontrada.\n";
     }
-    Response res = formatPart(disk->path,part->name,this->type,this->fs);
+    Response res = formatPart(disk->path,part->name,this->type,this->fs,false);
     if(res==SUCCESS){
         cout<<"¡Sistema de archivos creado con éxito!\n";
     }else{

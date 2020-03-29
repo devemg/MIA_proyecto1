@@ -14,9 +14,9 @@ extern char *yytext; //lexema actual
 int yyerror(const char* mens){
 //metodo que se llama al haber un error sintactico
 //SE IMPRIME EN CONSOLA EL ERROR
+
     if(strcmp(yytext," ")==1){
         std::cout<<"ERROR EN COMANDO: "<<mens<<" "<<yytext<< std::endl;
-
     }
 return 0;
 }
@@ -186,6 +186,7 @@ STATE_COMMANDS: MKDISK{$$=mkdisk;}
 |MKFS{$$=mkfs;}
 |MKGRP{$$=mkgrp;}
 |RECOVERY{$$=recovery;}
+|RMGRP{$$=rmgrp;}
 ;
 
 
