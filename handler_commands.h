@@ -276,7 +276,10 @@ public:
 
 Cmd* getFormedCommand(CommandEnum command,Option *op);
 
-bool validateParams();
+bool validateParams(char *name,char *path,char *id,char *usr,
+                    char *pwd,char *grp,char *cont,char *file,char *dest,
+                    Fit fit,Unit unit,TypeFormat format,TypePartition typePart,
+                    FileSistem fsystem,bool existSize,bool existAdd,bool existUgo,CommandEnum cmd);
 
 Cmd* ListCommand(Cmd *cmd,bool flag);
 

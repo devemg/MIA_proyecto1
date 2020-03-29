@@ -734,7 +734,13 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
         }
           it = it->next;
       }
-      switch (command) {
+
+    if(!validateParams(name,path,id,usr,pwd,grp,cont,file,dest,fit,unit,typeFormat,typePartition,
+                       fsystem,existSize,existAdd,existUgo,command)){
+        cout<<"Hay parámetros no permitidos en el comando.\n";
+          return NULL;
+    }
+    switch (command) {
       case mkdisk:
       {
           if(!existSize){
@@ -744,9 +750,6 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
           if(path==NULL){
               std::cout<<"Debe indicar una ruta(-path).\n";
               return NULL;
-          }
-          if(!validateParams()){
-                return NULL;
           }
           cmd_mkdisk *mkd =  new cmd_mkdisk(size,path);
           if(unit!=UNIT_ERROR){
@@ -764,9 +767,6 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
               std::cout<<"Debe indicar una ruta(-path).\n";
               return NULL;
           }
-          if(!validateParams()){
-                return NULL;
-          }
           return new cmd_rmdisk(path);
       }
           break;
@@ -783,9 +783,6 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
           if(name==NULL){
               std::cout<<"Debe indicar un nombre(-name).\n";
               return NULL;
-          }
-          if(!validateParams()){
-                return NULL;
           }
           if(typeFormat!=TF_ERROR){
               //eliminar particion
@@ -826,10 +823,7 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
               std::cout<<"Debe indicar un nombre(-name).\n";
               return NULL;
           }
-          if(!validateParams()){
-                return NULL;
-          }
-          return new cmd_mount(path,name);
+           return new cmd_mount(path,name);
       }
           break;
       case unmount:
@@ -837,9 +831,6 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
           if(id==NULL){
               std::cout<<"Debe indicar un id(-id).\n";
               return NULL;
-          }
-          if(!validateParams()){
-                return NULL;
           }
           return new cmd_unmount(id);
       }
@@ -1117,9 +1108,6 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
               cout<<"Error: Debe ingresar un id(-id)\n";
               return NULL;
           }
-          if(!validateParams()){
-                return NULL;
-          }
           TypeReport typeReport;
           if(strcmp(name,"mbr")==0){
                           typeReport = Mbr;
@@ -1154,8 +1142,550 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
  return NULL;
 }
 
-bool validateParams(){
-    return true;
+
+bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char *grp, char *cont, char *file,
+                    char *dest, Fit fit, Unit unit, TypeFormat format, TypePartition typePart, FileSistem fsystem,
+                    bool existSize, bool existAdd, bool existUgo, CommandEnum cmd){
+    switch (cmd) {
+      case mkdisk:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case rmdisk:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case fdisk:
+      {
+        return !( id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || format != TF_ERROR
+                       || existUgo
+                       );
+      }
+          break;
+      case mount:
+      {
+        return !( id != NULL
+                || usr != NULL
+                || pwd != NULL
+                || grp != NULL
+                || cont != NULL
+                || file != NULL
+                || dest != NULL
+                || fit != FIT_ERROR
+                || unit != UNIT_ERROR
+                || format != TF_ERROR
+                || typePart != TP_ERROR
+                || fsystem != FS_ERROR
+                || existSize
+                || existAdd
+                || existUgo
+                );
+      }
+          break;
+      case unmount:
+      {
+        return !(name!=NULL
+                       || path != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case exec:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case mkfs:
+      {
+        return !(name!=NULL
+                       || path != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || typePart != TP_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case login:
+      {
+        return !(name!=NULL
+                       || path != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case mkgrp:
+      {
+        return !(path != NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case rmgrp:
+      {
+        return !(path != NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case mkusr:
+      {
+        return !(name!=NULL
+                       || path != NULL
+                       || id != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case rmusr:
+      {
+        return !(name!=NULL
+                       || path != NULL
+                       || id != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case ch_mod:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       );
+      }
+          break;
+      case mkfile:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case cat:
+      {
+        return !(name!=NULL
+                       || path != NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case rem:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case edit:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case ren:
+      {
+        return !( id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case mk_dir:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case cp:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case mv:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case find_:
+      {
+        return !(id != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case ch_own:
+      {
+        return !(name!=NULL
+                       || id != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case chgrp:
+      {
+        return !(name!=NULL
+                       || path != NULL
+                       || id != NULL
+                       || pwd != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case loss:
+      {
+        return !(name!=NULL
+                       || path != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case recovery:
+      {
+        return !(name!=NULL
+                       || path != NULL
+                       || usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      case rep:
+      {
+        return !( usr != NULL
+                       || pwd != NULL
+                       || grp != NULL
+                       || cont != NULL
+                       || file != NULL
+                       || dest != NULL
+                       || fit != FIT_ERROR
+                       || unit != UNIT_ERROR
+                       || format != TF_ERROR
+                       || typePart != TP_ERROR
+                       || fsystem != FS_ERROR
+                       || existSize
+                       || existAdd
+                       || existUgo
+                       );
+      }
+          break;
+      }
 }
 
 Cmd* ListCommand(Cmd *cmd,bool flag){
