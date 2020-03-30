@@ -10,6 +10,12 @@
 #include <scanner.h>
 #include <parser.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <sys/types.h>
+#include <dirent.h>
+
 using namespace std;
 
 void clearArray(char [],int);
@@ -36,6 +42,6 @@ int getInt(string);
 
 Response getContadorDiscos(int *contadorDiscos,char *id);
 
-void myPause();
+void createPath(string path);
 
 #endif // UTILS_H

@@ -42,8 +42,7 @@ Response newDisk(int size,Fit fit,Unit unit,char path[],char name[]){
 
 bool writeMBR(MBR *disco,char path[],char full_path[]){
     //CREAR DIRECTORIO SI NO EXISTE
-    mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
+    createPath(full_path);
     FILE *myFile;
      myFile =  fopen(full_path,"wb+");
      if (myFile==NULL)

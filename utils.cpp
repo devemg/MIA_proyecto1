@@ -1,5 +1,32 @@
 #include "utils.h"
 
+void createPath(string path){
+    char copiaPath[150];
+        strcpy(copiaPath, &path[0]);
+        int posicion = 0;
+        for(int i = 0; i< strlen(copiaPath); i++)
+        {
+            if(copiaPath[i] == '/')
+            {
+                posicion = i;
+           }
+        }
+        copiaPath[posicion] = '\0';
+
+        DIR* carpeta =  opendir(copiaPath);
+        if(carpeta == 0)
+        {
+            char comando[1024] = "";
+           // strcat(comando, "sudo ./ chmod  777 ");
+            strcat(comando, "sudo mkdir -p -m 777 \"");
+            strcat(comando, copiaPath);
+            strcat(comando, "\"");
+            comando[strlen(comando) + 1] = '\0';
+            system(comando);
+        }
+}
+
+
 void clearArray(char array[],int size){
         for(int i = 0; i < size; i++)
         {

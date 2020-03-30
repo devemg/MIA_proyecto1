@@ -1099,15 +1099,22 @@ Response addUser(char *path,char *partition,char usr[],char pwd[],char grp[],boo
         if(user != NULL){
             return ERROR_USER_EXISTS;
         }
-    strcat(content,&to_string(contadorUsuarios+1)[0]);
-    strcat(content,",U,");
-    strcat(content,usr);
-    strcat(content,",");
-    strcat(content,grp);
-    strcat(content,",");
-    strcat(content,pwd);
-    strcat(content,"\n");
-    Response r = ReplaceContentFile(indexInode,content,path,partition);
+
+        string newContent = "";
+        int contador = 0;
+        while(resContent[contador]!='\0'){
+            newContent+=resContent[contador];
+            contador++;
+        }
+       newContent+= to_string(contadorUsuarios+1);
+       newContent+=",U,";
+       newContent+=usr;
+       newContent+=",";
+       newContent+=grp;
+       newContent+=",";
+       newContent+=pwd;
+       newContent+="\n";
+    Response r = ReplaceContentFile(indexInode,&newContent[0],path,partition);
     if(r == SUCCESS && !isRecovery){
         //AGREGAR A JOURNAL
         Journal *newj = new Journal();
@@ -1143,11 +1150,18 @@ Response addGroup(char *path,char *partition,char grp[],bool isRecovery){
     if(grpp != NULL){
         return ERROR_GROUP_EXISTS;
     }
-    strcat(content,&to_string(contadorGrupos+1)[0]);
-    strcat(content,",G,");
-    strcat(content,grp);
-    strcat(content,"\n");
-    Response r = ReplaceContentFile(indexInode,content,path,partition);
+
+    string newContent = "";
+    int contador = 0;
+    while(resContent[contador]!='\0'){
+        newContent+=resContent[contador];
+        contador++;
+    }
+   newContent+= to_string(contadorGrupos+1);
+   newContent+=",G,";
+   newContent+=grp;
+   newContent+="\n";
+    Response r = ReplaceContentFile(indexInode,&newContent[0],path,partition);
     if(r == SUCCESS && !isRecovery){
         //AGREGAR A JOURNAL
         Journal *newj = new Journal();

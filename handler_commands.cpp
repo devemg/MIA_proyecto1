@@ -508,7 +508,7 @@ void cmd_rep::Exec(){
 
     //cout<<"PATH: "<<hh<<endl;
     //CREAR DIRECTORIO SI NO EXISTE
-    mkdir(hh.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    createPath(hh);
 
     switch (this->type) {
     case Mbr:
@@ -653,7 +653,7 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
     char *cont=NULL;
     char *file=NULL;
     char *dest=NULL;
-
+    char *ruta = NULL;
     int size = -1;
     int ugo=-1;
 
@@ -728,6 +728,9 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
         case FileSys:
             fsystem = it->fs;
             break;
+        case Ruta:
+            ruta = it->text;
+            break;
         default:
             cout<<"La opción no es válida.\n";
             break;
@@ -735,7 +738,7 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
           it = it->next;
       }
 
-    if(!validateParams(name,path,id,usr,pwd,grp,cont,file,dest,fit,unit,typeFormat,typePartition,
+    if(!validateParams(name,path,id,usr,pwd,grp,cont,file,dest,ruta,fit,unit,typeFormat,typePartition,
                        fsystem,existSize,existAdd,existUgo,command)){
         cout<<"Hay parámetros no permitidos en el comando.\n";
           return NULL;
@@ -1135,7 +1138,16 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
                           cout<<"ERROR: El tipo de reporte no es permitido.\n";
                           return NULL;
                       }
-          return new cmd_rep(path,typeReport,id);
+          cmd_rep *rp = new cmd_rep(path,typeReport,id);
+          if(typeReport == Ls || typeReport == File){
+              if(ruta == NULL){
+                  cout<<"Error: Debe ingresar una ruta(-ruta)\n";
+                  return NULL;
+              }else{
+                  rp->path = ruta;
+              }
+          }
+          return rp;
       }
           break;
       }
@@ -1144,7 +1156,7 @@ Cmd* getFormedCommand(CommandEnum command,Option *op){
 
 
 bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char *grp, char *cont, char *file,
-                    char *dest, Fit fit, Unit unit, TypeFormat format, TypePartition typePart, FileSistem fsystem,
+                    char *dest, char *ruta, Fit fit, Unit unit, TypeFormat format, TypePartition typePart, FileSistem fsystem,
                     bool existSize, bool existAdd, bool existUgo, CommandEnum cmd){
     switch (cmd) {
       case mkdisk:
@@ -1157,6 +1169,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                       || ruta != NULL
                        || format != TF_ERROR
                        || typePart != TP_ERROR
                        || fsystem != FS_ERROR
@@ -1175,6 +1188,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                       || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1193,6 +1207,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || pwd != NULL
                        || grp != NULL
                        || cont != NULL
+                       || ruta != NULL
                        || file != NULL
                        || dest != NULL
                        || format != TF_ERROR
@@ -1209,6 +1224,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                 || cont != NULL
                 || file != NULL
                 || dest != NULL
+                || ruta != NULL
                 || fit != FIT_ERROR
                 || unit != UNIT_ERROR
                 || format != TF_ERROR
@@ -1230,6 +1246,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                       || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1251,6 +1268,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                       || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1272,6 +1290,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                       || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || typePart != TP_ERROR
@@ -1289,6 +1308,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                       || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1310,6 +1330,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                       || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1331,6 +1352,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1350,6 +1372,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1371,6 +1394,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1392,6 +1416,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1411,6 +1436,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || grp != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1431,6 +1457,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || grp != NULL
                        || cont != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1452,6 +1479,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1472,6 +1500,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || grp != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1492,6 +1521,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1513,6 +1543,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1533,6 +1564,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || grp != NULL
                        || cont != NULL
                        || file != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1553,6 +1585,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || grp != NULL
                        || cont != NULL
                        || file != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1573,6 +1606,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1593,6 +1627,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1613,6 +1648,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1634,6 +1670,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR
@@ -1655,6 +1692,7 @@ bool validateParams(char *name, char *path, char *id, char *usr, char *pwd, char
                        || cont != NULL
                        || file != NULL
                        || dest != NULL
+                || ruta != NULL
                        || fit != FIT_ERROR
                        || unit != UNIT_ERROR
                        || format != TF_ERROR

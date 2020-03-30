@@ -277,7 +277,7 @@ public:
 Cmd* getFormedCommand(CommandEnum command,Option *op);
 
 bool validateParams(char *name,char *path,char *id,char *usr,
-                    char *pwd,char *grp,char *cont,char *file,char *dest,
+                    char *pwd,char *grp,char *cont,char *file,char *dest,char *ruta,
                     Fit fit,Unit unit,TypeFormat format,TypePartition typePart,
                     FileSistem fsystem,bool existSize,bool existAdd,bool existUgo,CommandEnum cmd);
 
